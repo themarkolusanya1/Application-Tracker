@@ -12,9 +12,15 @@ import ApplicationForm from './ApplicationForm';
 
 interface DashboardClientProps {
   initialApplications: any[];
+  initialTab?: 'combined' | 'job' | 'scholarship';
+  hideTabs?: boolean;
 }
 
-export default function DashboardClient({ initialApplications }: DashboardClientProps) {
+export default function DashboardClient({ 
+  initialApplications, 
+  initialTab = 'combined', 
+  hideTabs = false 
+}: DashboardClientProps) {
   const [isPending, startTransition] = useTransition();
   
   // Modals / forms
@@ -23,7 +29,7 @@ export default function DashboardClient({ initialApplications }: DashboardClient
 
   // Layout / view modes
   const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
-  const [tabFilter, setTabFilter] = useState<'combined' | 'job' | 'scholarship'>('combined');
+  const [tabFilter, setTabFilter] = useState<'combined' | 'job' | 'scholarship'>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [locationFilter, setLocationFilter] = useState<string>('ALL');
@@ -191,41 +197,43 @@ export default function DashboardClient({ initialApplications }: DashboardClient
       </section>
 
       {/* Tabs Navigation */}
-      <div className="flex border-b border-white/5 space-x-6">
-        <button
-          onClick={() => { setTabFilter('combined'); setStatusFilter('ALL'); }}
-          className={`pb-4 text-sm font-bold transition-all relative cursor-pointer ${
-            tabFilter === 'combined' ? 'text-white font-extrabold' : 'text-gray-400 hover:text-white'
-          }`}
-        >
-          Combined View
-          {tabFilter === 'combined' && (
-            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full animate-pulse" />
-          )}
-        </button>
-        <button
-          onClick={() => { setTabFilter('job'); setStatusFilter('ALL'); }}
-          className={`pb-4 text-sm font-bold transition-all relative cursor-pointer ${
-            tabFilter === 'job' ? 'text-white font-extrabold' : 'text-gray-400 hover:text-white'
-          }`}
-        >
-          Jobs & Internships
-          {tabFilter === 'job' && (
-            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full animate-pulse" />
-          )}
-        </button>
-        <button
-          onClick={() => { setTabFilter('scholarship'); setStatusFilter('ALL'); }}
-          className={`pb-4 text-sm font-bold transition-all relative cursor-pointer ${
-            tabFilter === 'scholarship' ? 'text-white font-extrabold' : 'text-gray-400 hover:text-white'
-          }`}
-        >
-          Scholarships & Academic Programs
-          {tabFilter === 'scholarship' && (
-            <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full animate-pulse" />
-          )}
-        </button>
-      </div>
+      {!hideTabs && (
+        <div className="flex border-b border-white/5 space-x-6">
+          <button
+            onClick={() => { setTabFilter('combined'); setStatusFilter('ALL'); }}
+            className={`pb-4 text-sm font-bold transition-all relative cursor-pointer ${
+              tabFilter === 'combined' ? 'text-white font-extrabold' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            Combined View
+            {tabFilter === 'combined' && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full animate-pulse" />
+            )}
+          </button>
+          <button
+            onClick={() => { setTabFilter('job'); setStatusFilter('ALL'); }}
+            className={`pb-4 text-sm font-bold transition-all relative cursor-pointer ${
+              tabFilter === 'job' ? 'text-white font-extrabold' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            Jobs & Internships
+            {tabFilter === 'job' && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full animate-pulse" />
+            )}
+          </button>
+          <button
+            onClick={() => { setTabFilter('scholarship'); setStatusFilter('ALL'); }}
+            className={`pb-4 text-sm font-bold transition-all relative cursor-pointer ${
+              tabFilter === 'scholarship' ? 'text-white font-extrabold' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            Scholarships & Academic Programs
+            {tabFilter === 'scholarship' && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full animate-pulse" />
+            )}
+          </button>
+        </div>
+      )}
 
       {/* 2. Search & Controls */}
       <section className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white/2 backdrop-blur-md p-4 rounded-2xl border border-white/5">

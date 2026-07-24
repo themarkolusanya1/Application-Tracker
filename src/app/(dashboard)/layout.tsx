@@ -2,8 +2,9 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/app/actions/auth';
 import LogoutButton from '@/components/LogoutButton';
 import NotificationPopover from '@/components/NotificationPopover';
-import { LayoutDashboard, Briefcase, User as UserIcon } from 'lucide-react';
+import { Briefcase, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
+import SidebarNav from '@/components/SidebarNav';
 
 export default async function DashboardLayout({
   children,
@@ -33,15 +34,7 @@ export default async function DashboardLayout({
         </div>
 
         {/* Sidebar Nav */}
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-          <Link
-            href="/"
-            className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200"
-          >
-            <LayoutDashboard className="w-5 h-5 text-brand-indigo" />
-            <span>Dashboard</span>
-          </Link>
-        </nav>
+        <SidebarNav />
 
         {/* User profile & Logout footer */}
         <div className="p-4 border-t border-white/5 bg-gray-900/10">
