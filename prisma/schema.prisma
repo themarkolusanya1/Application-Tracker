@@ -1,0 +1,55 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  password      String         // Hashed password
+  applications  Application[]
+  notifications Notification[]
+  createdAt     DateTime       @default(now())
+}
+
+model Application {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationType String   @default("job") // "job" or "scholarship"
+  organization    String   // University, School, Company, etc.
+  title           String   // MSc/PhD Program, Job Role, Internship, etc.
+  status          String   // Represents pipeline status
+  url             String?
+  notes           String?
+  salary          String?  // Represents salary (job)
+  locationType    String   @default("ON_SITE") // Represents location (job)
+  appliedDate     DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Scholarship specific fields
+  fundingType     String?  // "fully funded", "partial", "self-funded"
+  stipendAmount   String?  // Stipend / funding amount
+  deadline        DateTime? // Application deadline
+
+  // Document checklist (true = completed, false = pending)
+  hasSop          Boolean  @default(false)
+  hasTranscripts  Boolean  @default(false)
+  hasReferences   Boolean  @default(false)
+  hasTestScores   Boolean  @default(false)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
