@@ -28,8 +28,7 @@ export default async function DashboardLayout({
             <Briefcase className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="font-bold text-white text-base leading-tight tracking-tight">AppTracker</h1>
-            <span className="text-[10px] text-gray-500 font-semibold tracking-wider uppercase">Enterprise</span>
+            <h1 className="font-black text-white text-lg tracking-tight">AppTracker</h1>
           </div>
         </div>
 

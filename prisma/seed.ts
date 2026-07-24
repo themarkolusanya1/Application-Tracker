@@ -51,13 +51,13 @@ async function main() {
       appliedDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7), // 7 days ago
     },
     {
-      applicationType: 'job',
+      applicationType: 'internship',
       organization: 'Vercel',
-      title: 'Frontend Engineer',
+      title: 'Frontend Intern',
       status: 'OFFERED',
       url: 'https://vercel.com/careers/frontend-engineer',
       notes: 'Received written offer! Deciding on salary/equity package details.',
-      salary: '$170,000 + equity',
+      salary: '$45 / hour',
       locationType: 'REMOTE',
       appliedDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30), // 30 days ago
     },

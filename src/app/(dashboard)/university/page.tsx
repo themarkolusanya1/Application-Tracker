@@ -4,7 +4,7 @@ import { AlertCircle } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ScholarshipsPage() {
+export default async function UniversityPage() {
   const response = await getApplications();
 
   if (!response.success) {
@@ -26,7 +26,7 @@ export default async function ScholarshipsPage() {
   return (
     <div className="animate-fade-in">
       <div className="mb-8">
-        <h3 className="text-2xl font-black text-white tracking-tight">Scholarships & Academic Programs</h3>
+        <h3 className="text-2xl font-black text-white tracking-tight">University Applications</h3>
         <p className="text-sm text-gray-400 mt-1">
           Direct dashboard entry for your MSc/PhD admissions and funding applications.
         </p>

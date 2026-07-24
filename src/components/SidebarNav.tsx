@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
-  LayoutDashboard, Briefcase, GraduationCap, 
+  LayoutDashboard, Briefcase, GraduationCap, ClipboardList,
   FileText, Calendar, Settings 
 } from 'lucide-react';
 
@@ -18,14 +18,20 @@ export default function SidebarNav() {
       color: 'text-brand-indigo',
     },
     {
-      label: 'Jobs & Internships',
+      label: 'Jobs',
       href: '/jobs',
       icon: Briefcase,
       color: 'text-brand-cyan',
     },
     {
-      label: 'Scholarships & Programs',
-      href: '/scholarships',
+      label: 'Internships',
+      href: '/internships',
+      icon: ClipboardList,
+      color: 'text-brand-indigo',
+    },
+    {
+      label: 'University Applications',
+      href: '/university',
       icon: GraduationCap,
       color: 'text-brand-amber',
     },

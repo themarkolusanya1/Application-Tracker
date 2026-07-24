@@ -12,7 +12,7 @@ import ApplicationForm from './ApplicationForm';
 
 interface DashboardClientProps {
   initialApplications: any[];
-  initialTab?: 'combined' | 'job' | 'scholarship';
+  initialTab?: 'combined' | 'job' | 'internship' | 'scholarship';
   hideTabs?: boolean;
 }
 
@@ -29,7 +29,7 @@ export default function DashboardClient({
 
   // Layout / view modes
   const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
-  const [tabFilter, setTabFilter] = useState<'combined' | 'job' | 'scholarship'>(initialTab);
+  const [tabFilter, setTabFilter] = useState<'combined' | 'job' | 'internship' | 'scholarship'>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [locationFilter, setLocationFilter] = useState<string>('ALL');
@@ -41,6 +41,7 @@ export default function DashboardClient({
   // Dynamic stats calculation depending on current active tab
   const getStats = () => {
     const jobs = initialApplications.filter(a => a.applicationType === 'job');
+    const internships = initialApplications.filter(a => a.applicationType === 'internship');
     const scholarships = initialApplications.filter(a => a.applicationType === 'scholarship');
 
     const upcomingDeadlines = scholarships.filter(s => {
@@ -56,9 +57,16 @@ export default function DashboardClient({
         { label: 'Offers Received', value: jobs.filter(a => a.status === 'OFFERED').length, colorClass: 'text-brand-emerald' },
         { label: 'Rejections', value: jobs.filter(a => a.status === 'REJECTED').length, colorClass: 'text-brand-rose' }
       ];
+    } else if (tabFilter === 'internship') {
+      return [
+        { label: 'Total Internships', value: internships.length, colorClass: 'text-white' },
+        { label: 'Interviewing', value: internships.filter(a => a.status === 'INTERVIEWING').length, colorClass: 'text-brand-amber' },
+        { label: 'Offers Received', value: internships.filter(a => a.status === 'OFFERED').length, colorClass: 'text-brand-emerald' },
+        { label: 'Rejections', value: internships.filter(a => a.status === 'REJECTED').length, colorClass: 'text-brand-rose' }
+      ];
     } else if (tabFilter === 'scholarship') {
       return [
-        { label: 'Total Scholarships', value: scholarships.length, colorClass: 'text-white' },
+        { label: 'University Applications', value: scholarships.length, colorClass: 'text-white' },
         { label: 'Submitted', value: scholarships.filter(a => a.status === 'Submitted').length, colorClass: 'text-brand-indigo' },
         { label: 'Admitted', value: scholarships.filter(a => a.status === 'Admitted').length, colorClass: 'text-brand-emerald' },
         { label: 'Upcoming Deadlines', value: upcomingDeadlines, colorClass: 'text-brand-rose' }
@@ -68,8 +76,8 @@ export default function DashboardClient({
       return [
         { label: 'Total Applications', value: initialApplications.length, colorClass: 'text-white' },
         { label: 'Jobs', value: jobs.length, colorClass: 'text-brand-indigo' },
-        { label: 'Scholarships', value: scholarships.length, colorClass: 'text-brand-cyan' },
-        { label: 'Upcoming Deadlines', value: upcomingDeadlines, colorClass: 'text-brand-rose' }
+        { label: 'Internships', value: internships.length, colorClass: 'text-brand-cyan' },
+        { label: 'Universities', value: scholarships.length, colorClass: 'text-brand-amber' }
       ];
     }
   };
@@ -91,7 +99,7 @@ export default function DashboardClient({
     const matchesStatus = statusFilter === 'ALL' || app.status === statusFilter;
     if (!matchesStatus) return false;
 
-    // 4. Filter by location (only applies to jobs, or default pass)
+    // 4. Filter by location (only applies to jobs/internships, or default pass)
     const matchesLocation = locationFilter === 'ALL' || app.locationType === locationFilter;
     if (!matchesLocation) return false;
 
@@ -216,8 +224,19 @@ export default function DashboardClient({
               tabFilter === 'job' ? 'text-white font-extrabold' : 'text-gray-400 hover:text-white'
             }`}
           >
-            Jobs & Internships
+            Jobs
             {tabFilter === 'job' && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full animate-pulse" />
+            )}
+          </button>
+          <button
+            onClick={() => { setTabFilter('internship'); setStatusFilter('ALL'); }}
+            className={`pb-4 text-sm font-bold transition-all relative cursor-pointer ${
+              tabFilter === 'internship' ? 'text-white font-extrabold' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            Internships
+            {tabFilter === 'internship' && (
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full animate-pulse" />
             )}
           </button>
@@ -227,7 +246,7 @@ export default function DashboardClient({
               tabFilter === 'scholarship' ? 'text-white font-extrabold' : 'text-gray-400 hover:text-white'
             }`}
           >
-            Scholarships & Academic Programs
+            University Applications
             {tabFilter === 'scholarship' && (
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full animate-pulse" />
             )}
@@ -508,7 +527,7 @@ export default function DashboardClient({
                   <th className="px-6 py-4">Status</th>
                   
                   {/* Tab Specific Headers */}
-                  {tabFilter === 'job' && (
+                  {(tabFilter === 'job' || tabFilter === 'internship') && (
                     <>
                       <th className="px-6 py-4">Location</th>
                       <th className="px-6 py-4">Salary</th>
@@ -545,7 +564,9 @@ export default function DashboardClient({
                       {tabFilter === 'combined' && (
                         <td className="px-6 py-4">
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
-                            app.applicationType === 'scholarship' ? 'bg-brand-cyan/20 text-brand-cyan' : 'bg-brand-indigo/20 text-brand-indigo'
+                            app.applicationType === 'scholarship' ? 'bg-brand-cyan/20 text-brand-cyan' :
+                            app.applicationType === 'internship' ? 'bg-brand-rose/20 text-brand-rose' :
+                            'bg-brand-indigo/20 text-brand-indigo'
                           }`}>
                             {app.applicationType}
                           </span>
@@ -557,7 +578,7 @@ export default function DashboardClient({
                       <td className="px-6 py-4">{getStatusBadge(app.status)}</td>
 
                       {/* Tab Specific Cells */}
-                      {tabFilter === 'job' && (
+                      {(tabFilter === 'job' || tabFilter === 'internship') && (
                         <>
                           <td className="px-6 py-4">{getLocationBadge(app.locationType)}</td>
                           <td className="px-6 py-4 font-semibold text-gray-200">
