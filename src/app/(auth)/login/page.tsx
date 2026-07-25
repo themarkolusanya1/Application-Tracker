@@ -14,18 +14,7 @@ function LoginForm() {
 
   const redirectTarget = searchParams.get('from') || '/';
 
-  // Seamless auto-login for local development / testing
-  useEffect(() => {
-    startTransition(async () => {
-      const res = await loginDevTestUser();
-      if (res.success) {
-        router.push(redirectTarget);
-        router.refresh();
-      } else {
-        setError('Auto-login failed. Please sign in manually.');
-      }
-    });
-  }, [router, redirectTarget]);
+
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
