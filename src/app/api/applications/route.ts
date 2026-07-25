@@ -40,7 +40,7 @@ export async function POST(req: Request) {
         userId = firstUser.id;
       } else {
         return NextResponse.json(
-          { success: false, error: 'No user registered. Please sign up in TrackIT first.' },
+          { success: false, error: 'No user registered. Please sign up in MyTraks first.' },
           { 
             status: 400,
             headers: { 'Access-Control-Allow-Origin': '*' }

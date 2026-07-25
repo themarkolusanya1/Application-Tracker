@@ -501,7 +501,7 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
 
           <div className="space-y-4">
             <p className="text-sm text-slate-600 leading-relaxed">
-              Reset the first-time walkthrough tour to review how TrackIT works. Replaying the guide will step you through the primary views, documents, and application forms.
+              Reset the first-time walkthrough tour to review how MyTraks works. Replaying the guide will step you through the primary views, documents, and application forms.
             </p>
 
             {successMsg && (

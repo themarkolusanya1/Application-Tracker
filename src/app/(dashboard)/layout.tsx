@@ -28,7 +28,7 @@ export default async function DashboardLayout({
             <img src="/images/applyhub_logo.png" alt="ApplyHub logo" className="w-full h-full object-cover select-none" />
           </div>
           <div>
-            <h1 className="font-display font-black text-brand-indigo text-lg tracking-tight">TrackIT</h1>
+            <h1 className="font-display font-black text-brand-indigo text-lg tracking-tight">MyTraks</h1>
           </div>
         </div>
 
@@ -49,7 +49,7 @@ export default async function DashboardLayout({
             <div className="md:hidden w-8 h-8 rounded-lg overflow-hidden shadow border border-slate-200/50 bg-white p-0.5">
               <img src="/images/applyhub_logo.png" alt="ApplyHub logo" className="w-full h-full object-cover select-none" />
             </div>
-            <h2 className="text-lg font-display font-bold text-slate-800 tracking-wide">TrackIT</h2>
+            <h2 className="text-lg font-display font-bold text-slate-800 tracking-wide">MyTraks</h2>
           </div>
 
           {/* Right section actions */}

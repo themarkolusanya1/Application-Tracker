@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     syncBtn.innerText = 'Syncing...';
 
     try {
-      // POST directly to local TrackIT API endpoint
+      // POST directly to local MyTraks API endpoint
       const response = await fetch('http://localhost:3000/api/applications', {
         method: 'POST',
         headers: {
@@ -72,17 +72,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const json = await response.json();
       if (json.success) {
-        showStatus('Success! Application synced to TrackIT.');
+        showStatus('Success! Application synced to MyTraks.');
         setTimeout(() => window.close(), 1500);
       } else {
         showStatus('Error: ' + (json.error || 'Failed to sync.'), true);
         syncBtn.disabled = false;
-        syncBtn.innerText = 'Sync to TrackIT';
+        syncBtn.innerText = 'Sync to MyTraks';
       }
     } catch (err) {
-      showStatus('Connection failed. Make sure TrackIT local dev server is running at http://localhost:3000.', true);
+      showStatus('Connection failed. Make sure MyTraks local dev server is running at http://localhost:3000.', true);
       syncBtn.disabled = false;
-      syncBtn.innerText = 'Sync to TrackIT';
+      syncBtn.innerText = 'Sync to MyTraks';
     }
   });
 });
