@@ -7,7 +7,11 @@ export async function POST(req: Request) {
     const { action, organization, title, type, question, answer } = body;
 
     const provider = req.headers.get('x-provider') || 'gemini';
-    let apiKey = provider === 'openai' ? process.env.OPENAI_API_KEY : process.env.GEMINI_API_KEY;
+    let apiKey = provider === 'openai' 
+      ? process.env.OPENAI_API_KEY 
+      : provider === 'groq'
+        ? process.env.GROQ_API_KEY
+        : process.env.GEMINI_API_KEY;
     const clientKey = req.headers.get('x-api-key');
     if (!apiKey && clientKey && clientKey.trim() !== '') {
       apiKey = clientKey;
@@ -38,15 +42,23 @@ Return ONLY a raw JSON array containing precisely 3 string elements (do not wrap
 ]
 `;
 
-      if (provider === 'openai') {
-        const openAiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      if (provider === 'openai' || provider === 'groq') {
+        const endpoint = provider === 'groq' 
+          ? 'https://api.groq.com/openai/v1/chat/completions' 
+          : 'https://api.openai.com/v1/chat/completions';
+        
+        const modelName = provider === 'groq'
+          ? 'llama-3.3-70b-versatile'
+          : 'gpt-4o-mini';
+
+        const openAiResponse = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: 'gpt-4o-mini',
+            model: modelName,
             messages: [{ role: 'user', content: prompt }],
             temperature: 0.2,
             response_format: { type: 'json_object' }
@@ -55,13 +67,13 @@ Return ONLY a raw JSON array containing precisely 3 string elements (do not wrap
 
         if (!openAiResponse.ok) {
           const errorText = await openAiResponse.text();
-          throw new Error(`OpenAI API error: ${errorText}`);
+          throw new Error(`${provider.toUpperCase()} API error: ${errorText}`);
         }
 
         const openAiData = await openAiResponse.json();
         const responseText = openAiData.choices[0].message.content.trim();
         const questions = JSON.parse(responseText);
-        // If OpenAI returned an object instead of array, handle it gracefully
+        // If LLM returned an object instead of array, handle it gracefully
         const finalQuestions = Array.isArray(questions) ? questions : Object.values(questions);
         return NextResponse.json({ success: true, questions: finalQuestions });
       }
@@ -126,15 +138,23 @@ Return ONLY a raw JSON object with this exact structure (do not wrap in markdown
 }
 `;
 
-      if (provider === 'openai') {
-        const openAiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      if (provider === 'openai' || provider === 'groq') {
+        const endpoint = provider === 'groq' 
+          ? 'https://api.groq.com/openai/v1/chat/completions' 
+          : 'https://api.openai.com/v1/chat/completions';
+        
+        const modelName = provider === 'groq'
+          ? 'llama-3.3-70b-versatile'
+          : 'gpt-4o-mini';
+
+        const openAiResponse = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: 'gpt-4o-mini',
+            model: modelName,
             messages: [{ role: 'user', content: prompt }],
             temperature: 0.1,
             response_format: { type: 'json_object' }
@@ -143,7 +163,7 @@ Return ONLY a raw JSON object with this exact structure (do not wrap in markdown
 
         if (!openAiResponse.ok) {
           const errorText = await openAiResponse.text();
-          throw new Error(`OpenAI API error: ${errorText}`);
+          throw new Error(`${provider.toUpperCase()} API error: ${errorText}`);
         }
 
         const openAiData = await openAiResponse.json();

@@ -39,11 +39,13 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
   // AI Configuration States
   const [aiProvider, setAiProvider] = useState('gemini');
   const [openaiApiKey, setOpenaiApiKey] = useState('');
+  const [groqApiKey, setGroqApiKey] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setApiKey(localStorage.getItem('applyhub_api_key') || '');
       setOpenaiApiKey(localStorage.getItem('applyhub_openai_api_key') || '');
+      setGroqApiKey(localStorage.getItem('applyhub_groq_api_key') || '');
       setAiProvider(localStorage.getItem('applyhub_ai_provider') || 'gemini');
       setMonthlyNotif(localStorage.getItem('applyhub_monthly_notif') !== 'false');
       setDailyReminder(localStorage.getItem('applyhub_daily_reminder') !== 'false');
@@ -69,6 +71,8 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
     localStorage.setItem('applyhub_ai_provider', aiProvider);
     if (aiProvider === 'openai') {
       localStorage.setItem('applyhub_openai_api_key', openaiApiKey);
+    } else if (aiProvider === 'groq') {
+      localStorage.setItem('applyhub_groq_api_key', groqApiKey);
     } else {
       localStorage.setItem('applyhub_api_key', apiKey);
     }
@@ -442,33 +446,40 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
               >
                 <option value="gemini">Google Gemini AI (default)</option>
                 <option value="openai">OpenAI (GPT-4o-mini)</option>
+                <option value="groq">Groq AI (Llama 3.3 Superfast)</option>
               </select>
             </div>
 
             <div className="space-y-1">
               <p className="font-bold text-slate-800 text-sm">
-                {aiProvider === 'openai' ? 'OpenAI API Key' : 'Gemini API Key'}
+                {aiProvider === 'openai' ? 'OpenAI API Key' : aiProvider === 'groq' ? 'Groq API Key' : 'Gemini API Key'}
               </p>
               <p className="text-xs text-slate-500">
                 {aiProvider === 'openai' 
                   ? 'Provide your OpenAI developer API key to power ATS optimization reviews, mock interviews, and details extraction.'
-                  : 'Provide your Google AI Studio developer key to power ATS optimization reviews, mock interviews, and details extraction.'
+                  : aiProvider === 'groq'
+                    ? 'Provide your Groq developer API key (gsk-...) to power superfast Llama-3 inference matching.'
+                    : 'Provide your Google AI Studio developer key to power ATS optimization reviews, mock interviews, and details extraction.'
                 } Saved locally in your browser.
               </p>
             </div>
 
             {apiKeySuccess && (
               <div className="p-3 bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald text-xs rounded-lg animate-fade-in">
-                {aiProvider === 'openai' ? 'OpenAI API Key' : 'Gemini API Key'} saved successfully!
+                {aiProvider === 'openai' ? 'OpenAI API Key' : aiProvider === 'groq' ? 'Groq API Key' : 'Gemini API Key'} saved successfully!
               </div>
             )}
 
             <div className="flex gap-2">
               <input
                 type="password"
-                value={aiProvider === 'openai' ? openaiApiKey : apiKey}
-                onChange={(e) => aiProvider === 'openai' ? setOpenaiApiKey(e.target.value) : setApiKey(e.target.value)}
-                placeholder={aiProvider === 'openai' ? 'sk-proj-...' : 'AIzaSy...'}
+                value={aiProvider === 'openai' ? openaiApiKey : aiProvider === 'groq' ? groqApiKey : apiKey}
+                onChange={(e) => {
+                  if (aiProvider === 'openai') setOpenaiApiKey(e.target.value);
+                  else if (aiProvider === 'groq') setGroqApiKey(e.target.value);
+                  else setApiKey(e.target.value);
+                }}
+                placeholder={aiProvider === 'openai' ? 'sk-proj-...' : aiProvider === 'groq' ? 'gsk-...' : 'AIzaSy...'}
                 className="flex-1 px-3 py-2.5 glass-input text-xs"
               />
               <button

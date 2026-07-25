@@ -50,7 +50,9 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
       const apiKey = typeof window !== 'undefined' 
         ? (provider === 'openai' 
             ? localStorage.getItem('applyhub_openai_api_key') || '' 
-            : localStorage.getItem('applyhub_api_key') || '') 
+            : provider === 'groq'
+              ? localStorage.getItem('applyhub_groq_api_key') || ''
+              : localStorage.getItem('applyhub_api_key') || '') 
         : '';
       const response = await fetch('/api/ai/parse-application', {
         method: 'POST',

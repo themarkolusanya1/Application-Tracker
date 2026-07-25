@@ -31,7 +31,9 @@ export default function InterviewCoachModal({ application, onClose }: InterviewC
       const provider = localStorage.getItem('applyhub_ai_provider') || 'gemini';
       const apiKey = provider === 'openai' 
         ? localStorage.getItem('applyhub_openai_api_key') || '' 
-        : localStorage.getItem('applyhub_api_key') || '';
+        : provider === 'groq'
+          ? localStorage.getItem('applyhub_groq_api_key') || ''
+          : localStorage.getItem('applyhub_api_key') || '';
       const res = await fetch('/api/ai/mock-interview', {
         method: 'POST',
         headers: {
@@ -71,7 +73,9 @@ export default function InterviewCoachModal({ application, onClose }: InterviewC
       const provider = localStorage.getItem('applyhub_ai_provider') || 'gemini';
       const apiKey = provider === 'openai' 
         ? localStorage.getItem('applyhub_openai_api_key') || '' 
-        : localStorage.getItem('applyhub_api_key') || '';
+        : provider === 'groq'
+          ? localStorage.getItem('applyhub_groq_api_key') || ''
+          : localStorage.getItem('applyhub_api_key') || '';
       const res = await fetch('/api/ai/mock-interview', {
         method: 'POST',
         headers: {

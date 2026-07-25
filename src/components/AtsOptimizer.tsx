@@ -25,7 +25,9 @@ export default function AtsOptimizer() {
       const provider = localStorage.getItem('applyhub_ai_provider') || 'gemini';
       const apiKey = provider === 'openai' 
         ? localStorage.getItem('applyhub_openai_api_key') || '' 
-        : localStorage.getItem('applyhub_api_key') || '';
+        : provider === 'groq'
+          ? localStorage.getItem('applyhub_groq_api_key') || ''
+          : localStorage.getItem('applyhub_api_key') || '';
       const res = await fetch('/api/ai/ats-review', {
         method: 'POST',
         headers: {
