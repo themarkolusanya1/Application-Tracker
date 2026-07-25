@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition, useState, useEffect } from 'react';
-import { X, Briefcase, DollarSign, Link as LinkIcon, Calendar, FileText, MapPin, Layers, GraduationCap, Trash2 } from 'lucide-react';
+import { X, Briefcase, DollarSign, Link as LinkIcon, Calendar, FileText, MapPin, Layers, GraduationCap, Trash2, CheckCircle2 } from 'lucide-react';
 import { createApplication, updateApplication, deleteApplication } from '@/app/actions/applications';
 
 interface ApplicationFormProps {
@@ -33,6 +33,71 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
   const [salary, setSalary] = useState('');
   const [appliedDate, setAppliedDate] = useState('');
   const [notes, setNotes] = useState('');
+
+  // AI Fill states
+  const [isAiMode, setIsAiMode] = useState(false);
+  const [aiText, setAiText] = useState('');
+  const [isParsing, setIsParsing] = useState(false);
+  const [aiSuccessMsg, setAiSuccessMsg] = useState<string | null>(null);
+
+  const handleAiParse = async () => {
+    if (!aiText.trim()) return;
+    setIsParsing(true);
+    setError(null);
+    setAiSuccessMsg(null);
+    try {
+      const apiKey = typeof window !== 'undefined' ? localStorage.getItem('applyhub_api_key') || '' : '';
+      const response = await fetch('/api/ai/parse-application', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+        },
+        body: JSON.stringify({ text: aiText }),
+      });
+      const result = await response.json();
+      if (result.success && result.data) {
+        const data = result.data;
+        // Populate standard form fields
+        setApplicationType(data.applicationType || 'job');
+        setOrganization(data.organization || '');
+        setTitle(data.title || '');
+        
+        if (data.applicationType === 'scholarship') {
+          setDegreeLevel(data.degreeLevel || 'Masters');
+          setDeadline(data.deadline || '');
+          setFundingType(data.fundingType || 'fully funded');
+          setStipendAmount(data.stipendAmount || '');
+          setStatus('Researching');
+        } else {
+          setLocationType(data.locationType || 'ON_SITE');
+          setUrl(data.url || '');
+          setSalary(data.salary || '');
+          setCurrency(data.currency || 'USD');
+          setStatus('WISH_LIST');
+        }
+        
+        setNotes(data.notes || '');
+        
+        setAiSuccessMsg(
+          result.simulated
+            ? '✨ Simulating AI parsing: Filled fields successfully!'
+            : '✨ AI parsed details successfully! Switched to manual form to review.'
+        );
+        // Switch back to manual form so they can inspect and confirm
+        setTimeout(() => {
+          setIsAiMode(false);
+          setAiSuccessMsg(null);
+        }, 1500);
+      } else {
+        setError(result.error || 'Failed to parse application details.');
+      }
+    } catch (e: any) {
+      setError(e.message || 'Failed to reach AI parsing service.');
+    } finally {
+      setIsParsing(false);
+    }
+  };
 
   // New checklist / currency fields
   const [currency, setCurrency] = useState('USD');
@@ -299,8 +364,78 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
             </div>
           )}
 
-          {/* Group 1: Company & Role */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Mode Switcher */}
+          {!applicationToEdit && (
+            <div className="flex border-b border-slate-200 gap-4 mb-2">
+              <button
+                type="button"
+                onClick={() => setIsAiMode(false)}
+                className={`pb-2 text-xs font-bold transition-all relative cursor-pointer ${
+                  !isAiMode ? 'text-brand-indigo font-extrabold' : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Manual Entry
+                {!isAiMode && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full animate-pulse" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAiMode(true)}
+                className={`pb-2 text-xs font-bold transition-all relative cursor-pointer ${
+                  isAiMode ? 'text-brand-indigo font-extrabold' : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                ✨ AI Auto-Fill
+                {isAiMode && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full animate-pulse" />
+                )}
+              </button>
+            </div>
+          )}
+
+          {isAiMode ? (
+            <div className="space-y-4 text-left">
+              {aiSuccessMsg && (
+                <div className="p-3 bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald text-xs rounded-lg animate-fade-in flex items-center gap-1.5 font-semibold">
+                  <CheckCircle2 className="w-4 h-4 text-brand-emerald" />
+                  <span>{aiSuccessMsg}</span>
+                </div>
+              )}
+              
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700" htmlFor="aiText">
+                  Application details (Job description, program info, or page copy)
+                </label>
+                <textarea
+                  id="aiText"
+                  rows={8}
+                  value={aiText}
+                  onChange={(e) => setAiText(e.target.value)}
+                  placeholder="Paste the full job post details, requirements, program overview, or scholarship info here. Our AI will automatically parse the organization/company, position title, degree level, salary estimation, location, deadlines, and requirements for you..."
+                  className="w-full px-3 py-2.5 glass-input text-xs leading-relaxed resize-y font-sans bg-white"
+                />
+              </div>
+
+              <button
+                type="button"
+                disabled={isParsing || !aiText.trim()}
+                onClick={handleAiParse}
+                className="w-full flex items-center justify-center gap-2 py-3 text-xs font-semibold text-white bg-gradient-to-r from-brand-indigo to-brand-cyan hover:opacity-95 rounded-xl shadow-md disabled:opacity-50 transition-all cursor-pointer font-sans"
+              >
+                {isParsing ? (
+                  <span>Parsing details with Gemini AI...</span>
+                ) : (
+                  <>
+                    <span>✨ Auto-Fill fields with AI</span>
+                  </>
+                )}
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Group 1: Company & Role */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700" htmlFor="organization">
                 {applicationType === 'scholarship' ? 'Institution / University Name *' : 'Organization / Company Name *'}
@@ -697,6 +832,8 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
               />
             </div>
           </div>
+          </>
+        )}
         </form>
 
         {/* Footer */}
@@ -719,13 +856,15 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
           >
             Cancel
           </button>
-          <button
-            onClick={handleSubmit}
-            disabled={isPending}
-            className="px-5 py-2 text-sm font-semibold text-white rounded-lg bg-gradient-to-r from-brand-indigo to-brand-cyan hover:opacity-95 shadow-md shadow-brand-indigo/15 transition-all disabled:opacity-50 cursor-pointer"
-          >
-            {isPending ? 'Saving...' : 'Save Application'}
-          </button>
+          {!isAiMode && (
+            <button
+              onClick={handleSubmit}
+              disabled={isPending}
+              className="px-5 py-2 text-sm font-semibold text-white rounded-lg bg-gradient-to-r from-brand-indigo to-brand-cyan hover:opacity-95 shadow-md shadow-brand-indigo/15 transition-all disabled:opacity-50 cursor-pointer"
+            >
+              {isPending ? 'Saving...' : 'Save Application'}
+            </button>
+          )}
         </div>
       </div>
     </div>
