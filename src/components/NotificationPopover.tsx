@@ -64,7 +64,7 @@ export default function NotificationPopover() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none rounded-lg hover:bg-gray-800/50"
+        className="relative p-2 text-slate-500 hover:text-slate-800 transition-colors duration-200 focus:outline-none rounded-lg hover:bg-slate-100"
         aria-label="Notifications"
       >
         <Bell className="w-6 h-6" />
@@ -74,13 +74,13 @@ export default function NotificationPopover() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 max-h-[480px] glass-panel rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col border border-white/10 animate-fade-in">
-          <div className="p-4 border-b border-white/10 flex justify-between items-center bg-gray-900/40">
-            <h3 className="font-semibold text-white text-sm">Notifications</h3>
+        <div className="absolute right-0 mt-2 w-80 max-h-[480px] bg-white rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col border border-slate-200/80 animate-fade-in">
+          <div className="p-4 border-b border-slate-200/85 flex justify-between items-center bg-slate-50">
+            <h3 className="font-semibold text-slate-800 text-sm">Notifications</h3>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                className="text-xs text-brand-indigo hover:text-indigo-400 font-medium transition-colors flex items-center gap-1 cursor-pointer"
+                className="text-xs text-brand-indigo hover:text-indigo-600 font-bold transition-colors flex items-center gap-1 cursor-pointer"
               >
                 <CheckSquare className="w-3.5 h-3.5" />
                 Mark all read
@@ -94,7 +94,7 @@ export default function NotificationPopover() {
                 No notifications yet.
               </div>
             ) : (
-              <div className="divide-y divide-white/5">
+              <div className="divide-y divide-slate-100">
                 {notifications.map((notification) => (
                   <div
                     key={notification.id}
@@ -103,12 +103,12 @@ export default function NotificationPopover() {
                     }`}
                   >
                     <div className="flex-1 min-w-0">
-                      <p className={`text-xs text-gray-200 leading-relaxed ${
-                        notification.isRead ? 'text-gray-400' : 'text-gray-200 font-medium'
+                      <p className={`text-xs leading-relaxed ${
+                        notification.isRead ? 'text-slate-400' : 'text-slate-700 font-medium'
                       }`}>
                         {notification.message}
                       </p>
-                      <span className="text-[10px] text-gray-500 mt-1 block">
+                      <span className="text-[10px] text-slate-400 mt-1 block">
                         {new Date(notification.createdAt).toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -118,7 +118,7 @@ export default function NotificationPopover() {
                     {!notification.isRead && (
                       <button
                         onClick={() => handleMarkAsRead(notification.id)}
-                        className="self-center p-1 text-gray-500 hover:text-brand-cyan transition-colors cursor-pointer"
+                        className="self-center p-1 text-slate-400 hover:text-brand-cyan transition-colors cursor-pointer"
                         title="Mark as read"
                       >
                         <Check className="w-4 h-4" />

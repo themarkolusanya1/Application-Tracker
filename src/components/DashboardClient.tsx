@@ -3,16 +3,17 @@
 import { useState, useTransition } from 'react';
 import { 
   Briefcase, Search, Filter, Kanban, List, Plus, 
-  MapPin, DollarSign, Calendar, ExternalLink, Edit2, Trash2, ArrowUpDown
+  MapPin, DollarSign, Calendar, ExternalLink, Edit2, Trash2, ArrowUpDown, Sparkles
 } from 'lucide-react';
 import { deleteApplication } from '@/app/actions/applications';
 type ApplicationStatus = 'WISH_LIST' | 'APPLIED' | 'INTERVIEWING' | 'OFFERED' | 'REJECTED' | 'WITHDRAWN';
 type LocationType = 'ON_SITE' | 'HYBRID' | 'REMOTE';
 import ApplicationForm from './ApplicationForm';
+import InterviewCoachModal from './InterviewCoachModal';
 
 interface DashboardClientProps {
   initialApplications: any[];
-  initialTab?: 'combined' | 'job' | 'internship' | 'scholarship';
+  initialTab?: 'combined' | 'job' | 'scholarship';
   hideTabs?: boolean;
 }
 
@@ -26,67 +27,170 @@ export default function DashboardClient({
   // Modals / forms
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingApplication, setEditingApplication] = useState<any | null>(null);
+  const [activeInterviewApp, setActiveInterviewApp] = useState<any | null>(null);
 
   // Layout / view modes
   const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
-  const [tabFilter, setTabFilter] = useState<'combined' | 'job' | 'internship' | 'scholarship'>(initialTab);
+  const [tabFilter, setTabFilter] = useState<'combined' | 'job' | 'scholarship'>(initialTab);
+  const [jobSubType, setJobSubType] = useState<'all' | 'job' | 'internship'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [locationFilter, setLocationFilter] = useState<string>('ALL');
+  const [degreeFilter, setDegreeFilter] = useState<string>('ALL');
+
+  const getCurrencySymbol = (currency: string) => {
+    switch (currency) {
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'JPY': return '¥';
+      case 'CAD': return 'CA$';
+      case 'AUD': return 'A$';
+      default: return '$';
+    }
+  };
+
+  const getEmptyStateContent = (colId: string) => {
+    switch (colId) {
+      case 'WISH_LIST':
+        return {
+          title: 'Wish List is empty',
+          desc: 'Found an exciting role? Save it here to apply later.',
+          action: 'Add a position'
+        };
+      case 'APPLIED':
+        return {
+          title: 'No applications logged',
+          desc: 'Keep track of where you have applied to stay organized.',
+          action: 'Log application'
+        };
+      case 'INTERVIEWING':
+        return {
+          title: 'No interviews yet',
+          desc: 'Step closer to your goal! Preparation is key.',
+          action: 'Add interview'
+        };
+      case 'OFFERED':
+        return {
+          title: 'No offers yet',
+          desc: 'Your hard work will pay off soon. Keep applying!',
+          action: 'Log offer'
+        };
+      case 'REJECTED':
+        return {
+          title: 'No updates here',
+          desc: 'Rejected or withdrawn records will appear here.',
+          action: null
+        };
+      case 'Researching':
+        return {
+          title: 'Wish List is empty',
+          desc: 'Found a research topic or school? Track it here.',
+          action: 'Add a university'
+        };
+      case 'Documents in Progress':
+        return {
+          title: 'No documents active',
+          desc: 'Transcripts, SOPs, and recommendation checklist.',
+          action: 'Add checklist'
+        };
+      case 'Submitted':
+        return {
+          title: 'Nothing submitted yet',
+          desc: 'Submit your application files and track them.',
+          action: 'Log submission'
+        };
+      case 'Interview':
+        return {
+          title: 'No interviews set',
+          desc: 'Academic interviews or supervisor chat followups.',
+          action: 'Add interview'
+        };
+      case 'Admitted':
+        return {
+          title: 'No admissions yet',
+          desc: 'Admissions and funding offers will appear here!',
+          action: 'Log admission'
+        };
+      case 'Rejected':
+        return {
+          title: 'No closures yet',
+          desc: 'Closed or withdrawn university applications.',
+          action: null
+        };
+      default:
+        return {
+          title: 'No items',
+          desc: 'This column is empty.',
+          action: null
+        };
+    }
+  };
 
   // Helper date references for upcoming deadlines (next 30 days)
   const now = new Date();
   const thirtyDaysFromNow = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
 
-  // Dynamic stats calculation depending on current active tab
+  // Unified stats calculation (Total, Deadlines, Active)
   const getStats = () => {
-    const jobs = initialApplications.filter(a => a.applicationType === 'job');
-    const internships = initialApplications.filter(a => a.applicationType === 'internship');
-    const scholarships = initialApplications.filter(a => a.applicationType === 'scholarship');
+    const totalApps = initialApplications.length;
 
+    const scholarships = initialApplications.filter(a => a.applicationType === 'scholarship');
     const upcomingDeadlines = scholarships.filter(s => {
       if (!s.deadline) return false;
       const d = new Date(s.deadline);
       return d >= now && d <= thirtyDaysFromNow;
     }).length;
 
-    if (tabFilter === 'job') {
-      return [
-        { label: 'Total Jobs', value: jobs.length, colorClass: 'text-white' },
-        { label: 'Interviewing', value: jobs.filter(a => a.status === 'INTERVIEWING').length, colorClass: 'text-brand-amber' },
-        { label: 'Offers Received', value: jobs.filter(a => a.status === 'OFFERED').length, colorClass: 'text-brand-emerald' },
-        { label: 'Rejections', value: jobs.filter(a => a.status === 'REJECTED').length, colorClass: 'text-brand-rose' }
-      ];
-    } else if (tabFilter === 'internship') {
-      return [
-        { label: 'Total Internships', value: internships.length, colorClass: 'text-white' },
-        { label: 'Interviewing', value: internships.filter(a => a.status === 'INTERVIEWING').length, colorClass: 'text-brand-amber' },
-        { label: 'Offers Received', value: internships.filter(a => a.status === 'OFFERED').length, colorClass: 'text-brand-emerald' },
-        { label: 'Rejections', value: internships.filter(a => a.status === 'REJECTED').length, colorClass: 'text-brand-rose' }
-      ];
-    } else if (tabFilter === 'scholarship') {
-      return [
-        { label: 'University Applications', value: scholarships.length, colorClass: 'text-white' },
-        { label: 'Submitted', value: scholarships.filter(a => a.status === 'Submitted').length, colorClass: 'text-brand-indigo' },
-        { label: 'Admitted', value: scholarships.filter(a => a.status === 'Admitted').length, colorClass: 'text-brand-emerald' },
-        { label: 'Upcoming Deadlines', value: upcomingDeadlines, colorClass: 'text-brand-rose' }
-      ];
-    } else {
-      // Combined Mode
-      return [
-        { label: 'Total Applications', value: initialApplications.length, colorClass: 'text-white' },
-        { label: 'Jobs', value: jobs.length, colorClass: 'text-brand-indigo' },
-        { label: 'Internships', value: internships.length, colorClass: 'text-brand-cyan' },
-        { label: 'Universities', value: scholarships.length, colorClass: 'text-brand-amber' }
-      ];
-    }
+    const activeApps = initialApplications.filter(a => 
+      a.status !== 'REJECTED' && 
+      a.status !== 'WITHDRAWN' && 
+      a.status !== 'Rejected' && 
+      a.status !== 'Withdrawn'
+    ).length;
+
+    return [
+      { label: 'Total Applications', value: totalApps, colorClass: 'text-white' },
+      { label: 'Upcoming Deadlines', value: upcomingDeadlines, colorClass: 'text-brand-rose' },
+      { label: 'Active Applications', value: activeApps, colorClass: 'text-brand-cyan' }
+    ];
+  };
+
+  const getMonthlyReport = () => {
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    const monthlyApps = initialApplications.filter(a => {
+      const d = new Date(a.appliedDate || a.createdAt);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    });
+
+    const jobCount = monthlyApps.filter(a => a.applicationType === 'job' || a.applicationType === 'internship').length;
+    const universityCount = monthlyApps.filter(a => a.applicationType === 'scholarship').length;
+    
+    const monthlyInterviews = monthlyApps.filter(a => a.status === 'INTERVIEWING' || a.status === 'Interview').length;
+    const monthlyOffers = monthlyApps.filter(a => a.status === 'OFFERED' || a.status === 'Admitted').length;
+
+    return {
+      total: monthlyApps.length,
+      jobs: jobCount,
+      universities: universityCount,
+      interviews: monthlyInterviews,
+      offers: monthlyOffers,
+      monthName: now.toLocaleString('default', { month: 'long' })
+    };
   };
 
   // Filter application list based on active tab and query filters
   const filteredApplications = initialApplications.filter((app) => {
     // 1. Filter by application type tab
-    if (tabFilter !== 'combined' && app.applicationType !== tabFilter) {
-      return false;
+    if (tabFilter === 'job') {
+      if (jobSubType === 'all') {
+        if (app.applicationType !== 'job' && app.applicationType !== 'internship') return false;
+      } else {
+        if (app.applicationType !== jobSubType) return false;
+      }
+    } else if (tabFilter === 'scholarship') {
+      if (app.applicationType !== 'scholarship') return false;
     }
 
     // 2. Filter by search query
@@ -102,6 +206,11 @@ export default function DashboardClient({
     // 4. Filter by location (only applies to jobs/internships, or default pass)
     const matchesLocation = locationFilter === 'ALL' || app.locationType === locationFilter;
     if (!matchesLocation) return false;
+
+    // 5. Filter by degree level (only applies to university/scholarship)
+    if (tabFilter === 'scholarship' && degreeFilter !== 'ALL') {
+      if (app.degreeLevel !== degreeFilter) return false;
+    }
 
     return true;
   });
@@ -182,35 +291,105 @@ export default function DashboardClient({
         { id: 'Rejected', title: 'Rejected/Withdrawn', count: filteredApplications.filter(a => a.status === 'Rejected' || a.status === 'Withdrawn').length },
       ];
     } else {
+      // Job or Combined view
+      const getCount = (colId: string) => {
+        return filteredApplications.filter(a => {
+          if (a.applicationType === 'scholarship' && tabFilter === 'combined') {
+            switch (colId) {
+              case 'WISH_LIST':
+                return a.status === 'Researching' || a.status === 'Documents in Progress';
+              case 'APPLIED':
+                return a.status === 'Submitted';
+              case 'INTERVIEWING':
+                return a.status === 'Interview';
+              case 'OFFERED':
+                return a.status === 'Admitted';
+              case 'REJECTED':
+                return a.status === 'Rejected' || a.status === 'Withdrawn';
+              default:
+                return false;
+            }
+          }
+          if (colId === 'REJECTED') {
+            return a.status === 'REJECTED' || a.status === 'WITHDRAWN';
+          }
+          return a.status === colId;
+        }).length;
+      };
+
       return [
-        { id: 'WISH_LIST', title: 'Wish List', count: filteredApplications.filter(a => a.status === 'WISH_LIST').length },
-        { id: 'APPLIED', title: 'Applied', count: filteredApplications.filter(a => a.status === 'APPLIED').length },
-        { id: 'INTERVIEWING', title: 'Interviewing', count: filteredApplications.filter(a => a.status === 'INTERVIEWING').length },
-        { id: 'OFFERED', title: 'Offered', count: filteredApplications.filter(a => a.status === 'OFFERED').length },
-        { id: 'REJECTED', title: 'Rejected/Withdrawn', count: filteredApplications.filter(a => a.status === 'REJECTED' || a.status === 'WITHDRAWN').length },
+        { id: 'WISH_LIST', title: 'Wish List', count: getCount('WISH_LIST') },
+        { id: 'APPLIED', title: 'Applied', count: getCount('APPLIED') },
+        { id: 'INTERVIEWING', title: 'Interviewing', count: getCount('INTERVIEWING') },
+        { id: 'OFFERED', title: 'Offered', count: getCount('OFFERED') },
+        { id: 'REJECTED', title: 'Rejected/Withdrawn', count: getCount('REJECTED') },
       ];
+    }
+  };
+
+  const getBannerContent = () => {
+    switch (tabFilter) {
+      case 'job':
+        return {
+          badge: "Career Momentum",
+          title: "Your dream career is built one application at a time!",
+          desc: "Keep refining your CV/Resume, tailor your cover letters, network with professionals, and get ready to land your next big career milestone.",
+          imgSrc: "/images/job_banner.png"
+        };
+      case 'scholarship':
+        return {
+          badge: "Academic Frontier",
+          title: "Unlock your global academic potential!",
+          desc: "Research fellowships diligently, prepare your letters of recommendation, refine your statement of purpose, and set yourself up for admission success.",
+          imgSrc: "/images/university_banner.png"
+        };
+      default:
+        return {
+          badge: "Success Trajectory",
+          title: "Track your milestones, celebrate your achievements!",
+          desc: "Every single application is a step closer to your dream career or university program. Keep tracking, stay consistent, and prepare to succeed!",
+          imgSrc: "/images/success_banner.png"
+        };
     }
   };
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Motivational Success Banner */}
+      {(() => {
+        const banner = getBannerContent();
+        return (
+          <div className="glass-card rounded-2xl overflow-hidden border border-slate-200/80 shadow-md flex flex-col md:flex-row items-center justify-between p-6 bg-white gap-6">
+            <div className="flex-1 space-y-2 text-left">
+              <span className="text-[10px] uppercase tracking-widest text-brand-indigo font-black">{banner.badge}</span>
+              <h4 className="text-base md:text-lg font-display font-bold text-slate-800 tracking-tight leading-tight">
+                {banner.title}
+              </h4>
+              <p className="text-xs text-slate-500 max-w-xl leading-relaxed">
+                {banner.desc}
+              </p>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* 1. Statistics Cards */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {getStats().map((stat, idx) => (
-          <div key={idx} className="glass-panel border border-white/5 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
-            <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">{stat.label}</span>
-            <span className={`text-2xl md:text-3xl font-black ${stat.colorClass} mt-2`}>{stat.value}</span>
+          <div key={idx} className="glass-card rounded-2xl p-5 flex flex-col justify-between">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{stat.label}</span>
+            <span className="text-xl md:text-2xl font-display font-bold text-slate-800 mt-2">{stat.value}</span>
           </div>
         ))}
       </section>
 
       {/* Tabs Navigation */}
       {!hideTabs && (
-        <div className="flex border-b border-white/5 space-x-6">
+        <div className="flex border-b border-slate-200/80 space-x-6">
           <button
             onClick={() => { setTabFilter('combined'); setStatusFilter('ALL'); }}
             className={`pb-4 text-sm font-bold transition-all relative cursor-pointer ${
-              tabFilter === 'combined' ? 'text-white font-extrabold' : 'text-gray-400 hover:text-white'
+              tabFilter === 'combined' ? 'text-brand-indigo font-extrabold' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             Combined View
@@ -221,29 +400,18 @@ export default function DashboardClient({
           <button
             onClick={() => { setTabFilter('job'); setStatusFilter('ALL'); }}
             className={`pb-4 text-sm font-bold transition-all relative cursor-pointer ${
-              tabFilter === 'job' ? 'text-white font-extrabold' : 'text-gray-400 hover:text-white'
+              tabFilter === 'job' ? 'text-brand-indigo font-extrabold' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            Jobs
+            Jobs & Internships
             {tabFilter === 'job' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full animate-pulse" />
-            )}
-          </button>
-          <button
-            onClick={() => { setTabFilter('internship'); setStatusFilter('ALL'); }}
-            className={`pb-4 text-sm font-bold transition-all relative cursor-pointer ${
-              tabFilter === 'internship' ? 'text-white font-extrabold' : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Internships
-            {tabFilter === 'internship' && (
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-indigo to-brand-cyan rounded-full animate-pulse" />
             )}
           </button>
           <button
             onClick={() => { setTabFilter('scholarship'); setStatusFilter('ALL'); }}
             className={`pb-4 text-sm font-bold transition-all relative cursor-pointer ${
-              tabFilter === 'scholarship' ? 'text-white font-extrabold' : 'text-gray-400 hover:text-white'
+              tabFilter === 'scholarship' ? 'text-brand-indigo font-extrabold' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             University Applications
@@ -255,7 +423,7 @@ export default function DashboardClient({
       )}
 
       {/* 2. Search & Controls */}
-      <section className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white/2 backdrop-blur-md p-4 rounded-2xl border border-white/5">
+      <section className="flex flex-col md:flex-row gap-4 items-center justify-between glass-panel p-4 rounded-2xl">
         <div className="flex flex-1 flex-col sm:flex-row w-full gap-3">
           {/* Search bar */}
           <div className="relative flex-1">
@@ -274,7 +442,7 @@ export default function DashboardClient({
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full sm:w-44 px-3 py-2 glass-input text-sm bg-gray-950/80 pr-8 cursor-pointer appearance-none"
+              className="w-full sm:w-44 px-3 py-2 glass-input text-sm bg-white/90 pr-8 cursor-pointer appearance-none"
             >
               <option value="ALL">All Statuses</option>
               {tabFilter === 'scholarship' ? (
@@ -307,7 +475,7 @@ export default function DashboardClient({
               <select
                 value={locationFilter}
                 onChange={(e) => setLocationFilter(e.target.value)}
-                className="w-full sm:w-44 px-3 py-2 glass-input text-sm bg-gray-950/80 pr-8 cursor-pointer appearance-none"
+                className="w-full sm:w-44 px-3 py-2 glass-input text-sm bg-white/90 pr-8 cursor-pointer appearance-none"
               >
                 <option value="ALL">All Locations</option>
                 <option value="ON_SITE">On-Site</option>
@@ -315,6 +483,39 @@ export default function DashboardClient({
                 <option value="REMOTE">Remote</option>
               </select>
               <MapPin className="absolute right-3 top-0 bottom-0 my-auto w-3.5 h-3.5 text-gray-500 pointer-events-none" />
+            </div>
+          )}
+
+          {/* Job/Internship Sub-type filter inside Jobs & Internships view */}
+          {tabFilter === 'job' && (
+            <div className="relative">
+              <select
+                value={jobSubType}
+                onChange={(e) => setJobSubType(e.target.value as any)}
+                className="w-full sm:w-44 px-3 py-2 glass-input text-sm bg-white/90 pr-8 cursor-pointer appearance-none"
+              >
+                <option value="all">All Positions</option>
+                <option value="job">Jobs Only</option>
+                <option value="internship">Internships Only</option>
+              </select>
+              <Filter className="absolute right-3 top-0 bottom-0 my-auto w-3.5 h-3.5 text-gray-500 pointer-events-none" />
+            </div>
+          )}
+
+          {/* Degree Level Filter (only for University Applications or Combined) */}
+          {(tabFilter === 'scholarship' || tabFilter === 'combined') && (
+            <div className="relative">
+              <select
+                value={degreeFilter}
+                onChange={(e) => setDegreeFilter(e.target.value)}
+                className="w-full sm:w-44 px-3 py-2 glass-input text-sm bg-white/90 pr-8 cursor-pointer appearance-none"
+              >
+                <option value="ALL">All Degrees</option>
+                <option value="Bachelors">Bachelor's</option>
+                <option value="Masters">Master's</option>
+                <option value="PhD">PhD</option>
+              </select>
+              <Filter className="absolute right-3 top-0 bottom-0 my-auto w-3.5 h-3.5 text-gray-500 pointer-events-none" />
             </div>
           )}
         </div>
@@ -358,6 +559,22 @@ export default function DashboardClient({
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 items-start">
           {getBoardColumns().map((col) => {
             const colApps = filteredApplications.filter((app) => {
+              if (app.applicationType === 'scholarship' && tabFilter === 'combined') {
+                switch (col.id) {
+                  case 'WISH_LIST':
+                    return app.status === 'Researching' || app.status === 'Documents in Progress';
+                  case 'APPLIED':
+                    return app.status === 'Submitted';
+                  case 'INTERVIEWING':
+                    return app.status === 'Interview';
+                  case 'OFFERED':
+                    return app.status === 'Admitted';
+                  case 'REJECTED':
+                    return app.status === 'Rejected' || app.status === 'Withdrawn';
+                  default:
+                    return false;
+                }
+              }
               if (col.id === 'REJECTED') {
                 return app.status === 'REJECTED' || app.status === 'WITHDRAWN';
               }
@@ -368,55 +585,85 @@ export default function DashboardClient({
             });
 
             return (
-              <div key={col.id} className="flex flex-col max-h-[80vh] bg-white/1 border border-white/5 rounded-2xl p-4">
+              <div key={col.id} className="flex flex-col max-h-[80vh] bg-slate-100/50 border border-slate-200/80 rounded-2xl p-4">
                 <div className="flex justify-between items-center mb-4 flex-shrink-0">
-                  <h4 className="font-bold text-gray-200 text-sm tracking-wide">{col.title}</h4>
-                  <span className="text-xs text-gray-500 font-semibold px-2 py-0.5 rounded-full bg-white/5">
+                  <h4 className="font-display font-bold text-slate-800 text-sm tracking-wide">{col.title}</h4>
+                  <span className="text-xs text-brand-indigo font-bold px-2 py-0.5 rounded-full bg-brand-indigo/10">
                     {colApps.length}
                   </span>
                 </div>
 
                 <div className="flex-1 overflow-y-auto space-y-3 pr-1">
                   {colApps.length === 0 ? (
-                    <div className="py-8 text-center text-xs text-gray-600 border border-dashed border-white/5 rounded-xl">
-                      Empty column
-                    </div>
+                    (() => {
+                      const state = getEmptyStateContent(col.id);
+                      return (
+                        <div className="py-6 px-4 text-center border border-dashed border-white/5 rounded-xl space-y-2 select-none flex flex-col justify-center items-center min-h-[120px]">
+                          <p className="font-bold text-gray-400 text-[11px] leading-tight">{state.title}</p>
+                          <p className="text-[10px] text-gray-500 max-w-[140px] leading-normal">{state.desc}</p>
+                          {state.action && (
+                            <button
+                              onClick={() => {
+                                setEditingApplication(null);
+                                setIsFormOpen(true);
+                              }}
+                              className="text-[10px] font-bold text-brand-cyan hover:underline mt-1 bg-transparent border-0 cursor-pointer"
+                            >
+                              {state.action} &rarr;
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })()
                   ) : (
                     colApps.map((app) => (
                       <div
                         key={app.id}
-                        className="glass-card rounded-xl p-4 space-y-3 text-left relative group border border-white/5"
+                        className="glass-card rounded-xl p-4 space-y-3 text-left relative group border border-slate-200/80 card-lift"
                       >
-                        {tabFilter === 'combined' && (
-                          <span className={`inline-block text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
-                            app.applicationType === 'scholarship' ? 'bg-brand-cyan/20 text-brand-cyan' : 'bg-brand-indigo/20 text-brand-indigo'
-                          }`}>
-                            {app.applicationType}
-                          </span>
-                        )}
+                        <div className="flex flex-wrap gap-1.5 items-center">
+                          {tabFilter === 'combined' && (
+                            <span className={`inline-block text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                              app.applicationType === 'scholarship' ? 'bg-brand-cyan/20 text-brand-cyan' :
+                              app.applicationType === 'internship' ? 'bg-brand-rose/20 text-brand-rose' :
+                              'bg-brand-indigo/20 text-brand-indigo'
+                            }`}>
+                              {app.applicationType}
+                            </span>
+                          )}
+                          {(app.status === 'REJECTED' || app.status === 'WITHDRAWN' || app.status === 'Rejected' || app.status === 'Withdrawn') && (
+                            <span className={`inline-block text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                              (app.status === 'REJECTED' || app.status === 'Rejected')
+                                ? 'bg-brand-rose/20 text-brand-rose'
+                                : 'bg-gray-500/20 text-gray-400'
+                            }`}>
+                              {app.status === 'REJECTED' || app.status === 'Rejected' ? 'Rejected' : 'Withdrawn'}
+                            </span>
+                          )}
+                        </div>
 
                         <div className="flex justify-between items-start">
                           <div>
-                            <h5 className="font-bold text-white text-sm truncate max-w-[140px]" title={app.organization}>
+                            <h5 className="font-bold text-slate-800 text-sm truncate max-w-[140px]" title={app.organization}>
                               {app.organization}
                             </h5>
-                            <p className="text-xs text-gray-400 truncate max-w-[140px]" title={app.title}>
+                            <p className="text-xs text-slate-500 truncate max-w-[140px]" title={app.title}>
                               {app.title}
                             </p>
                           </div>
 
-                          {/* Quick Actions overlay */}
-                          <div className="flex items-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          {/* Quick Actions */}
+                          <div className="flex items-center gap-0.5">
                             <button
                               onClick={() => handleEditClick(app)}
-                              className="p-1 rounded text-gray-500 hover:text-white hover:bg-white/5 cursor-pointer"
+                              className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-100 cursor-pointer transition-colors"
                               title="Edit"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => handleDelete(app.id)}
-                              className="p-1 rounded text-gray-500 hover:text-brand-rose hover:bg-brand-rose/10 cursor-pointer"
+                              className="p-1 rounded text-slate-400 hover:text-brand-rose hover:bg-brand-rose/10 cursor-pointer transition-colors"
                               title="Delete"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -427,7 +674,12 @@ export default function DashboardClient({
                         {/* Middle metadata fields: Conditional based on type */}
                         {app.applicationType === 'scholarship' ? (
                           <div className="space-y-2">
-                            <div className="flex flex-wrap gap-1.5">
+                            <div className="flex flex-wrap gap-1.5 items-center">
+                              {app.degreeLevel && (
+                                <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded bg-brand-amber/10 border border-brand-amber/20 text-brand-amber">
+                                  {app.degreeLevel === 'Bachelors' ? "Bachelor's" : app.degreeLevel === 'Masters' ? "Master's" : "PhD"}
+                                </span>
+                              )}
                               {app.fundingType && (
                                 <span className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded ${
                                   app.fundingType === 'fully funded' ? 'bg-brand-emerald/10 text-brand-emerald' :
@@ -436,29 +688,56 @@ export default function DashboardClient({
                                   {app.fundingType}
                                 </span>
                               )}
-                              {app.stipendAmount && (
-                                <span className="inline-flex items-center gap-0.5 text-[10px] text-gray-400 font-semibold">
-                                  <DollarSign className="w-3 h-3 text-brand-cyan" />
+                              {app.stipendAmount && app.stipendAmount !== '0' && (
+                                <span className="inline-flex items-center gap-0.5 text-[10px] text-gray-400 font-semibold" title="Stipend / Funding">
+                                  <span className="text-brand-cyan font-bold mr-0.5">{getCurrencySymbol(app.currency || 'USD')}</span>
                                   {app.stipendAmount}
                                 </span>
                               )}
                             </div>
 
-                            {/* Document checklist icons */}
-                            <div className="flex gap-1 items-center bg-white/2 p-1.5 rounded-lg border border-white/5">
+                            {/* Document checklist icons adjusted by degree level */}
+                            <div className="flex flex-wrap gap-1 items-center bg-white/2 p-1.5 rounded-lg border border-white/5">
                               <span className="text-[9px] font-semibold text-gray-500 mr-1 uppercase">Docs:</span>
-                              <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasSop ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="SOP">SOP</span>
+                              
+                              {/* Transcripts (All) */}
                               <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasTranscripts ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="Transcripts">TR</span>
-                              <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasReferences ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="Reference Letters">REF</span>
-                              <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasTestScores ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="Test Scores">TEST</span>
+                              
+                              {/* SOP / Proposal (Master's, PhD) */}
+                              {(app.degreeLevel === 'Masters' || app.degreeLevel === 'PhD' || !app.degreeLevel) && (
+                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasSop ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title={app.degreeLevel === 'PhD' ? "Research Proposal" : "Statement of Purpose"}>
+                                  {app.degreeLevel === 'PhD' ? "PROP" : "SOP"}
+                                </span>
+                              )}
+                              
+                              {/* Personal Statement (Bachelor's) */}
+                              {app.degreeLevel === 'Bachelors' && (
+                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasPersonalStatement ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="Personal Statement">PS</span>
+                              )}
+                              
+                              {/* References (All) */}
+                              <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasReferences ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="References">REF</span>
+                              
+                              {/* CV/Resume (Master's, PhD) */}
+                              {(app.degreeLevel === 'Masters' || app.degreeLevel === 'PhD') && (
+                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasCvResume ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="CV/Resume">CV</span>
+                              )}
+                              
+                              {/* Test Scores (All) */}
+                              <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasTestScores ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title={app.degreeLevel === 'Bachelors' ? "SAT/ACT Scores" : "GRE/Test Scores"}>TEST</span>
+                              
+                              {/* Potential Advisor (PhD only) */}
+                              {app.degreeLevel === 'PhD' && (
+                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.potentialAdvisor ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title={`Potential Advisor: ${app.potentialAdvisor || 'Pending'}`}>ADV</span>
+                              )}
                             </div>
                           </div>
                         ) : (
                           <div className="flex flex-wrap gap-2">
                             {getLocationBadge(app.locationType)}
                             {app.salary && (
-                              <span className="inline-flex items-center gap-0.5 text-[11px] text-gray-400 font-semibold">
-                                <DollarSign className="w-3 h-3 text-brand-cyan" />
+                              <span className="inline-flex items-center gap-0.5 text-[11px] text-gray-400 font-semibold" title="Salary / Compensation">
+                                <span className="text-brand-cyan font-bold mr-0.5">{getCurrencySymbol(app.currency || 'USD')}</span>
                                 {app.salary}
                               </span>
                             )}
@@ -506,6 +785,17 @@ export default function DashboardClient({
                             </a>
                           )}
                         </div>
+
+                        {(app.status === 'INTERVIEWING' || app.status === 'Interview') && (
+                          <button
+                            type="button"
+                            onClick={() => setActiveInterviewApp(app)}
+                            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-gradient-to-r from-brand-indigo to-brand-cyan hover:opacity-95 rounded-xl shadow-md shadow-brand-indigo/15 transition-all cursor-pointer mt-2"
+                          >
+                            <Sparkles className="w-3.5 h-3.5 text-white" />
+                            <span>AI Interview Prep</span>
+                          </button>
+                        )}
                       </div>
                     ))
                   )}
@@ -527,7 +817,7 @@ export default function DashboardClient({
                   <th className="px-6 py-4">Status</th>
                   
                   {/* Tab Specific Headers */}
-                  {(tabFilter === 'job' || tabFilter === 'internship') && (
+                  {tabFilter === 'job' && (
                     <>
                       <th className="px-6 py-4">Location</th>
                       <th className="px-6 py-4">Salary</th>
@@ -578,11 +868,11 @@ export default function DashboardClient({
                       <td className="px-6 py-4">{getStatusBadge(app.status)}</td>
 
                       {/* Tab Specific Cells */}
-                      {(tabFilter === 'job' || tabFilter === 'internship') && (
+                      {tabFilter === 'job' && (
                         <>
                           <td className="px-6 py-4">{getLocationBadge(app.locationType)}</td>
                           <td className="px-6 py-4 font-semibold text-gray-200">
-                            {app.salary ? app.salary : <span className="text-gray-600">—</span>}
+                            {app.salary ? `${getCurrencySymbol(app.currency || 'USD')} ${app.salary}` : <span className="text-gray-600">—</span>}
                           </td>
                         </>
                       )}
@@ -602,7 +892,7 @@ export default function DashboardClient({
                             )}
                           </td>
                           <td className="px-6 py-4 font-semibold text-gray-200">
-                            {app.stipendAmount ? app.stipendAmount : <span className="text-gray-600">—</span>}
+                            {app.stipendAmount && app.stipendAmount !== '0' ? `${getCurrencySymbol(app.currency || 'USD')} ${app.stipendAmount}` : <span className="text-gray-600">—</span>}
                           </td>
                           <td className="px-6 py-4 font-medium text-gray-300">
                             {app.deadline ? (
@@ -620,11 +910,37 @@ export default function DashboardClient({
                             )}
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex gap-1 select-none">
-                              <span className={`px-1.5 py-0.5 text-[9px] rounded font-bold border ${app.hasSop ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="SOP">SOP</span>
-                              <span className={`px-1.5 py-0.5 text-[9px] rounded font-bold border ${app.hasTranscripts ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="Transcripts">TR</span>
-                              <span className={`px-1.5 py-0.5 text-[9px] rounded font-bold border ${app.hasReferences ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="References">REF</span>
-                              <span className={`px-1.5 py-0.5 text-[9px] rounded font-bold border ${app.hasTestScores ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="Test Scores">TEST</span>
+                            <div className="flex flex-wrap gap-1 items-center select-none">
+                              {/* Transcripts */}
+                              <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasTranscripts ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="Transcripts">TR</span>
+                              
+                              {/* SOP / Proposal */}
+                              {(app.degreeLevel === 'Masters' || app.degreeLevel === 'PhD' || !app.degreeLevel) && (
+                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasSop ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title={app.degreeLevel === 'PhD' ? "Research Proposal" : "Statement of Purpose"}>
+                                  {app.degreeLevel === 'PhD' ? "PROP" : "SOP"}
+                                </span>
+                              )}
+                              
+                              {/* Personal Statement */}
+                              {app.degreeLevel === 'Bachelors' && (
+                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasPersonalStatement ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="Personal Statement">PS</span>
+                              )}
+                              
+                              {/* References */}
+                              <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasReferences ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="References">REF</span>
+                              
+                              {/* CV/Resume */}
+                              {(app.degreeLevel === 'Masters' || app.degreeLevel === 'PhD') && (
+                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasCvResume ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="CV/Resume">CV</span>
+                              )}
+                              
+                              {/* Test Scores */}
+                              <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasTestScores ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title={app.degreeLevel === 'Bachelors' ? "SAT/ACT Scores" : "GRE/Test Scores"}>TEST</span>
+                              
+                              {/* Advisor */}
+                              {app.degreeLevel === 'PhD' && (
+                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.potentialAdvisor ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title={`Advisor: ${app.potentialAdvisor || 'Pending'}`}>ADV</span>
+                              )}
                             </div>
                           </td>
                         </>
@@ -697,6 +1013,13 @@ export default function DashboardClient({
         onClose={() => setIsFormOpen(false)}
         applicationToEdit={editingApplication}
       />
+
+      {activeInterviewApp && (
+        <InterviewCoachModal
+          application={activeInterviewApp}
+          onClose={() => setActiveInterviewApp(null)}
+        />
+      )}
     </div>
   );
 }

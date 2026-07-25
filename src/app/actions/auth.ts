@@ -18,6 +18,7 @@ export async function register(formData: FormData): Promise<ActionResponse> {
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
+    const role = (formData.get('role') as string) || 'STUDENT';
 
     if (!name || !email || !password) {
       return { success: false, error: 'All fields are required.' };
@@ -45,6 +46,7 @@ export async function register(formData: FormData): Promise<ActionResponse> {
         name,
         email: email.toLowerCase(),
         password: passwordHash,
+        role,
       },
     });
 
@@ -147,8 +149,121 @@ export async function getCurrentUser(): Promise<UserSession | null> {
     const cookieStore = await cookies();
     const token = cookieStore.get('session_token')?.value;
     if (!token) return null;
-    return await verifyJWT(token);
+
+    const session = await verifyJWT(token);
+    if (!session) return null;
+
+    // Verify user exists in DB to prevent stale session cookie bugs (e.g. after prisma db push)
+    const userExists = await db.user.findUnique({
+      where: { id: session.userId },
+      select: { id: true },
+    });
+
+    if (!userExists) {
+      return null;
+    }
+
+    return session;
   } catch (error) {
     return null;
+  }
+}
+
+/**
+ * Update user profile details (name and role)
+ */
+export async function updateUserProfile(name: string, role: string): Promise<ActionResponse> {
+  try {
+    const session = await getCurrentUser();
+    if (!session) {
+      return { success: false, error: 'Unauthorized.' };
+    }
+
+    const updatedUser = await db.user.update({
+      where: { id: session.userId },
+      data: { name, role },
+    });
+
+    // Re-issue JWT session token
+    const sessionPayload: UserSession = {
+      userId: updatedUser.id,
+      email: updatedUser.email,
+      name: updatedUser.name,
+    };
+    const token = await signJWT(sessionPayload);
+
+    const cookieStore = await cookies();
+    cookieStore.set('session_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Update profile error:', error);
+    return { success: false, error: 'Failed to update profile.' };
+  }
+}
+
+/**
+ * Query complete User record from database based on current session
+ */
+export async function getCompleteUserRecord() {
+  try {
+    const session = await getCurrentUser();
+    if (!session) return null;
+    return await db.user.findUnique({
+      where: { id: session.userId }
+    });
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Auto-login developer test user server action
+ */
+export async function loginDevTestUser(): Promise<ActionResponse> {
+  try {
+    const cookieStore = await cookies();
+    
+    // Ensure test user exists in DB
+    let defaultUser = await db.user.findFirst({
+      where: { email: 'test@applyhub.com' }
+    });
+    
+    if (!defaultUser) {
+      defaultUser = await db.user.create({
+        data: {
+          name: 'Developer Test',
+          email: 'test@applyhub.com',
+          password: 'test_password_hash',
+          role: 'STUDENT',
+        },
+      });
+    }
+
+    const sessionPayload: UserSession = {
+      userId: defaultUser.id,
+      email: defaultUser.email,
+      name: defaultUser.name,
+    };
+    
+    const token = await signJWT(sessionPayload);
+    cookieStore.set('session_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('loginDevTestUser error:', error);
+    return { success: false, error: 'Failed to auto-login.' };
   }
 }

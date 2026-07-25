@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
-  LayoutDashboard, Briefcase, GraduationCap, ClipboardList,
+  LayoutDashboard, Briefcase, GraduationCap, 
   FileText, Calendar, Settings 
 } from 'lucide-react';
 
@@ -18,16 +18,10 @@ export default function SidebarNav() {
       color: 'text-brand-indigo',
     },
     {
-      label: 'Jobs',
+      label: 'Jobs & Internships',
       href: '/jobs',
       icon: Briefcase,
       color: 'text-brand-cyan',
-    },
-    {
-      label: 'Internships',
-      href: '/internships',
-      icon: ClipboardList,
-      color: 'text-brand-indigo',
     },
     {
       label: 'University Applications',
@@ -65,16 +59,16 @@ export default function SidebarNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 group border cursor-pointer ${
+            className={`flex items-center gap-3 px-5 py-3.5 text-sm font-semibold rounded-2xl transition-all duration-200 group border cursor-pointer hover:translate-x-1 ${
               isActive 
-                ? 'bg-white/5 border-white/10 text-white shadow-md' 
-                : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
+                ? 'bg-brand-indigo border-brand-indigo/20 text-white shadow-lg shadow-brand-indigo/20' 
+                : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-brand-indigo'
             }`}
           >
             <Icon className={`w-5 h-5 transition-transform duration-200 group-hover:scale-105 ${
-              isActive ? 'text-brand-indigo font-bold' : item.color
+              isActive ? 'text-white' : item.color
             }`} />
-            <span>{item.label}</span>
+            <span className="font-sans">{item.label}</span>
           </Link>
         );
       })}

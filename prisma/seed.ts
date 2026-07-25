@@ -35,7 +35,8 @@ async function main() {
       status: 'INTERVIEWING',
       url: 'https://careers.google.com/jobs/results/123456/',
       notes: 'Initial HR screening completed. Technical screen scheduled for next Tuesday.',
-      salary: '$180,000 - $220,000',
+      salary: '185000',
+      currency: 'USD',
       locationType: 'HYBRID',
       appliedDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14), // 14 days ago
     },
@@ -46,7 +47,8 @@ async function main() {
       status: 'APPLIED',
       url: 'https://stripe.com/jobs/careers/556677',
       notes: 'Applied through internal referral from Sarah.',
-      salary: '$160,000 - $190,000',
+      salary: '175000',
+      currency: 'USD',
       locationType: 'REMOTE',
       appliedDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7), // 7 days ago
     },
@@ -57,7 +59,8 @@ async function main() {
       status: 'OFFERED',
       url: 'https://vercel.com/careers/frontend-engineer',
       notes: 'Received written offer! Deciding on salary/equity package details.',
-      salary: '$45 / hour',
+      salary: '45 / hour',
+      currency: 'USD',
       locationType: 'REMOTE',
       appliedDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30), // 30 days ago
     },
@@ -68,79 +71,97 @@ async function main() {
       status: 'REJECTED',
       url: 'https://jobs.netflix.com/jobs/889900',
       notes: 'Completed final round virtual onsite. Position was closed and filled internally.',
-      salary: '$250,000',
+      salary: '250000',
+      currency: 'USD',
       locationType: 'ON_SITE',
       appliedDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 25), // 25 days ago
     },
 
-    // --- SCHOLARSHIP APPLICATIONS ---
+    // --- UNIVERSITY APPLICATIONS ---
     {
       applicationType: 'scholarship',
       organization: 'Stanford University', // Institution
-      title: 'MSc Computer Science', // Program Name
+      title: 'Computer Science', // Program Name
       status: 'Admitted',
       url: 'https://cs.stanford.edu/admissions/mscs',
       notes: 'Received formal admission email! Funding packages include fully funded tuition + TA stipend.',
       fundingType: 'fully funded',
-      stipendAmount: '$45,000 / year',
+      stipendAmount: '45000',
+      currency: 'USD',
       deadline: new Date(Date.now() + 1000 * 60 * 60 * 24 * 90), // 90 days from now
       locationType: 'ON_SITE',
       appliedDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 60), // 60 days ago
+      degreeLevel: 'Masters',
       hasSop: true,
       hasTranscripts: true,
       hasReferences: true,
       hasTestScores: true,
+      hasCvResume: true,
+      hasPersonalStatement: false,
     },
     {
       applicationType: 'scholarship',
       organization: 'MIT', // Institution
-      title: 'PhD Machine Learning', // Program Name
+      title: 'Machine Learning', // Program Name
       status: 'Documents in Progress',
       url: 'https://eecs.mit.edu/academics-admissions/graduate-program/',
       notes: 'Drafting SOP. Transcripts uploaded. Need to follow up with Professor Vance and Professor Cho for letters.',
       fundingType: 'fully funded',
-      stipendAmount: '$50,000 / year',
+      stipendAmount: '50000',
+      currency: 'USD',
       deadline: new Date(Date.now() + 1000 * 60 * 60 * 24 * 15), // 15 days from now (Upcoming!)
       locationType: 'ON_SITE',
       appliedDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5), // 5 days ago
+      degreeLevel: 'PhD',
+      potentialAdvisor: 'Professor Cho (EECS)',
       hasSop: true,
       hasTranscripts: true,
       hasReferences: false,
       hasTestScores: false,
+      hasCvResume: true,
+      hasPersonalStatement: false,
     },
     {
       applicationType: 'scholarship',
       organization: 'University of Cambridge', // Institution
-      title: 'MPhil Advanced Computer Science', // Program Name
+      title: 'Advanced Computer Science', // Program Name
       status: 'Submitted',
       url: 'https://www.postgraduate.study.cam.ac.uk/courses/directory/cscsmphil',
       notes: 'Submitted via Gates Cambridge Trust gateway. Interview invitations will be sent out in November.',
       fundingType: 'partial',
-      stipendAmount: '£25,000 / year',
+      stipendAmount: '25000',
+      currency: 'GBP',
       deadline: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5), // 5 days ago
       locationType: 'ON_SITE',
       appliedDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 20), // 20 days ago
+      degreeLevel: 'Masters',
       hasSop: true,
       hasTranscripts: true,
       hasReferences: true,
       hasTestScores: true,
+      hasCvResume: true,
+      hasPersonalStatement: false,
     },
     {
       applicationType: 'scholarship',
       organization: 'University of Oxford', // Institution
-      title: 'MSc Mathematical Sciences', // Program Name
+      title: 'Mathematical Sciences', // Program Name
       status: 'Researching',
       url: 'https://www.ox.ac.uk/admissions/graduate/courses/msc-mathematical-sciences',
       notes: 'Checking eligibility criteria and reviewing scholarship deadlines. The primary funding deadline is in January.',
       fundingType: 'self-funded',
-      stipendAmount: 'N/A',
+      stipendAmount: '0',
+      currency: 'GBP',
       deadline: new Date(Date.now() + 1000 * 60 * 60 * 24 * 45), // 45 days from now
       locationType: 'ON_SITE',
       appliedDate: new Date(), // Today
+      degreeLevel: 'Bachelors',
       hasSop: false,
       hasTranscripts: false,
       hasReferences: false,
       hasTestScores: false,
+      hasCvResume: false,
+      hasPersonalStatement: true,
     },
   ];
 

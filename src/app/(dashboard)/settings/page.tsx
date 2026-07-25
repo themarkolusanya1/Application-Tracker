@@ -1,6 +1,7 @@
-import { getCurrentUser } from '@/app/actions/auth';
+import { getCurrentUser, getCompleteUserRecord } from '@/app/actions/auth';
 import SettingsClient from '@/components/SettingsClient';
 import { redirect } from 'next/navigation';
+import { db } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,14 +12,21 @@ export default async function SettingsPage() {
     redirect('/login');
   }
 
+  const dbUser = await getCompleteUserRecord();
+
   const user = {
-    name: session.name,
-    email: session.email,
+    name: dbUser?.name || session.name,
+    email: dbUser?.email || session.email,
+    role: dbUser?.role || 'STUDENT',
   };
+
+  const applications = await db.application.findMany({
+    where: { userId: session.userId },
+  });
 
   return (
     <div className="animate-fade-in">
-      <SettingsClient user={user} />
+      <SettingsClient user={user} initialApplications={applications} />
     </div>
   );
 }

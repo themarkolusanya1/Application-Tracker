@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/app/actions/auth';
-import LogoutButton from '@/components/LogoutButton';
 import NotificationPopover from '@/components/NotificationPopover';
 import { Briefcase, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import SidebarNav from '@/components/SidebarNav';
+import SidebarFooter from '@/components/SidebarFooter';
 
 export default async function DashboardLayout({
   children,
@@ -21,46 +21,36 @@ export default async function DashboardLayout({
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex md:flex-col md:w-64 glass-panel border-r border-white/5 flex-shrink-0">
+      <aside className="hidden md:flex md:flex-col md:w-72 glass-panel border-r border-slate-200/80 flex-shrink-0">
         {/* Brand Header */}
-        <div className="flex items-center gap-3 px-6 h-20 border-b border-white/5 bg-gray-900/20">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-indigo to-brand-cyan flex items-center justify-center shadow-lg shadow-brand-indigo/20">
-            <Briefcase className="w-5 h-5 text-white" />
+        <div className="flex items-center gap-3 px-6 h-20 border-b border-slate-200/80 bg-slate-50/50">
+          <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-lg shadow-brand-indigo/15 border border-slate-200/50 bg-white p-0.5">
+            <img src="/images/applyhub_logo.png" alt="ApplyHub logo" className="w-full h-full object-cover select-none" />
           </div>
           <div>
-            <h1 className="font-black text-white text-lg tracking-tight">AppTracker</h1>
+            <h1 className="font-display font-black text-brand-indigo text-lg tracking-tight">ApplyHub</h1>
+            <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold leading-none">Success Tracker</p>
           </div>
         </div>
 
         {/* Sidebar Nav */}
         <SidebarNav />
 
-        {/* User profile & Logout footer */}
-        <div className="p-4 border-t border-white/5 bg-gray-900/10">
-          <div className="flex items-center gap-3 px-4 py-3 mb-2 rounded-lg bg-white/5">
-            <div className="w-9 h-9 rounded-full bg-brand-indigo/20 border border-brand-indigo/30 flex items-center justify-center">
-              <UserIcon className="w-5 h-5 text-brand-indigo" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-white truncate">{session.name}</p>
-              <p className="text-xs text-gray-500 truncate">{session.email}</p>
-            </div>
-          </div>
-          <LogoutButton />
-        </div>
+        {/* User profile & Logout footer (Client Toggled Theme) */}
+        <SidebarFooter userName={session.name} userEmail={session.email} />
       </aside>
 
       {/* Main content wrapper */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         {/* Header */}
-        <header className="flex justify-between items-center px-6 h-20 border-b border-white/5 bg-gray-900/10 backdrop-blur-md z-10 flex-shrink-0">
+        <header className="flex justify-between items-center px-6 h-20 border-b border-slate-200/80 bg-white/80 backdrop-blur-md z-10 flex-shrink-0">
           {/* Section title */}
           <div className="flex items-center gap-3">
             {/* Mobile menu toggle placeholder/brand icon */}
-            <div className="md:hidden w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-indigo to-brand-cyan flex items-center justify-center shadow">
-              <Briefcase className="w-4 h-4 text-white" />
+            <div className="md:hidden w-8 h-8 rounded-lg overflow-hidden shadow border border-slate-200/50 bg-white p-0.5">
+              <img src="/images/applyhub_logo.png" alt="ApplyHub logo" className="w-full h-full object-cover select-none" />
             </div>
-            <h2 className="text-lg font-bold text-white tracking-wide">Application Hub</h2>
+            <h2 className="text-lg font-display font-bold text-slate-800 tracking-wide">Success Tracker</h2>
           </div>
 
           {/* Right section actions */}
@@ -74,7 +64,7 @@ export default async function DashboardLayout({
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 bg-gradient-to-b from-gray-900/10 to-background/90">
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-50/30">
           {children}
         </main>
       </div>

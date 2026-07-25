@@ -7,22 +7,22 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-gradient-to-b from-gray-950 to-gray-900 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-background relative overflow-hidden">
       {/* Dynamic Background Glows */}
-      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-brand-indigo/10 blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 rounded-full bg-brand-cyan/10 blur-3xl" />
+      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-brand-indigo/5 blur-3xl" />
+      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 rounded-full bg-brand-cyan/5 blur-3xl" />
 
       {/* Auth Card Shell */}
       <div className="w-full max-w-md z-10">
         <div className="flex flex-col items-center mb-8 animate-fade-in">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-indigo to-brand-cyan flex items-center justify-center shadow-lg shadow-brand-indigo/25 mb-4">
-            <Briefcase className="w-6 h-6 text-white" />
+          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg shadow-brand-indigo/25 mb-4 border border-slate-200/50 bg-white p-0.5">
+            <img src="/images/applyhub_logo.png" alt="ApplyHub logo" className="w-full h-full object-cover select-none" />
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-white">AppTracker</h1>
-          <p className="text-sm text-gray-400 mt-1">Organize your applications, land your dream career.</p>
+          <h1 className="text-3xl font-display font-black tracking-tight text-brand-indigo">ApplyHub</h1>
+          <p className="text-xs font-semibold text-slate-500 tracking-wide uppercase mt-1">Success Tracker</p>
         </div>
 
-        <div className="glass-panel border border-white/10 rounded-2xl p-8 shadow-2xl animate-fade-in">
+        <div className="glass-panel border border-slate-200/80 rounded-3xl p-8 shadow-2xl animate-fade-in bg-white/80">
           {children}
         </div>
       </div>

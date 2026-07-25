@@ -82,18 +82,18 @@ export default function CalendarClient({ initialApplications }: CalendarClientPr
       {/* Header section controls */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h3 className="text-2xl font-black text-white tracking-tight">Timeline & Deadlines</h3>
-          <p className="text-sm text-gray-400 mt-1">
+          <h3 className="text-xl font-display font-extrabold text-slate-850 tracking-tight">Timeline & Deadlines</h3>
+          <p className="text-xs text-slate-500 mt-0.5">
             Track all deadlines, milestones, and status histories chronologically.
           </p>
         </div>
 
         {/* Filter toggles */}
-        <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 self-start">
+        <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200/80 self-start">
           <button
             onClick={() => setFilterType('all')}
             className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-              filterType === 'all' ? 'bg-brand-indigo text-white shadow-md' : 'text-gray-400 hover:text-white'
+              filterType === 'all' ? 'bg-brand-indigo text-white shadow-md' : 'text-slate-500 hover:text-slate-850'
             }`}
           >
             All Events
@@ -101,7 +101,7 @@ export default function CalendarClient({ initialApplications }: CalendarClientPr
           <button
             onClick={() => setFilterType('job')}
             className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-              filterType === 'job' ? 'bg-brand-indigo text-white shadow-md' : 'text-gray-400 hover:text-white'
+              filterType === 'job' ? 'bg-brand-indigo text-white shadow-md' : 'text-slate-500 hover:text-slate-850'
             }`}
           >
             Jobs Only
@@ -109,7 +109,7 @@ export default function CalendarClient({ initialApplications }: CalendarClientPr
           <button
             onClick={() => setFilterType('scholarship')}
             className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-              filterType === 'scholarship' ? 'bg-brand-indigo text-white shadow-md' : 'text-gray-400 hover:text-white'
+              filterType === 'scholarship' ? 'bg-brand-indigo text-white shadow-md' : 'text-slate-500 hover:text-slate-850'
             }`}
           >
             Scholarships Only
@@ -121,17 +121,17 @@ export default function CalendarClient({ initialApplications }: CalendarClientPr
       <div className="space-y-12">
         {/* ==================== UPCOMING EVENTS ==================== */}
         <div className="space-y-6">
-          <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
             <Clock className="w-4 h-4 text-brand-cyan" />
             <span>Upcoming Deadlines & Actions ({upcomingEvents.length})</span>
           </h4>
 
           {upcomingEvents.length === 0 ? (
-            <div className="p-8 text-center bg-white/1 border border-dashed border-white/5 rounded-2xl text-sm text-gray-500">
+            <div className="p-8 text-center bg-slate-100/50 border border-dashed border-slate-200/80 rounded-2xl text-xs text-slate-500">
               No upcoming deadlines found. Add scholarship deadlines to populate this list.
             </div>
           ) : (
-            <div className="relative border-l border-white/5 ml-4 pl-8 space-y-8 py-2">
+            <div className="relative border-l border-slate-200/80 ml-4 pl-8 space-y-8 py-2">
               {upcomingEvents.map((event) => {
                 const daysLeft = getDaysDiff(event.date);
                 const isUrgent = daysLeft <= 7;
@@ -202,17 +202,17 @@ export default function CalendarClient({ initialApplications }: CalendarClientPr
 
         {/* ==================== PAST HISTORY ==================== */}
         <div className="space-y-6">
-          <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-brand-emerald" />
             <span>History & Completed Actions ({pastEvents.length})</span>
           </h4>
 
           {pastEvents.length === 0 ? (
-            <div className="p-8 text-center bg-white/1 border border-dashed border-white/5 rounded-2xl text-sm text-gray-500">
+            <div className="p-8 text-center bg-slate-100/50 border border-dashed border-slate-200/80 rounded-2xl text-xs text-slate-500">
               No historical milestones found.
             </div>
           ) : (
-            <div className="relative border-l border-white/5 ml-4 pl-8 space-y-8 py-2">
+            <div className="relative border-l border-slate-200/80 ml-4 pl-8 space-y-8 py-2">
               {pastEvents.map((event) => {
                 const daysAgo = Math.abs(getDaysDiff(event.date));
 

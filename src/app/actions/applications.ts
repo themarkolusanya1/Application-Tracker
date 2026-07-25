@@ -72,6 +72,12 @@ export async function createApplication(payload: {
   hasTranscripts?: boolean;
   hasReferences?: boolean;
   hasTestScores?: boolean;
+  hasCvResume?: boolean;
+  hasPersonalStatement?: boolean;
+  hasCoverLetter?: boolean;
+  currency?: string;
+  degreeLevel?: string;
+  potentialAdvisor?: string;
 }): Promise<ActionResponse> {
   try {
     const session = await getCurrentUser();
@@ -81,7 +87,8 @@ export async function createApplication(payload: {
 
     const { 
       applicationType, organization, title, status, url, notes, salary, locationType, appliedDate,
-      fundingType, stipendAmount, deadline, hasSop, hasTranscripts, hasReferences, hasTestScores
+      fundingType, stipendAmount, deadline, hasSop, hasTranscripts, hasReferences, hasTestScores,
+      hasCvResume, hasPersonalStatement, hasCoverLetter, currency, degreeLevel, potentialAdvisor
     } = payload;
 
     if (!organization || !title) {
@@ -111,6 +118,12 @@ export async function createApplication(payload: {
         hasTranscripts: hasTranscripts || false,
         hasReferences: hasReferences || false,
         hasTestScores: hasTestScores || false,
+        hasCvResume: hasCvResume || false,
+        hasPersonalStatement: hasPersonalStatement || false,
+        hasCoverLetter: hasCoverLetter || false,
+        currency: currency || 'USD',
+        degreeLevel: degreeLevel || null,
+        potentialAdvisor: potentialAdvisor || null,
       },
     });
 
@@ -153,6 +166,12 @@ export async function updateApplication(
     hasTranscripts?: boolean;
     hasReferences?: boolean;
     hasTestScores?: boolean;
+    hasCvResume?: boolean;
+    hasPersonalStatement?: boolean;
+    hasCoverLetter?: boolean;
+    currency?: string;
+    degreeLevel?: string;
+    potentialAdvisor?: string;
   }
 ): Promise<ActionResponse> {
   try {
@@ -172,7 +191,8 @@ export async function updateApplication(
 
     const { 
       applicationType, organization, title, status, url, notes, salary, locationType, appliedDate,
-      fundingType, stipendAmount, deadline, hasSop, hasTranscripts, hasReferences, hasTestScores
+      fundingType, stipendAmount, deadline, hasSop, hasTranscripts, hasReferences, hasTestScores,
+      hasCvResume, hasPersonalStatement, hasCoverLetter, currency, degreeLevel, potentialAdvisor
     } = payload;
 
     const updateData: any = {};
@@ -192,6 +212,12 @@ export async function updateApplication(
     if (hasTranscripts !== undefined) updateData.hasTranscripts = hasTranscripts;
     if (hasReferences !== undefined) updateData.hasReferences = hasReferences;
     if (hasTestScores !== undefined) updateData.hasTestScores = hasTestScores;
+    if (hasCvResume !== undefined) updateData.hasCvResume = hasCvResume;
+    if (hasPersonalStatement !== undefined) updateData.hasPersonalStatement = hasPersonalStatement;
+    if (hasCoverLetter !== undefined) updateData.hasCoverLetter = hasCoverLetter;
+    if (currency !== undefined) updateData.currency = currency;
+    if (degreeLevel !== undefined) updateData.degreeLevel = degreeLevel || null;
+    if (potentialAdvisor !== undefined) updateData.potentialAdvisor = potentialAdvisor || null;
 
     const updated = await db.application.update({
       where: { id },
@@ -330,5 +356,30 @@ export async function markAllNotificationsAsRead(): Promise<ActionResponse> {
   } catch (error: any) {
     console.error('markAllNotificationsAsRead error:', error);
     return { success: false, error: 'Failed to update notifications.' };
+  }
+}
+
+/**
+ * Create a simulated notification for progress report or daily email motivation
+ */
+export async function sendSimulatedNotification(message: string): Promise<ActionResponse> {
+  try {
+    const session = await getCurrentUser();
+    if (!session) {
+      return { success: false, error: 'Unauthorized.' };
+    }
+
+    await db.notification.create({
+      data: {
+        userId: session.userId,
+        message,
+      },
+    });
+
+    revalidatePath('/');
+    return { success: true };
+  } catch (error: any) {
+    console.error('sendSimulatedNotification error:', error);
+    return { success: false, error: 'Failed to trigger simulated notification.' };
   }
 }

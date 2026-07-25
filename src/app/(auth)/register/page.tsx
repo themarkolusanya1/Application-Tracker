@@ -30,8 +30,8 @@ export default function RegisterPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-bold text-white tracking-tight">Create an account</h2>
-        <p className="text-xs text-gray-400">Get started by filling out the details below</p>
+        <h2 className="text-2xl font-display font-black text-slate-800 tracking-tight">Create an account</h2>
+        <p className="text-xs text-slate-500 font-medium">Get started by filling out the details below</p>
       </div>
 
       {error && (
@@ -43,7 +43,7 @@ export default function RegisterPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-gray-300" htmlFor="name">
+          <label className="text-xs font-semibold text-slate-600" htmlFor="name">
             Full Name
           </label>
           <div className="relative">
@@ -62,7 +62,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-gray-300" htmlFor="email">
+          <label className="text-xs font-semibold text-slate-600" htmlFor="email">
             Email Address
           </label>
           <div className="relative">
@@ -82,7 +82,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-gray-300" htmlFor="password">
+          <label className="text-xs font-semibold text-slate-600" htmlFor="password">
             Password
           </label>
           <div className="relative">
@@ -101,6 +101,21 @@ export default function RegisterPage() {
           </div>
         </div>
 
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-slate-600" htmlFor="role">
+            Profile Account Type
+          </label>
+          <select
+            id="role"
+            name="role"
+            required
+            className="w-full px-3 py-2.5 glass-input text-sm bg-white"
+          >
+            <option value="STUDENT">Student (Scholarships & Admissions)</option>
+            <option value="PROFESSIONAL">Professional (Job & Internship Seeker)</option>
+          </select>
+        </div>
+
         <button
           type="submit"
           disabled={isPending}
@@ -110,9 +125,9 @@ export default function RegisterPage() {
         </button>
       </form>
 
-      <div className="text-center text-xs text-gray-400 mt-4">
+      <div className="text-center text-xs text-slate-500 mt-4">
         Already have an account?{' '}
-        <Link href="/login" className="text-brand-indigo hover:text-indigo-400 font-semibold hover:underline">
+        <Link href="/login" className="text-brand-indigo hover:text-indigo-600 font-semibold hover:underline">
           Sign in
         </Link>
       </div>

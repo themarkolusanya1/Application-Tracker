@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useTransition, Suspense } from 'react';
+import { useState, useTransition, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, AlertTriangle } from 'lucide-react';
-import { login } from '@/app/actions/auth';
+import { login, loginDevTestUser } from '@/app/actions/auth';
 
 function LoginForm() {
   const router = useRouter();
@@ -13,6 +13,19 @@ function LoginForm() {
   const [isPending, startTransition] = useTransition();
 
   const redirectTarget = searchParams.get('from') || '/';
+
+  // Seamless auto-login for local development / testing
+  useEffect(() => {
+    startTransition(async () => {
+      const res = await loginDevTestUser();
+      if (res.success) {
+        router.push(redirectTarget);
+        router.refresh();
+      } else {
+        setError('Auto-login failed. Please sign in manually.');
+      }
+    });
+  }, [router, redirectTarget]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,8 +46,8 @@ function LoginForm() {
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-center">
-        <h2 className="text-xl font-bold text-white tracking-tight">Welcome back</h2>
-        <p className="text-xs text-gray-400">Enter your credentials to access your dashboard</p>
+        <h2 className="text-2xl font-display font-black text-slate-800 tracking-tight">Welcome back</h2>
+        <p className="text-xs text-slate-500 font-medium">Enter your credentials to access your dashboard</p>
       </div>
 
       {error && (
@@ -46,7 +59,7 @@ function LoginForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-gray-300" htmlFor="email">
+          <label className="text-xs font-semibold text-slate-600" htmlFor="email">
             Email Address
           </label>
           <div className="relative">
@@ -66,7 +79,7 @@ function LoginForm() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-gray-300" htmlFor="password">
+          <label className="text-xs font-semibold text-slate-600" htmlFor="password">
             Password
           </label>
           <div className="relative">
@@ -94,9 +107,9 @@ function LoginForm() {
         </button>
       </form>
 
-      <div className="text-center text-xs text-gray-400 mt-4">
+      <div className="text-center text-xs text-slate-500 mt-4">
         Don&apos;t have an account?{' '}
-        <Link href="/register" className="text-brand-indigo hover:text-indigo-400 font-semibold hover:underline">
+        <Link href="/register" className="text-brand-indigo hover:text-indigo-600 font-semibold hover:underline">
           Sign up
         </Link>
       </div>

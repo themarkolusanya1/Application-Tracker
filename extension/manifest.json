@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "ApplyHub Scraper",
+  "version": "1.0",
+  "description": "Scrapes job and scholarship listings from LinkedIn or university portals and syncs them to your ApplyHub workspace.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "https://*.edu/*",
+    "http://localhost:3000/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
