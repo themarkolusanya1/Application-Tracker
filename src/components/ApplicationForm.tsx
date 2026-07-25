@@ -46,11 +46,17 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
     setError(null);
     setAiSuccessMsg(null);
     try {
-      const apiKey = typeof window !== 'undefined' ? localStorage.getItem('applyhub_api_key') || '' : '';
+      const provider = typeof window !== 'undefined' ? localStorage.getItem('applyhub_ai_provider') || 'gemini' : 'gemini';
+      const apiKey = typeof window !== 'undefined' 
+        ? (provider === 'openai' 
+            ? localStorage.getItem('applyhub_openai_api_key') || '' 
+            : localStorage.getItem('applyhub_api_key') || '') 
+        : '';
       const response = await fetch('/api/ai/parse-application', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-provider': provider,
           'x-api-key': apiKey,
         },
         body: JSON.stringify({ text: aiText }),

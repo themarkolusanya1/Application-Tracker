@@ -6,8 +6,8 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { action, organization, title, type, question, answer } = body;
 
-    // Try env key first, then custom header key
-    let apiKey = process.env.GEMINI_API_KEY;
+    const provider = req.headers.get('x-provider') || 'gemini';
+    let apiKey = provider === 'openai' ? process.env.OPENAI_API_KEY : process.env.GEMINI_API_KEY;
     const clientKey = req.headers.get('x-api-key');
     if (!apiKey && clientKey && clientKey.trim() !== '') {
       apiKey = clientKey;
@@ -26,9 +26,6 @@ export async function POST(req: Request) {
         });
       }
 
-      const ai = new GoogleGenerativeAI(apiKey);
-      const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
       const prompt = `
 You are an expert interviewer for ${type === 'scholarship' ? 'academic admissions and scholarship selection panels' : 'corporate recruiters'}.
 Generate exactly 3 realistic interview questions (ranging from behavioral, research interest, or situational skills) for a candidate applying for the position of "${title}" at "${organization}".
@@ -40,6 +37,37 @@ Return ONLY a raw JSON array containing precisely 3 string elements (do not wrap
   "Question 3"
 ]
 `;
+
+      if (provider === 'openai') {
+        const openAiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.2,
+            response_format: { type: 'json_object' }
+          }),
+        });
+
+        if (!openAiResponse.ok) {
+          const errorText = await openAiResponse.text();
+          throw new Error(`OpenAI API error: ${errorText}`);
+        }
+
+        const openAiData = await openAiResponse.json();
+        const responseText = openAiData.choices[0].message.content.trim();
+        const questions = JSON.parse(responseText);
+        // If OpenAI returned an object instead of array, handle it gracefully
+        const finalQuestions = Array.isArray(questions) ? questions : Object.values(questions);
+        return NextResponse.json({ success: true, questions: finalQuestions });
+      }
+
+      const ai = new GoogleGenerativeAI(apiKey);
+      const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
       const result = await model.generateContent(prompt);
       let responseText = result.response.text().trim();
@@ -64,9 +92,6 @@ Return ONLY a raw JSON array containing precisely 3 string elements (do not wrap
           feedback: getSimulatedFeedback(question, answer, organization, title),
         });
       }
-
-      const ai = new GoogleGenerativeAI(apiKey);
-      const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
       const prompt = `
 You are a career development expert and professional interview coach.
@@ -100,6 +125,35 @@ Return ONLY a raw JSON object with this exact structure (do not wrap in markdown
   "modelResponse": "Provide a model STAR response formulation here"
 }
 `;
+
+      if (provider === 'openai') {
+        const openAiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.1,
+            response_format: { type: 'json_object' }
+          }),
+        });
+
+        if (!openAiResponse.ok) {
+          const errorText = await openAiResponse.text();
+          throw new Error(`OpenAI API error: ${errorText}`);
+        }
+
+        const openAiData = await openAiResponse.json();
+        const responseText = openAiData.choices[0].message.content.trim();
+        const feedback = JSON.parse(responseText);
+        return NextResponse.json({ success: true, feedback });
+      }
+
+      const ai = new GoogleGenerativeAI(apiKey);
+      const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
       const result = await model.generateContent(prompt);
       let responseText = result.response.text().trim();

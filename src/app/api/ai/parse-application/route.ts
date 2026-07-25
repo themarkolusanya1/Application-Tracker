@@ -12,8 +12,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Try env key first, then custom header key
-    let apiKey = process.env.GEMINI_API_KEY;
+    const provider = req.headers.get('x-provider') || 'gemini';
+    let apiKey = provider === 'openai' ? process.env.OPENAI_API_KEY : process.env.GEMINI_API_KEY;
     const clientKey = req.headers.get('x-api-key');
     if (!apiKey && clientKey && clientKey.trim() !== '') {
       apiKey = clientKey;
@@ -27,10 +27,6 @@ export async function POST(req: Request) {
         data: getSimulatedParseResult(text),
       });
     }
-
-    // Initialize Gemini SDK
-    const ai = new GoogleGenerativeAI(apiKey);
-    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const prompt = `
 Analyze the following text copy-pasted from a job post, university admission site, scholarship page, or internship listing.
@@ -68,6 +64,36 @@ Text to analyze:
 ${text}
 """
 `;
+
+    if (provider === 'openai') {
+      const openAiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.1,
+          response_format: { type: 'json_object' }
+        }),
+      });
+      
+      if (!openAiResponse.ok) {
+        const errorText = await openAiResponse.text();
+        throw new Error(`OpenAI API error: ${errorText}`);
+      }
+      
+      const openAiData = await openAiResponse.json();
+      const responseText = openAiData.choices[0].message.content.trim();
+      const data = JSON.parse(responseText);
+      return NextResponse.json({ success: true, data });
+    }
+
+    // Initialize Gemini SDK
+    const ai = new GoogleGenerativeAI(apiKey);
+    const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const result = await model.generateContent(prompt);
     let responseText = result.response.text().trim();

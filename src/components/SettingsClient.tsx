@@ -36,9 +36,15 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
   const [notifTriggerMsg, setNotifTriggerMsg] = useState<string | null>(null);
   const [monthlyGoal, setMonthlyGoal] = useState(5);
 
+  // AI Configuration States
+  const [aiProvider, setAiProvider] = useState('gemini');
+  const [openaiApiKey, setOpenaiApiKey] = useState('');
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setApiKey(localStorage.getItem('applyhub_api_key') || '');
+      setOpenaiApiKey(localStorage.getItem('applyhub_openai_api_key') || '');
+      setAiProvider(localStorage.getItem('applyhub_ai_provider') || 'gemini');
       setMonthlyNotif(localStorage.getItem('applyhub_monthly_notif') !== 'false');
       setDailyReminder(localStorage.getItem('applyhub_daily_reminder') !== 'false');
       const savedGoal = localStorage.getItem('applyhub_monthly_goal');
@@ -56,6 +62,18 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
   const handleGoalChange = (val: number) => {
     setMonthlyGoal(val);
     localStorage.setItem('applyhub_monthly_goal', String(val));
+  };
+
+  const handleSaveAiConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem('applyhub_ai_provider', aiProvider);
+    if (aiProvider === 'openai') {
+      localStorage.setItem('applyhub_openai_api_key', openaiApiKey);
+    } else {
+      localStorage.setItem('applyhub_api_key', apiKey);
+    }
+    setApiKeySuccess(true);
+    setTimeout(() => setApiKeySuccess(false), 2500);
   };
 
   const handleToggleDailyReminder = (val: boolean) => {
@@ -138,13 +156,6 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
         setProfileErrorMsg(res.error || 'Failed to update profile.');
       }
     });
-  };
-
-  const handleSaveApiKey = (e: React.FormEvent) => {
-    e.preventDefault();
-    localStorage.setItem('applyhub_api_key', apiKey);
-    setApiKeySuccess(true);
-    setTimeout(() => setApiKeySuccess(false), 2500);
   };
 
   const handleReplayTour = () => {
@@ -418,31 +429,53 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
             <span>AI Provider Configuration</span>
           </h4>
 
-          <form onSubmit={handleSaveApiKey} className="space-y-4">
+          <form onSubmit={handleSaveAiConfig} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600" htmlFor="settings-ai-provider">
+                AI Service Provider
+              </label>
+              <select
+                id="settings-ai-provider"
+                value={aiProvider}
+                onChange={(e) => setAiProvider(e.target.value)}
+                className="w-full px-3 py-2.5 glass-input text-sm bg-white"
+              >
+                <option value="gemini">Google Gemini AI (default)</option>
+                <option value="openai">OpenAI (GPT-4o-mini)</option>
+              </select>
+            </div>
+
             <div className="space-y-1">
-              <p className="font-bold text-slate-800 text-sm">Gemini API Key</p>
-              <p className="text-xs text-slate-500">Provide your Google AI Studio developer key to power actual ATS reviews and mock interviews. Saved locally in your browser.</p>
+              <p className="font-bold text-slate-800 text-sm">
+                {aiProvider === 'openai' ? 'OpenAI API Key' : 'Gemini API Key'}
+              </p>
+              <p className="text-xs text-slate-500">
+                {aiProvider === 'openai' 
+                  ? 'Provide your OpenAI developer API key to power ATS optimization reviews, mock interviews, and details extraction.'
+                  : 'Provide your Google AI Studio developer key to power ATS optimization reviews, mock interviews, and details extraction.'
+                } Saved locally in your browser.
+              </p>
             </div>
 
             {apiKeySuccess && (
               <div className="p-3 bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald text-xs rounded-lg animate-fade-in">
-                Gemini Developer Key saved successfully!
+                {aiProvider === 'openai' ? 'OpenAI API Key' : 'Gemini API Key'} saved successfully!
               </div>
             )}
 
             <div className="flex gap-2">
               <input
                 type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="AIzaSy..."
+                value={aiProvider === 'openai' ? openaiApiKey : apiKey}
+                onChange={(e) => aiProvider === 'openai' ? setOpenaiApiKey(e.target.value) : setApiKey(e.target.value)}
+                placeholder={aiProvider === 'openai' ? 'sk-proj-...' : 'AIzaSy...'}
                 className="flex-1 px-3 py-2.5 glass-input text-xs"
               />
               <button
                 type="submit"
                 className="px-4 py-2 text-xs font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg shadow cursor-pointer transition-colors shrink-0 font-sans"
               >
-                Save Key
+                Save Config
               </button>
             </div>
           </form>

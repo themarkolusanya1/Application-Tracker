@@ -28,11 +28,15 @@ export default function InterviewCoachModal({ application, onClose }: InterviewC
     setLoading(true);
     setError(null);
     try {
-      const apiKey = localStorage.getItem('applyhub_api_key') || '';
+      const provider = localStorage.getItem('applyhub_ai_provider') || 'gemini';
+      const apiKey = provider === 'openai' 
+        ? localStorage.getItem('applyhub_openai_api_key') || '' 
+        : localStorage.getItem('applyhub_api_key') || '';
       const res = await fetch('/api/ai/mock-interview', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-provider': provider,
           'x-api-key': apiKey,
         },
         body: JSON.stringify({
@@ -64,11 +68,15 @@ export default function InterviewCoachModal({ application, onClose }: InterviewC
     setSubmittingAnswer(true);
     setError(null);
     try {
-      const apiKey = localStorage.getItem('applyhub_api_key') || '';
+      const provider = localStorage.getItem('applyhub_ai_provider') || 'gemini';
+      const apiKey = provider === 'openai' 
+        ? localStorage.getItem('applyhub_openai_api_key') || '' 
+        : localStorage.getItem('applyhub_api_key') || '';
       const res = await fetch('/api/ai/mock-interview', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-provider': provider,
           'x-api-key': apiKey,
         },
         body: JSON.stringify({
