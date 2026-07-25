@@ -65,7 +65,7 @@ export default function AtsOptimizer() {
         <div className="space-y-1">
           <h4 className="text-sm font-bold text-slate-800">AI-Powered ATS Optimizer</h4>
           <p className="text-xs text-slate-500 leading-relaxed">
-            Paste your CV/Resume or Statement of Purpose alongside a target job post or university program syllabus. ApplyHub analyzes matching scores, reveals missing ATS keywords, and suggests bullet-point improvements in real-time.
+            Paste your CV/Resume or Statement of Purpose alongside a target job post or university program syllabus. TrackIT analyzes matching scores, reveals missing ATS keywords, and suggests bullet-point improvements in real-time.
           </p>
         </div>
       </div>

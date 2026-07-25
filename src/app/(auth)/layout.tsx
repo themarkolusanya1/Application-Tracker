@@ -18,8 +18,7 @@ export default function AuthLayout({
           <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg shadow-brand-indigo/25 mb-4 border border-slate-200/50 bg-white p-0.5">
             <img src="/images/applyhub_logo.png" alt="ApplyHub logo" className="w-full h-full object-cover select-none" />
           </div>
-          <h1 className="text-3xl font-display font-black tracking-tight text-brand-indigo">ApplyHub</h1>
-          <p className="text-xs font-semibold text-slate-500 tracking-wide uppercase mt-1">Success Tracker</p>
+          <h1 className="text-3xl font-display font-black tracking-tight text-brand-indigo">TrackIT</h1>
         </div>
 
         <div className="glass-panel border border-slate-200/80 rounded-3xl p-8 shadow-2xl animate-fade-in bg-white/80">

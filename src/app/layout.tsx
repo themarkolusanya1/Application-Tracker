@@ -13,7 +13,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: 'ApplyHub — Success Tracker',
+  title: 'TrackIT',
   description: 'A modern, premium, secure tracker for job, university, and project applications with real-time statistics and notification logs.',
 };
 

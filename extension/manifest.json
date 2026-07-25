@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "ApplyHub Scraper",
+  "name": "TrackIT Scraper",
   "version": "1.0",
-  "description": "Scrapes job and scholarship listings from LinkedIn or university portals and syncs them to your ApplyHub workspace.",
+  "description": "Scrapes job and scholarship listings from LinkedIn or university portals and syncs them to your TrackIT workspace.",
   "permissions": [
     "activeTab",
     "scripting"
