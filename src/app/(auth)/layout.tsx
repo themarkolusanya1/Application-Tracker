@@ -1,5 +1,4 @@
-import { Briefcase } from 'lucide-react';
-import Link from 'next/link';
+// AuthLayout for Auth-related pages
 
 export default function AuthLayout({
   children,
@@ -7,24 +6,27 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-background relative overflow-hidden">
-      {/* Dynamic Background Glows */}
-      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-brand-indigo/5 blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 rounded-full bg-brand-cyan/5 blur-3xl" />
+    <div className="min-h-screen flex flex-col justify-center items-center p-6 relative overflow-hidden font-sans">
+      <div className="bg-animated"></div>
+      <div className="shape shape-1"></div>
+      <div className="shape shape-2"></div>
 
-      {/* Auth Card Shell */}
-      <div className="w-full max-w-md z-10">
-        <div className="flex flex-col items-center mb-8 animate-fade-in">
-          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg shadow-brand-indigo/25 mb-4 border border-slate-200/50 bg-white p-0.5">
-            <img src="/images/applyhub_logo.png" alt="ApplyHub logo" className="w-full h-full object-cover select-none" />
-          </div>
-          <h1 className="text-3xl font-display font-black tracking-tight text-brand-indigo">MyTraks</h1>
+      {/* MainHeader */}
+      <header className="flex flex-col items-center mb-8 z-10">
+        <div className="w-24 h-24 bg-white/85 backdrop-blur-md rounded-3xl shadow-xl flex items-center justify-center mb-4 p-3 border border-white/50">
+          <img 
+            alt="MyTraks Logo" 
+            className="w-full h-full object-contain" 
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwytUbecYlmiaVMgOrc2uUPXjS8IgVj2zQJweiqgGKE_wRwp_hd6cePvk-eXAwTyD-1T9lxaeBTF-3W_rqV-OPz5ir7_C1pbxbrI5jfqNQAVjcMOsTcXZweEKBHBwXxF52x2Vy9I4-BdUNgsoFlqa25izKIgqJwfytIAF0BrL9NIsE1uGcFI9PFwqJZlVABilyfs3MlSwz1PpX1fQGtXWacKCmCDwtac8aZDahpRYAiRIdrGvJbH9cm-twXRDPzsKdR_dxC1dtzG8" 
+          />
         </div>
+        <h1 className="text-4xl font-bold logo-text tracking-tighter">MyTraks</h1>
+      </header>
 
-        <div className="glass-panel border border-slate-200/80 rounded-3xl p-8 shadow-2xl animate-fade-in bg-white/80">
-          {children}
-        </div>
-      </div>
+      {/* Main Card */}
+      <main className="w-full max-w-lg glass-effect shadow-2xl rounded-[2.5rem] px-8 pt-12 pb-10 sm:px-12 floating-card z-10">
+        {children}
+      </main>
     </div>
   );
 }

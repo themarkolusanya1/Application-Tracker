@@ -264,7 +264,9 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
               <div className="text-xs text-slate-600 leading-relaxed border-t border-slate-200 pt-4 flex items-start gap-2">
                 <span className="font-bold text-brand-indigo shrink-0">AI Insights:</span>
                 <span>
-                  You are tracking well for this month. Logged {report.total} applications total. Keep submitting applications and updating checklist files.
+                  {report.total === 0
+                    ? `You haven't logged any applications yet. Set your monthly target and add your first application to start tracking!`
+                    : `You are tracking well. Logged ${report.total} applications total this month. Keep submitting applications and updating checklist files.`}
                 </span>
               </div>
             </section>
