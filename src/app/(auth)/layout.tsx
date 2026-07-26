@@ -1,4 +1,4 @@
-// AuthLayout for Auth-related pages
+import { Rocket } from 'lucide-react';
 
 export default function AuthLayout({
   children,
@@ -13,13 +13,10 @@ export default function AuthLayout({
 
       {/* MainHeader */}
       <header className="flex flex-col items-center mb-8 z-10">
-        <div className="w-24 h-24 flex items-center justify-center mb-4">
-          <img 
-            alt="MyTraks Logo" 
-            className="w-full h-full object-contain" 
-            src="/images/mytraks_logo.png" 
-          />
+        <div className="w-20 h-20 rounded-3xl overflow-hidden shadow-lg shadow-brand-indigo/15 kinetic-gradient flex items-center justify-center text-white mb-4">
+          <Rocket className="w-10 h-10" />
         </div>
+        <h1 className="text-4xl font-bold logo-text tracking-tighter">MyTraks</h1>
       </header>
 
       {/* Main Card */}
