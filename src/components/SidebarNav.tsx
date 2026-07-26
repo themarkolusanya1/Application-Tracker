@@ -13,7 +13,7 @@ export default function SidebarNav() {
   const navItems = [
     {
       label: 'Dashboard',
-      href: '/',
+      href: '/dashboard',
       icon: LayoutDashboard,
       color: 'text-brand-indigo',
     },

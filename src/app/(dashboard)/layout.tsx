@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/app/actions/auth';
 import NotificationPopover from '@/components/NotificationPopover';
-import { Briefcase, User as UserIcon } from 'lucide-react';
+import { Briefcase, User as UserIcon, Rocket } from 'lucide-react';
 import Link from 'next/link';
 import SidebarNav from '@/components/SidebarNav';
 import SidebarFooter from '@/components/SidebarFooter';
@@ -24,11 +24,11 @@ export default async function DashboardLayout({
       <aside className="hidden md:flex md:flex-col md:w-72 glass-panel border-r border-slate-200/80 flex-shrink-0">
         {/* Brand Header */}
         <div className="flex items-center gap-3 px-6 h-20 border-b border-slate-200/80 bg-slate-50/50">
-          <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-lg shadow-brand-indigo/15 border border-slate-200/50 bg-white p-0.5">
-            <img src="/images/applyhub_logo.png" alt="ApplyHub logo" className="w-full h-full object-cover select-none" />
+          <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-lg shadow-brand-indigo/15 kinetic-gradient flex items-center justify-center text-white">
+            <Rocket className="w-5.5 h-5.5" />
           </div>
           <div>
-            <h1 className="font-display font-black text-brand-indigo text-lg tracking-tight">MyTraks</h1>
+            <h1 className="font-display font-extrabold text-brand-indigo text-lg tracking-tight">MyTraks</h1>
           </div>
         </div>
 
@@ -46,10 +46,9 @@ export default async function DashboardLayout({
           {/* Section title */}
           <div className="flex items-center gap-3">
             {/* Mobile menu toggle placeholder/brand icon */}
-            <div className="md:hidden w-8 h-8 rounded-lg overflow-hidden shadow border border-slate-200/50 bg-white p-0.5">
-              <img src="/images/applyhub_logo.png" alt="ApplyHub logo" className="w-full h-full object-cover select-none" />
+            <div className="md:hidden w-8 h-8 rounded-lg overflow-hidden shadow kinetic-gradient flex items-center justify-center text-white">
+              <Rocket className="w-4 h-4" />
             </div>
-            <h2 className="text-lg font-display font-bold text-slate-800 tracking-wide">MyTraks</h2>
           </div>
 
           {/* Right section actions */}

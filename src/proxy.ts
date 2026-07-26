@@ -8,7 +8,8 @@ const secretKey = new TextEncoder().encode(JWT_SECRET);
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Define public routes
+  // Define public routes (landing page, auth pages)
+  const isLandingPage = pathname === '/';
   const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register');
   
   // Exclude static assets, API routes, or next internal files
@@ -37,20 +38,25 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Redirect logic
-  if (isAuthPage) {
+  // Landing page: always public, but if logged in redirect to dashboard
+  if (isLandingPage) {
     if (isValidSession) {
-      // If logged in, redirect away from login/register to dashboard
-      return NextResponse.redirect(new URL('/', request.url));
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
     return NextResponse.next();
   }
 
-  // Protected routes
+  // Auth pages: if already logged in, redirect to dashboard
+  if (isAuthPage) {
+    if (isValidSession) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // Protected routes (everything else: /dashboard, /jobs, /university, etc.)
   if (!isValidSession) {
-    // If not logged in, redirect to login page
     const loginUrl = new URL('/login', request.url);
-    // Keep search params if they want to redirect back
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
   }

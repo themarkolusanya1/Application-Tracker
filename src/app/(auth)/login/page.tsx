@@ -12,7 +12,7 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const redirectTarget = searchParams.get('from') || '/';
+  const redirectTarget = searchParams.get('from') || '/dashboard';
 
 
 

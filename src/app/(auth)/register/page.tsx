@@ -19,7 +19,7 @@ export default function RegisterPage() {
     startTransition(async () => {
       const res = await register(formData);
       if (res.success) {
-        router.push('/');
+        router.push('/dashboard');
         router.refresh();
       } else {
         setError(res.error || 'Failed to register.');
