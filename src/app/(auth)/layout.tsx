@@ -13,14 +13,14 @@ export default function AuthLayout({
 
       {/* MainHeader */}
       <header className="flex flex-col items-center mb-5 z-10">
-        <div className="w-28 h-20 flex items-center justify-center mb-0">
+        <div className="w-36 h-24 flex items-center justify-center mb-0">
           <img 
             alt="MyTraks Logo" 
             className="w-full h-full object-contain" 
             src="/images/mytraks_logo_nobg.png" 
           />
         </div>
-        <h1 className="text-3xl font-bold logo-text tracking-tighter">MyTraks</h1>
+        <h1 className="text-3xl font-bold logo-text tracking-tighter -mt-4">MyTraks</h1>
       </header>
 
       {/* Main Card */}
