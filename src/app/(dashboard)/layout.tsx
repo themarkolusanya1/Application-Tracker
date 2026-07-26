@@ -24,7 +24,7 @@ export default async function DashboardLayout({
       <aside className="hidden md:flex md:flex-col md:w-72 glass-panel border-r border-slate-200/80 flex-shrink-0">
         {/* Brand Header */}
         <div className="flex items-center gap-3 px-6 h-20 border-b border-slate-200/80 bg-slate-50/50">
-          <div className="w-11 h-11 flex items-center justify-center">
+          <div className="w-16 h-16 flex items-center justify-center">
             <img 
               alt="MyTraks Logo" 
               className="w-full h-full object-contain" 
