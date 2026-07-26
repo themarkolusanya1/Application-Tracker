@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import * as jose from 'jose';
+import { db } from './lib/db';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'a_very_long_fallback_secret_key_that_is_at_least_32_characters';
 const secretKey = new TextEncoder().encode(JWT_SECRET);
@@ -29,10 +30,19 @@ export async function proxy(request: NextRequest) {
   let isValidSession = false;
   if (sessionToken) {
     try {
-      await jose.jwtVerify(sessionToken, secretKey, {
+      const { payload } = await jose.jwtVerify(sessionToken, secretKey, {
         algorithms: ['HS256'],
       });
-      isValidSession = true;
+      const userId = (payload as any).userId;
+      if (userId) {
+        const userExists = await db.user.findUnique({
+          where: { id: userId },
+          select: { id: true },
+        });
+        if (userExists) {
+          isValidSession = true;
+        }
+      }
     } catch (e) {
       // Invalid token
     }
