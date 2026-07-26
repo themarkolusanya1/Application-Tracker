@@ -1,33 +1,41 @@
 'use client';
 
-import { useState, useTransition, Suspense, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Mail, Lock, AlertTriangle } from 'lucide-react';
-import { login, loginDevTestUser } from '@/app/actions/auth';
+import { Mail, Lock, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { resetPassword } from '@/app/actions/auth';
 
-function LoginForm() {
+export default function ForgotPasswordPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<boolean>(false);
   const [isPending, startTransition] = useTransition();
-
-  const redirectTarget = searchParams.get('from') || '/dashboard';
-
-
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    setSuccess(false);
+
     const formData = new FormData(e.currentTarget);
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
 
     startTransition(async () => {
-      const res = await login(formData);
+      const res = await resetPassword(formData);
       if (res.success) {
-        router.push(redirectTarget);
-        router.refresh();
+        setSuccess(true);
+        setTimeout(() => {
+          router.push('/login');
+          router.refresh();
+        }, 2000);
       } else {
-        setError(res.error || 'Invalid credentials.');
+        setError(res.error || 'Failed to reset password.');
       }
     });
   };
@@ -35,8 +43,8 @@ function LoginForm() {
   return (
     <div className="space-y-8 animate-fade-in text-left">
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Welcome back</h2>
-        <p className="text-slate-500 text-sm font-medium">Securely access your analytics portal</p>
+        <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Reset Password</h2>
+        <p className="text-slate-500 text-sm font-medium">Verify your email to create a new password</p>
       </div>
 
       {error && (
@@ -46,7 +54,14 @@ function LoginForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      {success && (
+        <div className="flex items-center gap-2 p-3.5 bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald text-xs rounded-2xl animate-fade-in font-medium">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-brand-emerald" />
+          <span>Password reset successfully! Redirecting to login...</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Email Field */}
         <div className="space-y-2">
           <label className="block text-xs font-bold text-gray-700 ml-1" htmlFor="email">
@@ -68,19 +83,11 @@ function LoginForm() {
           </div>
         </div>
 
-        {/* Password Field */}
+        {/* New Password Field */}
         <div className="space-y-2">
-          <div className="flex justify-between items-center px-1">
-            <label className="block text-xs font-bold text-gray-700" htmlFor="password">
-              Password
-            </label>
-            <Link 
-              className="text-xs font-semibold text-brand-indigo hover:text-brand-cyan transition-colors" 
-              href="/forgot-password"
-            >
-              Forgot?
-            </Link>
-          </div>
+          <label className="block text-xs font-bold text-gray-700 ml-1" htmlFor="password">
+            New Password
+          </label>
           <div className="relative group">
             <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-indigo transition-colors">
               <Lock className="w-4 h-4" />
@@ -89,7 +96,26 @@ function LoginForm() {
               id="password"
               name="password"
               type="password"
-              autoComplete="current-password"
+              required
+              className="block w-full pl-11 pr-4 py-3 bg-white/60 border border-slate-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:ring-4 focus:ring-brand-indigo/10 focus:border-brand-indigo transition-all outline-none text-sm"
+              placeholder="••••••••"
+            />
+          </div>
+        </div>
+
+        {/* Confirm New Password Field */}
+        <div className="space-y-2">
+          <label className="block text-xs font-bold text-gray-700 ml-1" htmlFor="confirmPassword">
+            Confirm New Password
+          </label>
+          <div className="relative group">
+            <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-indigo transition-colors">
+              <Lock className="w-4 h-4" />
+            </span>
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
               required
               className="block w-full pl-11 pr-4 py-3 bg-white/60 border border-slate-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:ring-4 focus:ring-brand-indigo/10 focus:border-brand-indigo transition-all outline-none text-sm"
               placeholder="••••••••"
@@ -99,35 +125,22 @@ function LoginForm() {
 
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || success}
           className="w-full gradient-button text-white font-bold py-4 px-6 rounded-2xl shadow-lg focus:outline-none focus:ring-4 focus:ring-brand-indigo/30 transform active:scale-[0.98] transition-all text-sm disabled:opacity-50 cursor-pointer text-center"
         >
-          {isPending ? 'Signing in...' : 'Sign In to Dashboard'}
+          {isPending ? 'Resetting password...' : 'Reset Password'}
         </button>
       </form>
 
       <div className="text-center text-sm text-slate-500 mt-6">
-        Don&apos;t have an account?{' '}
+        Remember your credentials?{' '}
         <Link 
-          href="/register" 
+          href="/login" 
           className="text-brand-indigo hover:text-brand-cyan font-bold transition-colors underline decoration-2 underline-offset-4 hover:no-underline"
         >
-          Create Account
+          Sign in
         </Link>
       </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={
-      <div className="flex flex-col items-center justify-center p-6 text-center space-y-3">
-        <div className="w-8 h-8 rounded-full border-2 border-brand-indigo/30 border-t-brand-indigo animate-spin" />
-        <span className="text-xs text-gray-500">Loading secure environment...</span>
-      </div>
-    }>
-      <LoginForm />
-    </Suspense>
   );
 }

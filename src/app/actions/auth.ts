@@ -267,3 +267,44 @@ export async function loginDevTestUser(): Promise<ActionResponse> {
     return { success: false, error: 'Failed to auto-login.' };
   }
 }
+
+/**
+ * Reset password for a user
+ */
+export async function resetPassword(formData: FormData): Promise<ActionResponse> {
+  try {
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    if (!email || !password) {
+      return { success: false, error: 'All fields are required.' };
+    }
+
+    if (password.length < 6) {
+      return { success: false, error: 'Password must be at least 6 characters.' };
+    }
+
+    // Check if user exists
+    const user = await db.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (!user) {
+      return { success: false, error: 'No account found with this email address.' };
+    }
+
+    // Hash new password
+    const passwordHash = await hashPassword(password);
+
+    // Update password
+    await db.user.update({
+      where: { id: user.id },
+      data: { password: passwordHash },
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Reset password error:', error);
+    return { success: false, error: 'Internal server error occurred.' };
+  }
+}

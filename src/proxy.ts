@@ -11,7 +11,7 @@ export async function proxy(request: NextRequest) {
 
   // Define public routes (landing page, auth pages)
   const isLandingPage = pathname === '/';
-  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register');
+  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password');
   
   // Exclude static assets, API routes, or next internal files
   const isStaticFile =
