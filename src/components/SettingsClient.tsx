@@ -408,8 +408,8 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
                   onChange={(e) => setProfileRole(e.target.value)}
                   className="w-full px-3 py-2.5 glass-input text-sm bg-white"
                 >
-                  <option value="STUDENT">Student (Scholarships & Admissions)</option>
-                  <option value="PROFESSIONAL">Professional (Job & Internship Seeker)</option>
+                  <option value="STUDENT">Student</option>
+                  <option value="PROFESSIONAL">Professional</option>
                 </select>
               </div>
             </div>
