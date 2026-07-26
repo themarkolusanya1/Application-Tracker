@@ -20,7 +20,6 @@ export default function AuthLayout({
             src="/images/mytraks_logo.png" 
           />
         </div>
-        <h1 className="text-4xl font-bold logo-text tracking-tighter">MyTraks</h1>
       </header>
 
       {/* Main Card */}
