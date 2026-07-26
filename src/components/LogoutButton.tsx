@@ -13,7 +13,7 @@ export default function LogoutButton() {
     startTransition(async () => {
       const res = await logout();
       if (res.success) {
-        router.push('/login');
+        router.push('/');
         router.refresh();
       } else {
         alert('Failed to log out.');
