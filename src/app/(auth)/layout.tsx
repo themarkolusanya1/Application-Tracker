@@ -13,7 +13,7 @@ export default function AuthLayout({
 
       {/* MainHeader */}
       <header className="flex flex-col items-center mb-5 z-10">
-        <div className="w-20 h-16 flex items-center justify-center mb-0">
+        <div className="w-28 h-20 flex items-center justify-center mb-0">
           <img 
             alt="MyTraks Logo" 
             className="w-full h-full object-contain" 

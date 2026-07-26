@@ -33,7 +33,11 @@ export default function LandingPage() {
           <div className="relative z-10 max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#4648d4]/10 rounded-full text-[#4648d4] text-xs font-semibold tracking-[0.05em] border border-[#4648d4]/20">
-                <Zap className="w-4 h-4 fill-current" />
+                <img 
+                  alt="MyTraks Logo" 
+                  className="w-4.5 h-4.5 object-contain" 
+                  src="/images/mytraks_logo_nobg.png" 
+                />
                 VANGUARD TRACKING ENGINE
               </div>
               <h1 className="font-display text-[32px] md:text-[64px] leading-[1.1] md:leading-[1.1] tracking-[-0.02em] font-bold">
