@@ -7,7 +7,16 @@ export default function LandingPage() {
       {/* Top Navigation */}
       <nav className="sticky top-0 z-50 bg-[#f7f9fb]/70 backdrop-blur-xl shadow-sm">
         <div className="flex justify-between items-center w-full px-5 md:px-16 py-4 max-w-[1280px] mx-auto">
-          <div className="font-display text-2xl font-bold text-[#191c1e]">MyTraks</div>
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-20 h-16 flex items-center justify-center">
+              <img 
+                alt="MyTraks Logo" 
+                className="w-full h-full object-contain" 
+                src="/images/mytraks_logo_nobg.png" 
+              />
+            </div>
+            <div className="font-display text-3xl font-bold text-[#191c1e] tracking-tight">MyTraks</div>
+          </Link>
           <div className="hidden md:flex items-center gap-8">
             <a className="text-[#464554] hover:text-[#4648d4] transition-colors text-xs font-semibold tracking-[0.05em]" href="#features">Features</a>
             <a className="text-[#464554] hover:text-[#4648d4] transition-colors text-xs font-semibold tracking-[0.05em]" href="#how-it-works">How it Works</a>
