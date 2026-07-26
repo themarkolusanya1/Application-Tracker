@@ -1,4 +1,4 @@
-import { Rocket } from 'lucide-react';
+// Auth layout wrapper for login and sign up pages
 
 export default function AuthLayout({
   children,
@@ -12,11 +12,15 @@ export default function AuthLayout({
       <div className="shape shape-2"></div>
 
       {/* MainHeader */}
-      <header className="flex flex-col items-center mb-8 z-10">
-        <div className="w-20 h-20 rounded-3xl overflow-hidden shadow-lg shadow-brand-indigo/15 kinetic-gradient flex items-center justify-center text-white mb-4">
-          <Rocket className="w-10 h-10" />
+      <header className="flex flex-col items-center mb-5 z-10">
+        <div className="w-20 h-16 flex items-center justify-center mb-0">
+          <img 
+            alt="MyTraks Logo" 
+            className="w-full h-full object-contain" 
+            src="/images/mytraks_logo_nobg.png" 
+          />
         </div>
-        <h1 className="text-4xl font-bold logo-text tracking-tighter">MyTraks</h1>
+        <h1 className="text-3xl font-bold logo-text tracking-tighter">MyTraks</h1>
       </header>
 
       {/* Main Card */}
