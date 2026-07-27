@@ -3,6 +3,8 @@
 import { cookies } from 'next/headers';
 import { db } from '@/lib/db';
 import { hashPassword, comparePassword, signJWT, verifyJWT, UserSession } from '@/lib/auth';
+import fs from 'fs';
+import path from 'path';
 
 export interface ActionResponse<T = any> {
   success: boolean;
@@ -71,6 +73,10 @@ export async function register(formData: FormData): Promise<ActionResponse> {
     return { success: true };
   } catch (error: any) {
     console.error('Registration error:', error);
+    try {
+      const logPath = path.join(process.cwd(), 'error.log');
+      fs.appendFileSync(logPath, `[${new Date().toISOString()}] Registration error:\n${error.stack || error.message || error}\n\n`);
+    } catch (e) {}
     return { success: false, error: 'Internal server error occurred.' };
   }
 }
@@ -123,6 +129,10 @@ export async function login(formData: FormData): Promise<ActionResponse> {
     return { success: true };
   } catch (error: any) {
     console.error('Login error:', error);
+    try {
+      const logPath = path.join(process.cwd(), 'error.log');
+      fs.appendFileSync(logPath, `[${new Date().toISOString()}] Login error:\n${error.stack || error.message || error}\n\n`);
+    } catch (e) {}
     return { success: false, error: 'Internal server error occurred.' };
   }
 }
@@ -305,6 +315,10 @@ export async function resetPassword(formData: FormData): Promise<ActionResponse>
     return { success: true };
   } catch (error: any) {
     console.error('Reset password error:', error);
+    try {
+      const logPath = path.join(process.cwd(), 'error.log');
+      fs.appendFileSync(logPath, `[${new Date().toISOString()}] Reset password error:\n${error.stack || error.message || error}\n\n`);
+    } catch (e) {}
     return { success: false, error: 'Internal server error occurred.' };
   }
 }
