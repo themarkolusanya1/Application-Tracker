@@ -73,11 +73,7 @@ export async function register(formData: FormData): Promise<ActionResponse> {
     return { success: true };
   } catch (error: any) {
     console.error('Registration error:', error);
-    try {
-      const logPath = path.join(process.cwd(), 'error.log');
-      fs.appendFileSync(logPath, `[${new Date().toISOString()}] Registration error:\n${error.stack || error.message || error}\n\n`);
-    } catch (e) {}
-    return { success: false, error: 'Internal server error occurred.' };
+    return { success: false, error: 'Registration error: ' + (error.stack || error.message || error) };
   }
 }
 
@@ -129,11 +125,7 @@ export async function login(formData: FormData): Promise<ActionResponse> {
     return { success: true };
   } catch (error: any) {
     console.error('Login error:', error);
-    try {
-      const logPath = path.join(process.cwd(), 'error.log');
-      fs.appendFileSync(logPath, `[${new Date().toISOString()}] Login error:\n${error.stack || error.message || error}\n\n`);
-    } catch (e) {}
-    return { success: false, error: 'Internal server error occurred.' };
+    return { success: false, error: 'Login error: ' + (error.stack || error.message || error) };
   }
 }
 
@@ -315,10 +307,6 @@ export async function resetPassword(formData: FormData): Promise<ActionResponse>
     return { success: true };
   } catch (error: any) {
     console.error('Reset password error:', error);
-    try {
-      const logPath = path.join(process.cwd(), 'error.log');
-      fs.appendFileSync(logPath, `[${new Date().toISOString()}] Reset password error:\n${error.stack || error.message || error}\n\n`);
-    } catch (e) {}
-    return { success: false, error: 'Internal server error occurred.' };
+    return { success: false, error: 'Reset password error: ' + (error.stack || error.message || error) };
   }
 }
