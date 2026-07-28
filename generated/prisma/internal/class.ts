@@ -34,6 +34,10 @@ const config: runtime.GetPrismaClientConfig = {
         "fromEnvVar": null,
         "value": "windows",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "rhel-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
@@ -47,6 +51,7 @@ const config: runtime.GetPrismaClientConfig = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -55,8 +60,8 @@ const config: runtime.GetPrismaClientConfig = {
       }
     }
   },
-  "inlineSchema": "datasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"../generated/prisma\"\n}\n\nmodel User {\n  id            String         @id @default(cuid())\n  name          String\n  email         String         @unique\n  password      String // Hashed password\n  role          String         @default(\"STUDENT\") // \"STUDENT\" or \"PROFESSIONAL\"\n  applications  Application[]\n  notifications Notification[]\n  createdAt     DateTime       @default(now())\n}\n\nmodel Application {\n  id              String   @id @default(cuid())\n  userId          String\n  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n  applicationType String   @default(\"job\") // \"job\" or \"scholarship\"\n  organization    String // University, School, Company, etc.\n  title           String // MSc/PhD Program, Job Role, Internship, etc.\n  status          String // Represents pipeline status\n  url             String?\n  notes           String?\n  salary          String? // Represents salary (job)\n  locationType    String   @default(\"ON_SITE\") // Represents location (job)\n  appliedDate     DateTime @default(now())\n  createdAt       DateTime @default(now())\n  updatedAt       DateTime @updatedAt\n\n  // Multi-currency support\n  currency String @default(\"USD\")\n\n  // Scholarship specific fields\n  fundingType   String? // \"fully funded\", \"partial\", \"self-funded\"\n  stipendAmount String? // Stipend / funding amount\n  deadline      DateTime? // Application deadline\n\n  // Document checklist (true = completed, false = pending)\n  hasSop               Boolean @default(false)\n  hasTranscripts       Boolean @default(false)\n  hasReferences        Boolean @default(false)\n  hasTestScores        Boolean @default(false)\n  hasCvResume          Boolean @default(false)\n  hasPersonalStatement Boolean @default(false)\n  hasCoverLetter       Boolean @default(false)\n\n  // University academic details\n  degreeLevel      String? // \"Bachelors\", \"Masters\", \"PhD\"\n  potentialAdvisor String? // Supervisor contact info (for PhD)\n}\n\nmodel Notification {\n  id        String   @id @default(cuid())\n  userId    String\n  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n  message   String\n  isRead    Boolean  @default(false)\n  createdAt DateTime @default(now())\n}\n",
-  "inlineSchemaHash": "5256f51a4c08e76b9563d2f840ba6e93313307c14c7f0c57cd0e112cfc8eb0f3",
+  "inlineSchema": "datasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\ngenerator client {\n  provider      = \"prisma-client\"\n  output        = \"../generated/prisma\"\n  binaryTargets = [\"native\", \"rhel-openssl-3.0.x\"]\n}\n\nmodel User {\n  id            String         @id @default(cuid())\n  name          String\n  email         String         @unique\n  password      String // Hashed password\n  role          String         @default(\"STUDENT\") // \"STUDENT\" or \"PROFESSIONAL\"\n  applications  Application[]\n  notifications Notification[]\n  createdAt     DateTime       @default(now())\n}\n\nmodel Application {\n  id              String   @id @default(cuid())\n  userId          String\n  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n  applicationType String   @default(\"job\") // \"job\" or \"scholarship\"\n  organization    String // University, School, Company, etc.\n  title           String // MSc/PhD Program, Job Role, Internship, etc.\n  status          String // Represents pipeline status\n  url             String?\n  notes           String?\n  salary          String? // Represents salary (job)\n  locationType    String   @default(\"ON_SITE\") // Represents location (job)\n  appliedDate     DateTime @default(now())\n  createdAt       DateTime @default(now())\n  updatedAt       DateTime @updatedAt\n\n  // Multi-currency support\n  currency String @default(\"USD\")\n\n  // Scholarship specific fields\n  fundingType   String? // \"fully funded\", \"partial\", \"self-funded\"\n  stipendAmount String? // Stipend / funding amount\n  deadline      DateTime? // Application deadline\n\n  // Document checklist (true = completed, false = pending)\n  hasSop               Boolean @default(false)\n  hasTranscripts       Boolean @default(false)\n  hasReferences        Boolean @default(false)\n  hasTestScores        Boolean @default(false)\n  hasCvResume          Boolean @default(false)\n  hasPersonalStatement Boolean @default(false)\n  hasCoverLetter       Boolean @default(false)\n\n  // University academic details\n  degreeLevel      String? // \"Bachelors\", \"Masters\", \"PhD\"\n  potentialAdvisor String? // Supervisor contact info (for PhD)\n}\n\nmodel Notification {\n  id        String   @id @default(cuid())\n  userId    String\n  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n  message   String\n  isRead    Boolean  @default(false)\n  createdAt DateTime @default(now())\n}\n",
+  "inlineSchemaHash": "683bd5aa65a05f44ddf158e21b2911e40851b3a529c75973e156c398197a8a72",
   "copyEngine": true,
   "runtimeDataModel": {
     "models": {},

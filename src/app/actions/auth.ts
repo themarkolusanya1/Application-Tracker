@@ -73,7 +73,7 @@ export async function register(formData: FormData): Promise<ActionResponse> {
     return { success: true };
   } catch (error: any) {
     console.error('Registration error:', error);
-    return { success: false, error: 'Registration error: ' + (error.stack || error.message || error) };
+    return { success: false, error: 'Internal server error occurred.' };
   }
 }
 
@@ -125,7 +125,7 @@ export async function login(formData: FormData): Promise<ActionResponse> {
     return { success: true };
   } catch (error: any) {
     console.error('Login error:', error);
-    return { success: false, error: 'Login error: ' + (error.stack || error.message || error) };
+    return { success: false, error: 'Internal server error occurred.' };
   }
 }
 
@@ -307,6 +307,6 @@ export async function resetPassword(formData: FormData): Promise<ActionResponse>
     return { success: true };
   } catch (error: any) {
     console.error('Reset password error:', error);
-    return { success: false, error: 'Reset password error: ' + (error.stack || error.message || error) };
+    return { success: false, error: 'Internal server error occurred.' };
   }
 }
