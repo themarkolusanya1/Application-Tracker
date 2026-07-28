@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Sparkles, AlertTriangle, CheckCircle2, MessageSquare, Award, ArrowRight, RefreshCw } from 'lucide-react';
 
 interface InterviewCoachModalProps {
@@ -14,6 +14,14 @@ interface InterviewCoachModalProps {
 }
 
 export default function InterviewCoachModal({ application, onClose }: InterviewCoachModalProps) {
+  // Lock body scroll when modal is mounted
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   const [step, setStep] = useState<'welcome' | 'questions' | 'completed'>('welcome');
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<string[]>([]);

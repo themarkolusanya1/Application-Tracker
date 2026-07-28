@@ -23,6 +23,18 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   // Form states
   const [applicationType, setApplicationType] = useState<string>('job');
   const [organization, setOrganization] = useState('');
