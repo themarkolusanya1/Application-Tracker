@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Sparkles, AlertTriangle, CheckCircle2, MessageSquare, Award, ArrowRight, RefreshCw } from 'lucide-react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface InterviewCoachModalProps {
   application: {
@@ -14,14 +15,6 @@ interface InterviewCoachModalProps {
 }
 
 export default function InterviewCoachModal({ application, onClose }: InterviewCoachModalProps) {
-  // Lock body scroll when modal is mounted
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, []);
-
   const [step, setStep] = useState<'welcome' | 'questions' | 'completed'>('welcome');
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<string[]>([]);
@@ -133,8 +126,8 @@ export default function InterviewCoachModal({ application, onClose }: InterviewC
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="glass-panel border border-slate-200/80 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col bg-white animate-fade-in max-h-[90vh]">
+    <Dialog open={true} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent showCloseButton={false} className="sm:max-w-2xl w-full p-0 overflow-hidden bg-white border border-slate-200/80 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
         {/* Modal Header */}
         <header className="flex justify-between items-center px-6 py-4 border-b border-slate-200/80 bg-slate-50 flex-shrink-0">
           <div className="flex items-center gap-2">
@@ -341,7 +334,7 @@ export default function InterviewCoachModal({ application, onClose }: InterviewC
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

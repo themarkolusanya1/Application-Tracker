@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { updateUserProfile } from '@/app/actions/auth';
 import { sendSimulatedNotification } from '@/app/actions/applications';
+import { toast } from 'sonner';
 
 interface SettingsClientProps {
   user: {
@@ -20,20 +21,16 @@ interface SettingsClientProps {
 
 export default function SettingsClient({ user, initialApplications }: SettingsClientProps) {
   const router = useRouter();
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [profileName, setProfileName] = useState(user.name);
   const [profileRole, setProfileRole] = useState(user.role);
   const [isUpdating, startUpdateTransition] = useTransition();
-  const [profileSuccessMsg, setProfileSuccessMsg] = useState<string | null>(null);
   const [profileErrorMsg, setProfileErrorMsg] = useState<string | null>(null);
 
   const [apiKey, setApiKey] = useState('');
-  const [apiKeySuccess, setApiKeySuccess] = useState(false);
 
   // Preference Settings States
   const [monthlyNotif, setMonthlyNotif] = useState(true);
   const [dailyReminder, setDailyReminder] = useState(true);
-  const [notifTriggerMsg, setNotifTriggerMsg] = useState<string | null>(null);
   const [monthlyGoal, setMonthlyGoal] = useState(5);
 
   // AI Configuration States
@@ -76,8 +73,7 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
     } else {
       localStorage.setItem('applyhub_api_key', apiKey);
     }
-    setApiKeySuccess(true);
-    setTimeout(() => setApiKeySuccess(false), 2500);
+    toast.success('API Configuration saved successfully!');
   };
 
   const handleToggleDailyReminder = (val: boolean) => {
@@ -118,8 +114,7 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
     startUpdateTransition(async () => {
       const res = await sendSimulatedNotification(message);
       if (res.success) {
-        setNotifTriggerMsg('Monthly progress report generated & logged in your notification inbox!');
-        setTimeout(() => setNotifTriggerMsg(null), 4000);
+        toast.success('Monthly progress report generated successfully!');
       }
     });
   };
@@ -139,23 +134,20 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
     startUpdateTransition(async () => {
       const res = await sendSimulatedNotification(message);
       if (res.success) {
-        setNotifTriggerMsg('Daily motivational reminder email triggered & logged in your inbox notifications!');
-        setTimeout(() => setNotifTriggerMsg(null), 4000);
+        toast.success('Daily motivational reminder email triggered successfully!');
       }
     });
   };
 
   const handleUpdateProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    setProfileSuccessMsg(null);
     setProfileErrorMsg(null);
 
     startUpdateTransition(async () => {
       const res = await updateUserProfile(profileName, profileRole);
       if (res.success) {
-        setProfileSuccessMsg('Profile updated successfully!');
+        toast.success('Profile updated successfully!');
         router.refresh();
-        setTimeout(() => setProfileSuccessMsg(null), 3000);
       } else {
         setProfileErrorMsg(res.error || 'Failed to update profile.');
       }
@@ -164,7 +156,7 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
 
   const handleReplayTour = () => {
     localStorage.removeItem('apptracker_onboarding_completed');
-    setSuccessMsg('Onboarding tour reset! Redirecting to Dashboard to start the tour...');
+    toast.success('Onboarding tour reset! Redirecting to Dashboard to start the tour...');
     setTimeout(() => {
       router.push('/');
     }, 1500);
@@ -282,12 +274,7 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
             </h4>
           </div>
 
-          {notifTriggerMsg && (
-            <div className="p-3 bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald text-xs rounded-lg animate-fade-in flex items-center gap-2 font-semibold">
-              <CheckCircle2 className="w-4.5 h-4.5 shrink-0 text-brand-emerald" />
-              <span>{notifTriggerMsg}</span>
-            </div>
-          )}
+
 
           <div className="space-y-5">
             {/* Toggle 1: Monthly Reports */}
@@ -374,11 +361,6 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
           </div>
 
           <form onSubmit={handleUpdateProfile} className="space-y-4 pt-4 border-t border-slate-200/50">
-            {profileSuccessMsg && (
-              <div className="p-3 bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald text-xs rounded-lg">
-                {profileSuccessMsg}
-              </div>
-            )}
             {profileErrorMsg && (
               <div className="p-3 bg-brand-rose/10 border border-brand-rose/20 text-brand-rose text-xs rounded-lg">
                 {profileErrorMsg}
@@ -466,12 +448,6 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
               </p>
             </div>
 
-            {apiKeySuccess && (
-              <div className="p-3 bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald text-xs rounded-lg animate-fade-in">
-                {aiProvider === 'openai' ? 'OpenAI API Key' : aiProvider === 'groq' ? 'Groq API Key' : 'Gemini API Key'} saved successfully!
-              </div>
-            )}
-
             <div className="flex gap-2">
               <input
                 type="password"
@@ -506,12 +482,7 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
               Reset the first-time walkthrough tour to review how MyTraks works. Replaying the guide will step you through the primary views, documents, and application forms.
             </p>
 
-            {successMsg && (
-              <div className="p-3 bg-brand-emerald/10 border border-brand-emerald/20 text-brand-emerald text-xs rounded-lg flex items-center gap-2">
-                <CheckCircle2 className="w-4.5 h-4.5 shrink-0" />
-                <span>{successMsg}</span>
-              </div>
-            )}
+
 
             <button
               onClick={handleReplayTour}

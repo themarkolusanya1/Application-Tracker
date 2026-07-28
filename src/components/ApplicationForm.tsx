@@ -2,6 +2,18 @@
 
 import { useTransition, useState, useEffect } from 'react';
 import { X, Briefcase, DollarSign, Link as LinkIcon, Calendar, FileText, MapPin, Layers, GraduationCap, Trash2, CheckCircle2 } from 'lucide-react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 import { createApplication, updateApplication, deleteApplication } from '@/app/actions/applications';
 
 interface ApplicationFormProps {
@@ -22,18 +34,9 @@ const currencies = [
 export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: ApplicationFormProps) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
 
-  // Lock body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+
 
   // Form states
   const [applicationType, setApplicationType] = useState<string>('job');
@@ -49,11 +52,14 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
   // AI Fill states
   const [isAiMode, setIsAiMode] = useState(false);
   const [aiText, setAiText] = useState('');
+  const [aiUrl, setAiUrl] = useState('');
+  const [aiModeType, setAiModeType] = useState<'text' | 'url'>('text');
   const [isParsing, setIsParsing] = useState(false);
   const [aiSuccessMsg, setAiSuccessMsg] = useState<string | null>(null);
 
   const handleAiParse = async () => {
-    if (!aiText.trim()) return;
+    const parsePayload = aiModeType === 'url' ? aiUrl.trim() : aiText.trim();
+    if (!parsePayload) return;
     setIsParsing(true);
     setError(null);
     setAiSuccessMsg(null);
@@ -73,7 +79,7 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
           'x-provider': provider,
           'x-api-key': apiKey,
         },
-        body: JSON.stringify({ text: aiText }),
+        body: JSON.stringify({ text: parsePayload }),
       });
       const result = await response.json();
       if (result.success && result.data) {
@@ -285,6 +291,7 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
       }
 
       if (res.success) {
+        toast.success(applicationToEdit ? 'Application updated successfully!' : 'Application logged successfully!');
         onClose();
       } else {
         setError(res.error || 'Failed to save application.');
@@ -294,21 +301,12 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
 
   const handleDelete = () => {
     if (!applicationToEdit) return;
-    if (confirm('Are you sure you want to delete this application?')) {
-      startTransition(async () => {
-        const res = await deleteApplication(applicationToEdit.id);
-        if (res.success) {
-          onClose();
-        } else {
-          setError(res.error || 'Failed to delete application.');
-        }
-      });
-    }
+    setShowDeleteAlert(true);
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4 overflow-y-auto">
-      <div className="glass-panel border border-slate-200/85 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-fade-in flex flex-col max-h-[90vh]">
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent showCloseButton={false} className="sm:max-w-2xl w-full p-0 overflow-hidden bg-slate-50 border border-slate-200/85 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-6 border-b border-slate-200/80 flex justify-between items-center bg-slate-50">
           <div className="flex items-center gap-3">
@@ -423,23 +421,63 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
                 </div>
               )}
               
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700" htmlFor="aiText">
-                  Application details (Job description, program info, or page copy)
-                </label>
-                <textarea
-                  id="aiText"
-                  rows={8}
-                  value={aiText}
-                  onChange={(e) => setAiText(e.target.value)}
-                  placeholder="Paste the full job post details, requirements, program overview, or scholarship info here. Our AI will automatically parse the organization/company, position title, degree level, salary estimation, location, deadlines, and requirements for you..."
-                  className="w-full px-3 py-2.5 glass-input text-xs leading-relaxed resize-y font-sans bg-white"
-                />
+              <div className="space-y-4">
+                {/* Selector */}
+                <div className="flex gap-2 p-0.5 bg-slate-100 rounded-lg border border-slate-205/60 max-w-[280px]">
+                  <button
+                    type="button"
+                    onClick={() => setAiModeType('text')}
+                    className={`flex-1 py-1.5 text-[11px] font-bold rounded-md transition-all cursor-pointer ${
+                      aiModeType === 'text' ? 'bg-white text-slate-800 shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    Paste Text
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAiModeType('url')}
+                    className={`flex-1 py-1.5 text-[11px] font-bold rounded-md transition-all cursor-pointer ${
+                      aiModeType === 'url' ? 'bg-white text-slate-800 shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    Use Link / URL
+                  </button>
+                </div>
+
+                {aiModeType === 'text' ? (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700" htmlFor="aiText">
+                      Application details (Job description, program info, or page copy)
+                    </label>
+                    <textarea
+                      id="aiText"
+                      rows={8}
+                      value={aiText}
+                      onChange={(e) => setAiText(e.target.value)}
+                      placeholder="Paste the full job post details, requirements, program overview, or scholarship info here. Our AI will automatically parse the organization/company, position title, degree level, salary estimation, location, deadlines, and requirements for you..."
+                      className="w-full px-3 py-2.5 glass-input text-xs leading-relaxed resize-y font-sans bg-white"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700" htmlFor="aiUrl">
+                      Job posting or program overview link / URL
+                    </label>
+                    <input
+                      id="aiUrl"
+                      type="url"
+                      value={aiUrl}
+                      onChange={(e) => setAiUrl(e.target.value)}
+                      placeholder="https://example.com/jobs/frontend-engineer"
+                      className="w-full px-3 py-2.5 glass-input text-xs font-sans bg-white"
+                    />
+                  </div>
+                )}
               </div>
 
               <button
                 type="button"
-                disabled={isParsing || !aiText.trim()}
+                disabled={isParsing || (aiModeType === 'text' ? !aiText.trim() : !aiUrl.trim())}
                 onClick={handleAiParse}
                 className="w-full flex items-center justify-center gap-2 py-3 text-xs font-semibold text-white bg-gradient-to-r from-brand-indigo to-brand-cyan hover:opacity-95 rounded-xl shadow-md disabled:opacity-50 transition-all cursor-pointer font-sans"
               >
@@ -886,7 +924,37 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
             </button>
           )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the application.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (applicationToEdit) {
+                startTransition(async () => {
+                  const res = await deleteApplication(applicationToEdit.id);
+                  if (res.success) {
+                    toast.success('Application deleted successfully!');
+                    onClose();
+                  } else {
+                    setError(res.error || 'Failed to delete application.');
+                  }
+                });
+              }
+              setShowDeleteAlert(false);
+            }}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Dialog>
   );
 }

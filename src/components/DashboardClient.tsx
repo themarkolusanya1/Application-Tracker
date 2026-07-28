@@ -1,6 +1,9 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+
+const Joyride = dynamic<any>(() => import('react-joyride').then((mod: any) => ({ default: mod.Joyride })), { ssr: false });
 import { 
   Briefcase, Search, Filter, Kanban, List, Plus, 
   MapPin, DollarSign, Calendar, ExternalLink, Edit2, Trash2, ArrowUpDown, Sparkles
@@ -10,6 +13,17 @@ type ApplicationStatus = 'WISH_LIST' | 'APPLIED' | 'INTERVIEWING' | 'OFFERED' | 
 type LocationType = 'ON_SITE' | 'HYBRID' | 'REMOTE';
 import ApplicationForm from './ApplicationForm';
 import InterviewCoachModal from './InterviewCoachModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 interface DashboardClientProps {
   initialApplications: any[];
@@ -28,6 +42,45 @@ export default function DashboardClient({
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingApplication, setEditingApplication] = useState<any | null>(null);
   const [activeInterviewApp, setActiveInterviewApp] = useState<any | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [runTour, setRunTour] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const tourCompleted = localStorage.getItem('apptracker_onboarding_completed');
+    if (!tourCompleted) {
+      setRunTour(true);
+    }
+  }, []);
+
+  const tourSteps: any[] = [
+    {
+      target: '#tour-stats',
+      content: 'Here is your high-level overview. You can see your total active applications, pending interviews, and successful offers at a glance.',
+      disableBeacon: true,
+    },
+    {
+      target: '#tour-tabs',
+      content: 'Switch between Careers and University tracks, or view them together in the Combined View.',
+    },
+    {
+      target: '#tour-filters',
+      content: 'Search and filter your applications by keywords, status, location, or degree requirements.',
+    },
+    {
+      target: '#tour-view-toggle',
+      content: 'Toggle between Kanban Board View and tabular List View formats.',
+    },
+    {
+      target: '#tour-add-btn',
+      content: 'Click here to log a new application. You can enter details manually or use the AI Auto-Fill / URL parsing feature to populate fields instantly!',
+    },
+    {
+      target: '#tour-board',
+      content: 'Visually organize your progress by managing your application cards directly within board columns.',
+    }
+  ];
 
   // Layout / view modes
   const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
@@ -217,11 +270,7 @@ export default function DashboardClient({
 
   // Handler for delete
   const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this application?')) {
-      startTransition(async () => {
-        await deleteApplication(id);
-      });
-    }
+    setDeleteId(id);
   };
 
   const handleEditClick = (app: any) => {
@@ -374,7 +423,7 @@ export default function DashboardClient({
       })()}
 
       {/* 1. Statistics Cards */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+      <section id="tour-stats" className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {getStats().map((stat, idx) => (
           <div key={idx} className="glass-card rounded-2xl p-5 flex flex-col justify-between">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{stat.label}</span>
@@ -385,7 +434,7 @@ export default function DashboardClient({
 
       {/* Tabs Navigation */}
       {!hideTabs && (
-        <div className="flex border-b border-slate-200/80 space-x-6">
+        <div id="tour-tabs" className="flex border-b border-slate-200/80 space-x-6">
           <button
             onClick={() => { setTabFilter('combined'); setStatusFilter('ALL'); }}
             className={`pb-4 text-sm font-bold transition-all relative cursor-pointer ${
@@ -423,7 +472,7 @@ export default function DashboardClient({
       )}
 
       {/* 2. Search & Controls */}
-      <section className="flex flex-col md:flex-row gap-4 items-center justify-between glass-panel p-4 rounded-2xl">
+      <section id="tour-filters" className="flex flex-col md:flex-row gap-4 items-center justify-between glass-panel p-4 rounded-2xl">
         <div className="flex flex-1 flex-col sm:flex-row w-full gap-3">
           {/* Search bar */}
           <div className="relative flex-1">
@@ -522,7 +571,7 @@ export default function DashboardClient({
 
         {/* View toggles & Add action */}
         <div className="flex w-full md:w-auto items-center justify-between sm:justify-end gap-3 flex-shrink-0">
-          <div className="flex items-center bg-white/5 p-1 rounded-lg border border-white/5">
+          <div id="tour-view-toggle" className="flex items-center bg-white/5 p-1 rounded-lg border border-white/5">
             <button
               onClick={() => setViewMode('board')}
               className={`p-1.5 rounded-md transition-all cursor-pointer ${
@@ -545,6 +594,7 @@ export default function DashboardClient({
 
           <button
             onClick={handleAddClick}
+            id="tour-add-btn"
             className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-brand-indigo to-brand-cyan hover:opacity-95 rounded-lg shadow-md shadow-brand-indigo/15 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
@@ -556,7 +606,7 @@ export default function DashboardClient({
       {/* 3. Main Views Grid/List */}
       {viewMode === 'board' ? (
         /* ==================== KANBAN BOARD VIEW ==================== */
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 items-start">
+        <section id="tour-board" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 items-start">
           {getBoardColumns().map((col) => {
             const colApps = filteredApplications.filter((app) => {
               if (app.applicationType === 'scholarship' && tabFilter === 'combined') {
@@ -1018,6 +1068,60 @@ export default function DashboardClient({
         <InterviewCoachModal
           application={activeInterviewApp}
           onClose={() => setActiveInterviewApp(null)}
+        />
+      )}
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the application.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (deleteId) {
+                startTransition(async () => {
+                  const res = await deleteApplication(deleteId);
+                  if (res.success) {
+                    toast.success('Application deleted successfully!');
+                  } else {
+                    toast.error(res.error || 'Failed to delete application.');
+                  }
+                });
+                setDeleteId(null);
+              }
+            }}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {isMounted && (
+        <Joyride
+          steps={tourSteps}
+          run={runTour}
+          continuous={true}
+          showSkipButton={true}
+          showProgress={true}
+          styles={{
+            options: {
+              primaryColor: '#6366f1',
+              textColor: '#1e293b',
+              backgroundColor: '#ffffff',
+              arrowColor: '#ffffff',
+            },
+          }}
+          callback={(data: any) => {
+            const { status } = data;
+            if (['finished', 'skipped'].includes(status)) {
+              localStorage.setItem('apptracker_onboarding_completed', 'true');
+              setRunTour(false);
+            }
+          }}
         />
       )}
     </div>

@@ -186,7 +186,7 @@ export default function DocumentsClient({ initialApplications }: DocumentsClient
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200/80 bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <tr className="border-b border-slate-200/80 bg-slate-50 text-xs font-semibold text-slate-500 tracking-wider">
                   <th className="px-6 py-4">Institution & Program</th>
                   <th className="px-6 py-4 text-center">Degree</th>
                   <th className="px-6 py-4 text-center">SOP / Proposal</th>

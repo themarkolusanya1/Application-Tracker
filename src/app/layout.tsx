@@ -1,11 +1,9 @@
 import type { Metadata } from 'next';
-import { Inter, Montserrat } from 'next/font/google';
+import { Inter, Montserrat, Geist } from 'next/font/google';
 import './globals.css';
+import { cn } from "@/lib/utils";
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-sans',
-});
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -17,13 +15,15 @@ export const metadata: Metadata = {
   description: 'A modern, premium, secure tracker for job, university, and project applications with real-time statistics and notification logs.',
 };
 
+import { Toaster } from '@/components/ui/sonner';
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${montserrat.variable} h-full antialiased`}>
+    <html lang="en" className={cn("h-full", "antialiased", montserrat.variable, "font-sans", geist.variable)}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
@@ -36,6 +36,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {children}
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );

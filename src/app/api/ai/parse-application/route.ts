@@ -12,6 +12,38 @@ export async function POST(req: Request) {
       );
     }
 
+    let textToAnalyze = text;
+    const isUrl = text.trim().startsWith('http://') || text.trim().startsWith('https://');
+
+    if (isUrl) {
+      try {
+        const fetchRes = await fetch(text.trim(), {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          }
+        });
+        if (fetchRes.ok) {
+          const html = await fetchRes.text();
+          const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+          const bodyHtml = bodyMatch ? bodyMatch[1] : html;
+          
+          textToAnalyze = bodyHtml
+            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+            .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .substring(0, 12000);
+          
+          if (textToAnalyze.length < 50) {
+            textToAnalyze = text;
+          }
+        }
+      } catch (err) {
+        console.error('Failed to scrape URL:', err);
+      }
+    }
+
     const provider = req.headers.get('x-provider') || 'gemini';
     let apiKey = provider === 'openai' 
       ? process.env.OPENAI_API_KEY 
@@ -28,7 +60,7 @@ export async function POST(req: Request) {
       return NextResponse.json({
         success: true,
         simulated: true,
-        data: getSimulatedParseResult(text),
+        data: getSimulatedParseResult(textToAnalyze),
       });
     }
 
@@ -65,7 +97,7 @@ If it is a UNIVERSITY program or SCHOLARSHIP:
 
 Text to analyze:
 """
-${text}
+${textToAnalyze}
 """
 `;
 
