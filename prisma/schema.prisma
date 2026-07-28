@@ -7,13 +7,14 @@ generator client {
   provider      = "prisma-client"
   output        = "../generated/prisma"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  engineType    = "client"
 }
 
 model User {
   id            String         @id @default(cuid())
   name          String
   email         String         @unique
-  password      String         // Hashed password
+  password      String // Hashed password
   role          String         @default("STUDENT") // "STUDENT" or "PROFESSIONAL"
   applications  Application[]
   notifications Notification[]
@@ -25,36 +26,36 @@ model Application {
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   applicationType String   @default("job") // "job" or "scholarship"
-  organization    String   // University, School, Company, etc.
-  title           String   // MSc/PhD Program, Job Role, Internship, etc.
-  status          String   // Represents pipeline status
+  organization    String // University, School, Company, etc.
+  title           String // MSc/PhD Program, Job Role, Internship, etc.
+  status          String // Represents pipeline status
   url             String?
   notes           String?
-  salary          String?  // Represents salary (job)
+  salary          String? // Represents salary (job)
   locationType    String   @default("ON_SITE") // Represents location (job)
   appliedDate     DateTime @default(now())
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   // Multi-currency support
-  currency        String   @default("USD")
+  currency String @default("USD")
 
   // Scholarship specific fields
-  fundingType     String?  // "fully funded", "partial", "self-funded"
-  stipendAmount   String?  // Stipend / funding amount
-  deadline        DateTime? // Application deadline
+  fundingType   String? // "fully funded", "partial", "self-funded"
+  stipendAmount String? // Stipend / funding amount
+  deadline      DateTime? // Application deadline
 
   // Document checklist (true = completed, false = pending)
-  hasSop          Boolean  @default(false)
-  hasTranscripts  Boolean  @default(false)
-  hasReferences   Boolean  @default(false)
-  hasTestScores   Boolean  @default(false)
-  hasCvResume     Boolean  @default(false)
+  hasSop               Boolean @default(false)
+  hasTranscripts       Boolean @default(false)
+  hasReferences        Boolean @default(false)
+  hasTestScores        Boolean @default(false)
+  hasCvResume          Boolean @default(false)
   hasPersonalStatement Boolean @default(false)
-  hasCoverLetter  Boolean  @default(false)
+  hasCoverLetter       Boolean @default(false)
 
   // University academic details
-  degreeLevel     String?  // "Bachelors", "Masters", "PhD"
+  degreeLevel      String? // "Bachelors", "Masters", "PhD"
   potentialAdvisor String? // Supervisor contact info (for PhD)
 }
 
