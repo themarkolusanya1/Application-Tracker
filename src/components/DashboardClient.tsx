@@ -917,18 +917,18 @@ export default function DashboardClient({
                           )}
                         </div>
 
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h5 className="font-bold text-slate-800 text-sm truncate max-w-[140px]" title={app.organization}>
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="min-w-0 flex-1">
+                            <h5 className="font-bold text-slate-800 text-sm truncate" title={app.organization}>
                               {app.organization}
                             </h5>
-                            <p className="text-xs text-slate-500 truncate max-w-[140px]" title={app.title}>
+                            <p className="text-xs text-slate-500 truncate" title={app.title}>
                               {app.title}
                             </p>
                           </div>
 
                           {/* Quick Actions */}
-                          <div className="flex items-center gap-0.5">
+                          <div className="flex items-center gap-0.5 shrink-0">
                             <button
                               onClick={() => handleEditClick(app)}
                               className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-100 cursor-pointer transition-colors"
