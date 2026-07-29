@@ -45,36 +45,40 @@ export default function DashboardClient({
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [runTour, setRunTour] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [monthlyGoal, setMonthlyGoal] = useState(5);
 
   useEffect(() => {
     setIsMounted(true);
+    const showGuide = localStorage.getItem('apptracker_show_onboarding_guide') !== 'false';
     const tourCompleted = localStorage.getItem('apptracker_onboarding_completed');
-    if (!tourCompleted) {
+    if (showGuide && !tourCompleted) {
       setRunTour(true);
+    }
+    const savedGoal = localStorage.getItem('applyhub_monthly_goal');
+    if (savedGoal) {
+      setMonthlyGoal(parseInt(savedGoal, 10));
     }
   }, []);
 
-  const tourSteps: any[] = [
+  const tourSteps: any[] = initialTab === 'combined' ? [
+    {
+      target: '#tour-analytics',
+      content: 'Track your application targets here. You can see your progress toward your monthly goal and stats for interviews, offers, and tracks.',
+      disableBeacon: true,
+    },
+    {
+      target: '#tour-top-five',
+      content: 'Here are your top 5 applications for the current month. You can quickly add new applications or view details directly from here!',
+    }
+  ] : [
     {
       target: '#tour-stats',
       content: 'Here is your high-level overview. You can see your total active applications, pending interviews, and successful offers at a glance.',
       disableBeacon: true,
     },
     {
-      target: '#tour-tabs',
-      content: 'Switch between Careers and University tracks, or view them together in the Combined View.',
-    },
-    {
       target: '#tour-filters',
       content: 'Search and filter your applications by keywords, status, location, or degree requirements.',
-    },
-    {
-      target: '#tour-view-toggle',
-      content: 'Toggle between Kanban Board View and tabular List View formats.',
-    },
-    {
-      target: '#tour-add-btn',
-      content: 'Click here to log a new application. You can enter details manually or use the AI Auto-Fill / URL parsing feature to populate fields instantly!',
     },
     {
       target: '#tour-board',
@@ -229,7 +233,8 @@ export default function DashboardClient({
       universities: universityCount,
       interviews: monthlyInterviews,
       offers: monthlyOffers,
-      monthName: now.toLocaleString('default', { month: 'long' })
+      monthName: now.toLocaleString('default', { month: 'long' }),
+      apps: monthlyApps
     };
   };
 
@@ -402,6 +407,224 @@ export default function DashboardClient({
     }
   };
 
+  const monthlyReport = getMonthlyReport();
+  const topFiveApps = [...(monthlyReport.apps || [])]
+    .sort((a, b) => {
+      const dateA = new Date(a.appliedDate || a.createdAt).getTime();
+      const dateB = new Date(b.appliedDate || b.createdAt).getTime();
+      return dateB - dateA;
+    })
+    .slice(0, 5);
+  const goalProgress = monthlyGoal > 0 ? Math.min(100, Math.round((monthlyReport.total / monthlyGoal) * 100)) : 0;
+
+  if (initialTab === 'combined') {
+    return (
+      <div className="space-y-8 max-w-7xl mx-auto">
+        {/* Motivational Success Banner */}
+        {(() => {
+          const banner = getBannerContent();
+          return (
+            <div className="glass-card rounded-2xl overflow-hidden border border-slate-200/80 shadow-md flex flex-col md:flex-row items-center justify-between p-6 bg-white gap-6">
+              <div className="flex-1 space-y-2 text-left">
+                <span className="text-[10px] uppercase tracking-widest text-brand-indigo font-black">{banner.badge}</span>
+                <h4 className="text-base md:text-lg font-display font-bold text-slate-800 tracking-tight leading-tight">
+                  {banner.title}
+                </h4>
+                <p className="text-xs text-slate-500 max-w-xl leading-relaxed">
+                  {banner.desc}
+                </p>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Monthly Overview & Analytics Section */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Analytics of the Month Card */}
+          <div id="tour-analytics" className="lg:col-span-1 glass-panel border border-slate-200/80 rounded-2xl p-6 shadow-md bg-white flex flex-col justify-between text-left animate-fade-in">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+                  Analytics of {monthlyReport.monthName}
+                </h4>
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-indigo/10 text-brand-indigo uppercase">
+                  Insights
+                </span>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Monthly Target Goal</p>
+                    <p className="text-3xl font-black text-slate-800 mt-1">
+                      {monthlyReport.total} / {monthlyGoal}
+                    </p>
+                  </div>
+                  <span className="text-sm font-bold text-brand-indigo">{goalProgress}%</span>
+                </div>
+                
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/30">
+                  <div 
+                    className="h-full bg-gradient-to-r from-brand-indigo to-brand-cyan transition-all duration-500" 
+                    style={{ width: `${goalProgress}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/40">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Interviews</span>
+                  <p className="text-xl font-bold text-brand-amber mt-1">{monthlyReport.interviews}</p>
+                </div>
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/40">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Offers</span>
+                  <p className="text-xl font-bold text-brand-emerald mt-1">{monthlyReport.offers}</p>
+                </div>
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/40">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Job Tracks</span>
+                  <p className="text-xl font-bold text-slate-700 mt-1">{monthlyReport.jobs}</p>
+                </div>
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/40">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Uni Tracks</span>
+                  <p className="text-xl font-bold text-slate-700 mt-1">{monthlyReport.universities}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Top 5 Applications for the Month Card */}
+          <div id="tour-top-five" className="lg:col-span-2 glass-panel border border-slate-200/80 rounded-2xl p-6 shadow-md bg-white flex flex-col justify-between text-left animate-fade-in">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-brand-cyan" />
+                  <span>Top 5 Applications for {monthlyReport.monthName}</span>
+                </h4>
+                
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleAddClick}
+                    className="flex items-center gap-1 px-3.5 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-brand-indigo to-brand-cyan hover:opacity-95 rounded-lg shadow-sm cursor-pointer select-none"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Application</span>
+                  </button>
+                  <span className="text-xs text-slate-400 font-medium hidden sm:inline">Recently Updated</span>
+                </div>
+              </div>
+
+              {topFiveApps.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-6 text-center text-slate-400 space-y-2">
+                  <p className="text-xs">No applications logged in {monthlyReport.monthName} yet.</p>
+                  <button 
+                    onClick={handleAddClick}
+                    className="text-xs font-semibold text-brand-indigo hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    Log your first card →
+                  </button>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100 max-h-[220px] overflow-y-auto pr-1">
+                  {topFiveApps.map((app) => {
+                    return (
+                      <div key={app.id} className="py-2.5 flex items-center justify-between hover:bg-slate-50/50 rounded-lg px-2 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center font-bold text-xs text-slate-600 select-none">
+                            {app.organization.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div className="text-left">
+                            <p className="text-sm font-bold text-slate-800 leading-tight">{app.title}</p>
+                            <p className="text-xs text-slate-500 leading-tight mt-1">{app.organization}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-4">
+                          <div className="text-xs shrink-0">
+                            {getStatusBadge(app.status)}
+                          </div>
+                          <span className="text-xs text-slate-500">
+                            {new Date(app.appliedDate || app.createdAt).toLocaleDateString('default', { month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <ApplicationForm
+          isOpen={isFormOpen}
+          onClose={() => setIsFormOpen(false)}
+          applicationToEdit={editingApplication}
+        />
+
+        {activeInterviewApp && (
+          <InterviewCoachModal
+            application={activeInterviewApp}
+            onClose={() => setActiveInterviewApp(null)}
+          />
+        )}
+
+        <AlertDialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the application.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => {
+                if (deleteId) {
+                  startTransition(async () => {
+                    const res = await deleteApplication(deleteId);
+                    if (res.success) {
+                      toast.success('Application deleted successfully!');
+                    } else {
+                      toast.error(res.error || 'Failed to delete application.');
+                    }
+                  });
+                  setDeleteId(null);
+                }
+              }}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {isMounted && (
+          <Joyride
+            steps={tourSteps}
+            run={runTour}
+            continuous={true}
+            showSkipButton={true}
+            showProgress={true}
+            styles={{
+              options: {
+                primaryColor: '#6366f1',
+                textColor: '#1e293b',
+                backgroundColor: '#ffffff',
+                arrowColor: '#ffffff',
+              },
+            }}
+            callback={(data: any) => {
+              const { status } = data;
+              if (['finished', 'skipped'].includes(status)) {
+                localStorage.setItem('apptracker_onboarding_completed', 'true');
+                setRunTour(false);
+              }
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Motivational Success Banner */}
@@ -421,6 +644,8 @@ export default function DashboardClient({
           </div>
         );
       })()}
+
+
 
       {/* 1. Statistics Cards */}
       <section id="tour-stats" className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">

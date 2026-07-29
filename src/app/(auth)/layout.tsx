@@ -11,18 +11,6 @@ export default function AuthLayout({
       <div className="shape shape-1"></div>
       <div className="shape shape-2"></div>
 
-      {/* MainHeader */}
-      <header className="flex flex-col items-center mb-5 z-10">
-        <div className="w-36 h-24 flex items-center justify-center mb-0">
-          <img 
-            alt="MyTraks Logo" 
-            className="w-full h-full object-contain" 
-            src="/images/mytraks_logo_nobg.png" 
-          />
-        </div>
-        <h1 className="text-3xl font-bold logo-text tracking-tighter -mt-4">MyTraks</h1>
-      </header>
-
       {/* Main Card */}
       <main className="w-full max-w-lg glass-effect shadow-2xl rounded-[2.5rem] px-8 pt-12 pb-10 sm:px-12 z-10">
         {children}

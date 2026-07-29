@@ -25,13 +25,6 @@ export default async function JobsPage() {
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-6">
-        <h3 className="text-xl font-display font-extrabold text-slate-850 tracking-tight">Jobs & Internships</h3>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Direct dashboard entry for your corporate job and internship pipelines.
-        </p>
-      </div>
-      
       <DashboardClient initialApplications={applications} initialTab="job" hideTabs={true} />
     </div>
   );

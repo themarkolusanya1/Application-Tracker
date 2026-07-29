@@ -383,3 +383,86 @@ export async function sendSimulatedNotification(message: string): Promise<Action
     return { success: false, error: 'Failed to trigger simulated notification.' };
   }
 }
+
+/**
+ * Scans the database and generates a daily reminder & activity summary notification for the logged-in user.
+ */
+export async function generateDailyNotificationSummary(): Promise<ActionResponse> {
+  try {
+    const session = await getCurrentUser();
+    if (!session) {
+      return { success: false, error: 'Unauthorized.' };
+    }
+
+    const userId = session.userId;
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+    // Fetch all user applications
+    const apps = await db.application.findMany({
+      where: { userId },
+    });
+
+    // 1. Calculate activities done today (created or updated today)
+    const updatedToday = apps.filter(app => {
+      const updatedDate = new Date(app.updatedAt);
+      return updatedDate >= todayStart && updatedDate <= todayEnd;
+    });
+
+    // 2. Identify upcoming scholarship deadlines (in next 7 days)
+    const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const upcomingDeadlines = apps.filter(app => {
+      if (!app.deadline) return false;
+      const dl = new Date(app.deadline);
+      return dl >= now && dl <= sevenDaysFromNow;
+    });
+
+    // 3. Identify active interviews
+    const activeInterviews = apps.filter(app => 
+      app.status === 'INTERVIEWING' || app.status === 'Interview'
+    );
+
+    // Construct Summary Message
+    let activityText = '';
+    if (updatedToday.length > 0) {
+      const itemsList = updatedToday.map(a => `${a.title} (${a.organization})`).join(', ');
+      activityText = `📊 Activity Summary: You updated/logged ${updatedToday.length} applications today (${itemsList}).`;
+    } else {
+      activityText = `📊 Activity Summary: No applications logged or updated today.`;
+    }
+
+    // Construct Reminders Message
+    let reminderText = '';
+    const reminders: string[] = [];
+    if (upcomingDeadlines.length > 0) {
+      reminders.push(`${upcomingDeadlines.length} upcoming deadlines this week`);
+    }
+    if (activeInterviews.length > 0) {
+      reminders.push(`${activeInterviews.length} active interview loops in progress`);
+    }
+
+    if (reminders.length > 0) {
+      reminderText = `⏰ Reminders: You have ${reminders.join(' and ')}. Keep preparing!`;
+    } else {
+      reminderText = `⏰ Reminders: No urgent deadlines or scheduled interviews this week.`;
+    }
+
+    // Construct final message simulating email delivery + app notification
+    const fullMessage = `✉️ [Email Sent & Inbox Summary] ${activityText} ${reminderText}`;
+
+    // Write to notifications database
+    await db.notification.create({
+      data: {
+        userId,
+        message: fullMessage,
+      },
+    });
+
+    revalidatePath('/');
+    return { success: true, data: fullMessage };
+  } catch (error: any) {
+    console.error('generateDailyNotificationSummary error:', error);
+    return { success: false, error: 'Failed to generate notification summary.' };
+  }
+}

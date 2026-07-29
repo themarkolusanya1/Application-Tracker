@@ -310,3 +310,63 @@ export async function resetPassword(formData: FormData): Promise<ActionResponse>
     return { success: false, error: 'Internal server error occurred.' };
   }
 }
+
+/**
+ * Login or automatically register a user using Google authentication details
+ */
+export async function loginWithGoogle(email: string, name: string): Promise<ActionResponse> {
+  try {
+    if (!email || !name) {
+      return { success: false, error: 'Email and Name are required.' };
+    }
+
+    // Check if user already exists
+    let user = await db.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (!user) {
+      // Create user automatically
+      const passwordHash = await hashPassword(Math.random().toString(36).slice(-10));
+      user = await db.user.create({
+        data: {
+          name,
+          email: email.toLowerCase(),
+          password: passwordHash,
+          role: 'STUDENT',
+        },
+      });
+
+      // Create welcome notification
+      await db.notification.create({
+        data: {
+          userId: user.id,
+          message: `Welcome to MyTraks, ${name}! Your account has been automatically created via Google.`,
+        }
+      });
+    }
+
+    // Create session JWT
+    const sessionPayload: UserSession = {
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+    };
+    const token = await signJWT(sessionPayload);
+
+    // Set cookie
+    const cookieStore = await cookies();
+    cookieStore.set('session_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Google Sign In error:', error);
+    return { success: false, error: 'Failed to authenticate with Google.' };
+  }
+}

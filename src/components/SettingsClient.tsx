@@ -7,7 +7,7 @@ import {
   RotateCcw, Sparkles, CheckCircle2, Bell, Mail
 } from 'lucide-react';
 import { updateUserProfile } from '@/app/actions/auth';
-import { sendSimulatedNotification } from '@/app/actions/applications';
+import { sendSimulatedNotification, generateDailyNotificationSummary } from '@/app/actions/applications';
 import { toast } from 'sonner';
 
 interface SettingsClientProps {
@@ -31,6 +31,7 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
   // Preference Settings States
   const [monthlyNotif, setMonthlyNotif] = useState(true);
   const [dailyReminder, setDailyReminder] = useState(true);
+  const [showOnboardingGuide, setShowOnboardingGuide] = useState(true);
   const [monthlyGoal, setMonthlyGoal] = useState(5);
 
   // AI Configuration States
@@ -46,6 +47,7 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
       setAiProvider(localStorage.getItem('applyhub_ai_provider') || 'gemini');
       setMonthlyNotif(localStorage.getItem('applyhub_monthly_notif') !== 'false');
       setDailyReminder(localStorage.getItem('applyhub_daily_reminder') !== 'false');
+      setShowOnboardingGuide(localStorage.getItem('apptracker_show_onboarding_guide') !== 'false');
       const savedGoal = localStorage.getItem('applyhub_monthly_goal');
       if (savedGoal) {
         setMonthlyGoal(parseInt(savedGoal, 10));
@@ -79,6 +81,12 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
   const handleToggleDailyReminder = (val: boolean) => {
     setDailyReminder(val);
     localStorage.setItem('applyhub_daily_reminder', String(val));
+  };
+
+  const handleToggleOnboardingGuide = (val: boolean) => {
+    setShowOnboardingGuide(val);
+    localStorage.setItem('apptracker_show_onboarding_guide', String(val));
+    toast.success(`Onboarding tour guide ${val ? 'enabled' : 'disabled'}.`);
   };
 
   const getMonthlyReport = () => {
@@ -120,21 +128,12 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
   };
 
   const handleTriggerDailyMotivation = () => {
-    const quotes = [
-      "Believe you can and you're halfway there. - Theodore Roosevelt",
-      "Opportunity does not waste time with those who are unprepared. - K.S. Lew",
-      "The only way to do great work is to love what you do. - Steve Jobs",
-      "Your limitation—it's only your imagination. Keep submitting those applications!",
-      "Great things take time. Every application is one step closer to your dream program or career.",
-      "Push yourself, because no one else is going to do it for you. Log a new tracker card today!"
-    ];
-    const quote = quotes[Math.floor(Math.random() * quotes.length)];
-    const message = `✉️ [Daily Email Reminder] Motivation: "${quote}" Keep applying and updating your checklist items!`;
-    
     startUpdateTransition(async () => {
-      const res = await sendSimulatedNotification(message);
+      const res = await generateDailyNotificationSummary();
       if (res.success) {
-        toast.success('Daily motivational reminder email triggered successfully!');
+        toast.success('Daily reminder email & activity summary triggered successfully!');
+      } else {
+        toast.error(res.error || 'Failed to trigger daily reminder.');
       }
     });
   };
@@ -477,20 +476,37 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
             <span>Interactive Onboarding Guide</span>
           </h4>
 
-          <div className="space-y-4">
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Reset the first-time walkthrough tour to review how MyTraks works. Replaying the guide will step you through the primary views, documents, and application forms.
-            </p>
+          <div className="space-y-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-slate-800">Show Guided Onboarding Tour</p>
+                <p className="text-xs text-slate-500 leading-normal">
+                  Automatically show the interactive guided tour when visiting the dashboard for the first time.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer select-none">
+                <input 
+                  type="checkbox" 
+                  checked={showOnboardingGuide}
+                  onChange={(e) => handleToggleOnboardingGuide(e.target.checked)}
+                  className="sr-only peer" 
+                />
+                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
+              </label>
+            </div>
 
-
-
-            <button
-              onClick={handleReplayTour}
-              className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-gradient-to-r from-brand-indigo to-brand-cyan hover:opacity-95 rounded-lg shadow-md shadow-brand-indigo/15 transition-all cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Replay Guided Tour</span>
-            </button>
+            <div className="pt-4 border-t border-slate-100 space-y-3">
+              <p className="text-sm text-slate-600 leading-relaxed">
+                If you would like to manually trigger and replay the dashboard walkthrough step-by-step, use the button below to clear onboarding progress and start over.
+              </p>
+              <button
+                onClick={handleReplayTour}
+                className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-gradient-to-r from-brand-indigo to-brand-cyan hover:opacity-95 rounded-lg shadow-md shadow-brand-indigo/15 transition-all cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Replay Guided Tour</span>
+              </button>
+            </div>
           </div>
         </section>
 

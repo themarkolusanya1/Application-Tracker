@@ -25,13 +25,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-6">
-        <h3 className="text-xl font-display font-extrabold text-slate-850 tracking-tight">Dashboard</h3>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Review, filter, and modify your application stages.
-        </p>
-      </div>
-      
       <DashboardClient initialApplications={applications} />
     </div>
   );
