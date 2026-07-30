@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers';
 import { db } from '@/lib/db';
 import { hashPassword, comparePassword, signJWT, verifyJWT, UserSession } from '@/lib/auth';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import fs from 'fs';
 import path from 'path';
 
@@ -144,29 +145,77 @@ export async function logout(): Promise<ActionResponse> {
 }
 
 /**
- * Get current authenticated user session helper
+ * Get current authenticated user session helper (Clerk integrated)
  */
 export async function getCurrentUser(): Promise<UserSession | null> {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('session_token')?.value;
-    if (!token) return null;
+    const { userId } = await auth();
+    if (!userId) return null;
 
-    const session = await verifyJWT(token);
-    if (!session) return null;
+    const user = await currentUser();
+    if (!user) return null;
 
-    // Verify user exists in DB to prevent stale session cookie bugs (e.g. after prisma db push)
-    const userExists = await db.user.findUnique({
-      where: { id: session.userId },
-      select: { id: true },
+    const email = user.emailAddresses[0]?.emailAddress;
+    if (!email) return null;
+
+    const name = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User';
+
+    // Find user by Clerk ID
+    let dbUser = await db.user.findUnique({
+      where: { id: userId },
     });
 
-    if (!userExists) {
-      return null;
+    if (!dbUser) {
+      // Check if user exists by email (pre-Clerk migration)
+      const existingUser = await db.user.findUnique({
+        where: { email: email.toLowerCase() },
+      });
+
+      if (!existingUser) {
+        // Auto-create new user
+        dbUser = await db.user.create({
+          data: {
+            id: userId,
+            name,
+            email: email.toLowerCase(),
+            password: 'clerk_managed',
+            role: 'STUDENT',
+          },
+        });
+      } else {
+        // Migrate existing user to Clerk ID
+        dbUser = await db.user.create({
+          data: {
+            id: userId,
+            name,
+            email: email.toLowerCase(),
+            password: 'clerk_managed',
+            role: existingUser.role,
+            profilePicture: existingUser.profilePicture,
+          },
+        });
+
+        await db.application.updateMany({
+          where: { userId: existingUser.id },
+          data: { userId: userId },
+        });
+
+        await db.notification.updateMany({
+          where: { userId: existingUser.id },
+          data: { userId: userId },
+        });
+
+        await db.user.delete({ where: { id: existingUser.id } });
+      }
     }
 
-    return session;
+    return {
+      userId: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name,
+    };
   } catch (error) {
+    console.error('getCurrentUser error:', error);
     return null;
   }
 }
