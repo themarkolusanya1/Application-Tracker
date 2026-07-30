@@ -438,8 +438,7 @@ export default function DashboardClient({
   const getBoardColumns = () => {
     if (tabFilter === 'scholarship') {
       return [
-        { id: 'Researching', title: 'Researching', count: filteredApplications.filter(a => a.status === 'Researching').length },
-        { id: 'Documents in Progress', title: 'Docs in Progress', count: filteredApplications.filter(a => a.status === 'Documents in Progress').length },
+        { id: 'Researching', title: 'Researching', count: filteredApplications.filter(a => a.status === 'Researching' || a.status === 'Documents in Progress').length },
         { id: 'Submitted', title: 'Submitted', count: filteredApplications.filter(a => a.status === 'Submitted').length },
         { id: 'Interview', title: 'Interviewing', count: filteredApplications.filter(a => a.status === 'Interview').length },
         { id: 'Admitted', title: 'Admitted', count: filteredApplications.filter(a => a.status === 'Admitted').length },
@@ -950,6 +949,9 @@ export default function DashboardClient({
                   default:
                     return false;
                 }
+              }
+              if (col.id === 'Researching') {
+                return app.status === 'Researching' || app.status === 'Documents in Progress';
               }
               if (col.id === 'REJECTED') {
                 return app.status === 'REJECTED' || app.status === 'WITHDRAWN';

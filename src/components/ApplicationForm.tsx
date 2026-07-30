@@ -540,7 +540,6 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
                 {applicationType === 'scholarship' ? (
                   <>
                     <option value="Researching">Researching</option>
-                    <option value="Documents in Progress">Docs in Progress</option>
                     <option value="Submitted">Submitted</option>
                     <option value="Interview">Interview</option>
                     <option value="Admitted">Admitted</option>
