@@ -88,6 +88,7 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
         setApplicationType(data.applicationType || 'job');
         setOrganization(data.organization || '');
         setTitle(data.title || '');
+        setUrl(data.url || '');
         
         if (data.applicationType === 'scholarship') {
           setDegreeLevel(data.degreeLevel || 'Masters');
@@ -97,7 +98,6 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
           setStatus('Researching');
         } else {
           setLocationType(data.locationType || 'ON_SITE');
-          setUrl(data.url || '');
           setSalary(data.salary || '');
           setCurrency(data.currency || 'USD');
           setStatus('WISH_LIST');
@@ -596,7 +596,7 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
           </div>
 
           {/* Group 3: Financial & Deadlines */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className={`grid grid-cols-1 ${applicationType === 'scholarship' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-4`}>
             {/* Currency Selector */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700" htmlFor="currency">
@@ -654,46 +654,45 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
                 </div>
               </>
             ) : (
-              <>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700" htmlFor="salary">
-                    Salary / Compensation
-                  </label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-xs font-bold">
-                      {getCurrencySymbol(currency)}
-                    </span>
-                    <input
-                      id="salary"
-                      type="text"
-                      value={salary}
-                      onChange={(e) => setSalary(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 glass-input text-sm"
-                      placeholder="e.g. 120,000"
-                    />
-                  </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700" htmlFor="salary">
+                  Salary / Compensation
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-xs font-bold">
+                    {getCurrencySymbol(currency)}
+                  </span>
+                  <input
+                    id="salary"
+                    type="text"
+                    value={salary}
+                    onChange={(e) => setSalary(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 glass-input text-sm"
+                    placeholder="e.g. 120,000"
+                  />
                 </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700" htmlFor="url">
-                    Job Posting URL
-                  </label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                      <LinkIcon className="w-4 h-4" />
-                    </span>
-                    <input
-                      id="url"
-                      type="url"
-                      value={url}
-                      onChange={(e) => setUrl(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 glass-input text-sm"
-                      placeholder="https://..."
-                    />
-                  </div>
-                </div>
-              </>
+              </div>
             )}
+          </div>
+
+          {/* Application Link (URL) - Always available for both Job and Scholarship */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700" htmlFor="url">
+              {applicationType === 'scholarship' ? 'University / Scholarship Application Link' : 'Job Posting / Application Link'}
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                <LinkIcon className="w-4 h-4" />
+              </span>
+              <input
+                id="url"
+                type="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 glass-input text-sm"
+                placeholder="https://..."
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

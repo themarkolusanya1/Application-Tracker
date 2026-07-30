@@ -69,6 +69,7 @@ export default function DashboardClient({
     {
       target: '#tour-top-five',
       content: 'Here are your top 5 applications for the current month. You can quickly add new applications or view details directly from here!',
+      disableBeacon: true,
     }
   ] : [
     {
@@ -79,10 +80,12 @@ export default function DashboardClient({
     {
       target: '#tour-filters',
       content: 'Search and filter your applications by keywords, status, location, or degree requirements.',
+      disableBeacon: true,
     },
     {
       target: '#tour-board',
       content: 'Visually organize your progress by managing your application cards directly within board columns.',
+      disableBeacon: true,
     }
   ];
 
@@ -187,18 +190,27 @@ export default function DashboardClient({
   const now = new Date();
   const thirtyDaysFromNow = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
 
-  // Unified stats calculation (Total, Deadlines, Active)
+  // Unified stats calculation (Total, Deadlines, Active) filtered by active tab
   const getStats = () => {
-    const totalApps = initialApplications.length;
+    const tabApps = initialApplications.filter(a => {
+      if (tabFilter === 'job') {
+        return a.applicationType === 'job' || a.applicationType === 'internship';
+      } else if (tabFilter === 'scholarship') {
+        return a.applicationType === 'scholarship';
+      }
+      return true;
+    });
 
-    const scholarships = initialApplications.filter(a => a.applicationType === 'scholarship');
+    const totalApps = tabApps.length;
+
+    const scholarships = tabApps.filter(a => a.applicationType === 'scholarship');
     const upcomingDeadlines = scholarships.filter(s => {
       if (!s.deadline) return false;
       const d = new Date(s.deadline);
       return d >= now && d <= thirtyDaysFromNow;
     }).length;
 
-    const activeApps = initialApplications.filter(a => 
+    const activeApps = tabApps.filter(a => 
       a.status !== 'REJECTED' && 
       a.status !== 'WITHDRAWN' && 
       a.status !== 'Rejected' && 
@@ -876,17 +888,6 @@ export default function DashboardClient({
                         <div className="py-6 px-4 text-center border border-dashed border-white/5 rounded-xl space-y-2 select-none flex flex-col justify-center items-center min-h-[120px]">
                           <p className="font-bold text-gray-400 text-[11px] leading-tight">{state.title}</p>
                           <p className="text-[10px] text-gray-500 max-w-[140px] leading-normal">{state.desc}</p>
-                          {state.action && (
-                            <button
-                              onClick={() => {
-                                setEditingApplication(null);
-                                setIsFormOpen(true);
-                              }}
-                              className="text-[10px] font-bold text-brand-cyan hover:underline mt-1 bg-transparent border-0 cursor-pointer"
-                            >
-                              {state.action} &rarr;
-                            </button>
-                          )}
                         </div>
                       );
                     })()
@@ -894,7 +895,8 @@ export default function DashboardClient({
                     colApps.map((app) => (
                       <div
                         key={app.id}
-                        className="glass-card rounded-xl p-4 space-y-3 text-left relative group border border-slate-200/80 card-lift"
+                        onClick={() => handleEditClick(app)}
+                        className="glass-card rounded-xl p-4 space-y-3 text-left relative group border border-slate-200/80 card-lift cursor-pointer hover:border-brand-indigo/45 hover:shadow-md transition-all duration-200"
                       >
                         <div className="flex flex-wrap gap-1.5 items-center">
                           {tabFilter === 'combined' && (
@@ -927,17 +929,10 @@ export default function DashboardClient({
                             </p>
                           </div>
 
-                          {/* Quick Actions */}
+                          {/* Quick Actions - Only Delete, since clicking the card itself triggers Edit */}
                           <div className="flex items-center gap-0.5 shrink-0">
                             <button
-                              onClick={() => handleEditClick(app)}
-                              className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-100 cursor-pointer transition-colors"
-                              title="Edit"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(app.id)}
+                              onClick={(e) => { e.stopPropagation(); handleDelete(app.id); }}
                               className="p-1 rounded text-slate-400 hover:text-brand-rose hover:bg-brand-rose/10 cursor-pointer transition-colors"
                               title="Delete"
                             >
@@ -1053,6 +1048,7 @@ export default function DashboardClient({
                               href={app.url}
                               target="_blank"
                               rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
                               className="text-brand-cyan hover:underline flex items-center gap-0.5 font-semibold"
                             >
                               <span>Apply Post</span>
@@ -1064,7 +1060,7 @@ export default function DashboardClient({
                         {(app.status === 'INTERVIEWING' || app.status === 'Interview') && (
                           <button
                             type="button"
-                            onClick={() => setActiveInterviewApp(app)}
+                            onClick={(e) => { e.stopPropagation(); setActiveInterviewApp(app); }}
                             className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-gradient-to-r from-brand-indigo to-brand-cyan hover:opacity-95 rounded-xl shadow-md shadow-brand-indigo/15 transition-all cursor-pointer mt-2"
                           >
                             <Sparkles className="w-3.5 h-3.5 text-white" />
@@ -1081,11 +1077,11 @@ export default function DashboardClient({
         </section>
       ) : (
         /* ==================== LIST / TABLE VIEW ==================== */
-        <section className="glass-panel border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
+        <section className="glass-panel border border-slate-200/60 rounded-2xl overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/5 bg-gray-900/40 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <tr className="border-b border-slate-200 bg-slate-100/70 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   {tabFilter === 'combined' && <th className="px-6 py-4">Type</th>}
                   <th className="px-6 py-4">{tabFilter === 'scholarship' ? 'Institution' : 'Organization'}</th>
                   <th className="px-6 py-4">{tabFilter === 'scholarship' ? 'Program Name' : 'Title / Program'}</th>
@@ -1116,16 +1112,16 @@ export default function DashboardClient({
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 text-sm text-gray-300">
+              <tbody className="divide-y divide-slate-100 text-sm text-slate-650">
                 {filteredApplications.length === 0 ? (
                   <tr>
-                    <td colSpan={tabFilter === 'combined' ? 7 : tabFilter === 'scholarship' ? 8 : 7} className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={tabFilter === 'combined' ? 7 : tabFilter === 'scholarship' ? 8 : 7} className="px-6 py-12 text-center text-slate-400 font-medium">
                       No applications match the active tab and filters.
                     </td>
                   </tr>
                 ) : (
                   filteredApplications.map((app) => (
-                    <tr key={app.id} className="hover:bg-white/2 transition-colors duration-150">
+                    <tr key={app.id} className="hover:bg-slate-50/60 transition-colors duration-150">
                       {tabFilter === 'combined' && (
                         <td className="px-6 py-4">
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
@@ -1138,16 +1134,16 @@ export default function DashboardClient({
                         </td>
                       )}
                       
-                      <td className="px-6 py-4 font-bold text-white">{app.organization}</td>
-                      <td className="px-6 py-4">{app.title}</td>
+                      <td className="px-6 py-4 font-bold text-slate-800">{app.organization || <span className="text-slate-350">—</span>}</td>
+                      <td className="px-6 py-4 font-semibold text-slate-700">{app.title || <span className="text-slate-350">—</span>}</td>
                       <td className="px-6 py-4">{getStatusBadge(app.status)}</td>
 
                       {/* Tab Specific Cells */}
                       {tabFilter === 'job' && (
                         <>
                           <td className="px-6 py-4">{getLocationBadge(app.locationType)}</td>
-                          <td className="px-6 py-4 font-semibold text-gray-200">
-                            {app.salary ? `${getCurrencySymbol(app.currency || 'USD')} ${app.salary}` : <span className="text-gray-600">—</span>}
+                          <td className="px-6 py-4 font-semibold text-slate-800">
+                            {app.salary ? `${getCurrencySymbol(app.currency || 'USD')} ${app.salary}` : <span className="text-slate-350">—</span>}
                           </td>
                         </>
                       )}
@@ -1158,63 +1154,63 @@ export default function DashboardClient({
                             {app.fundingType ? (
                               <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
                                 app.fundingType === 'fully funded' ? 'bg-brand-emerald/10 text-brand-emerald' :
-                                app.fundingType === 'partial' ? 'bg-brand-indigo/10 text-brand-indigo' : 'bg-white/5 text-gray-400'
+                                app.fundingType === 'partial' ? 'bg-brand-indigo/10 text-brand-indigo' : 'bg-slate-100 text-slate-650'
                               }`}>
                                 {app.fundingType}
                               </span>
                             ) : (
-                              <span className="text-gray-600">—</span>
+                              <span className="text-slate-350">—</span>
                             )}
                           </td>
-                          <td className="px-6 py-4 font-semibold text-gray-200">
-                            {app.stipendAmount && app.stipendAmount !== '0' ? `${getCurrencySymbol(app.currency || 'USD')} ${app.stipendAmount}` : <span className="text-gray-600">—</span>}
+                          <td className="px-6 py-4 font-semibold text-slate-800">
+                            {app.stipendAmount && app.stipendAmount !== '0' ? `${getCurrencySymbol(app.currency || 'USD')} ${app.stipendAmount}` : <span className="text-slate-350">—</span>}
                           </td>
-                          <td className="px-6 py-4 font-medium text-gray-300">
+                          <td className="px-6 py-4 font-semibold text-slate-700">
                             {app.deadline ? (
                               (() => {
                                 const d = new Date(app.deadline);
                                 const isUrgent = d.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000;
                                 return (
-                                  <span className={isUrgent ? 'text-brand-rose font-bold' : ''}>
+                                  <span className={isUrgent ? 'text-brand-rose font-bold' : 'text-slate-600'}>
                                     {d.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
                                   </span>
                                 );
                               })()
                             ) : (
-                              <span className="text-gray-600">—</span>
+                              <span className="text-slate-350">—</span>
                             )}
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex flex-wrap gap-1 items-center select-none">
                               {/* Transcripts */}
-                              <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasTranscripts ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="Transcripts">TR</span>
+                              <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasTranscripts ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-slate-100 border-slate-200/50 text-slate-400'}`} title="Transcripts">TR</span>
                               
                               {/* SOP / Proposal */}
                               {(app.degreeLevel === 'Masters' || app.degreeLevel === 'PhD' || !app.degreeLevel) && (
-                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasSop ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title={app.degreeLevel === 'PhD' ? "Research Proposal" : "Statement of Purpose"}>
+                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasSop ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-slate-100 border-slate-200/50 text-slate-400'}`} title={app.degreeLevel === 'PhD' ? "Research Proposal" : "Statement of Purpose"}>
                                   {app.degreeLevel === 'PhD' ? "PROP" : "SOP"}
                                 </span>
                               )}
                               
                               {/* Personal Statement */}
                               {app.degreeLevel === 'Bachelors' && (
-                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasPersonalStatement ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="Personal Statement">PS</span>
+                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasPersonalStatement ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-slate-100 border-slate-200/50 text-slate-400'}`} title="Personal Statement">PS</span>
                               )}
                               
                               {/* References */}
-                              <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasReferences ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="References">REF</span>
+                              <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasReferences ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-slate-100 border-slate-200/50 text-slate-400'}`} title="References">REF</span>
                               
                               {/* CV/Resume */}
                               {(app.degreeLevel === 'Masters' || app.degreeLevel === 'PhD') && (
-                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasCvResume ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title="CV/Resume">CV</span>
+                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasCvResume ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-slate-100 border-slate-200/50 text-slate-400'}`} title="CV/Resume">CV</span>
                               )}
                               
                               {/* Test Scores */}
-                              <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasTestScores ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title={app.degreeLevel === 'Bachelors' ? "SAT/ACT Scores" : "GRE/Test Scores"}>TEST</span>
+                              <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.hasTestScores ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-slate-100 border-slate-200/50 text-slate-400'}`} title={app.degreeLevel === 'Bachelors' ? "SAT/ACT Scores" : "GRE/Test Scores"}>TEST</span>
                               
                               {/* Advisor */}
                               {app.degreeLevel === 'PhD' && (
-                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.potentialAdvisor ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-white/5 border-white/5 text-gray-500'}`} title={`Advisor: ${app.potentialAdvisor || 'Pending'}`}>ADV</span>
+                                <span className={`px-1 py-0.2 text-[8px] rounded font-bold border ${app.potentialAdvisor ? 'bg-brand-emerald/20 border-brand-emerald/30 text-brand-emerald' : 'bg-slate-100 border-slate-200/50 text-slate-400'}`} title={`Advisor: ${app.potentialAdvisor || 'Pending'}`}>ADV</span>
                               )}
                             </div>
                           </td>
@@ -1225,11 +1221,11 @@ export default function DashboardClient({
                         <td className="px-6 py-4 text-xs">
                           {app.applicationType === 'scholarship' ? (
                             app.deadline ? (
-                              <span className="text-gray-300 font-medium">
+                              <span className="text-slate-600 font-medium">
                                 Deadline: {new Date(app.deadline).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                               </span>
                             ) : (
-                              <span className="text-gray-600">—</span>
+                              <span className="text-slate-350">—</span>
                             )
                           ) : (
                             getLocationBadge(app.locationType)
@@ -1237,7 +1233,7 @@ export default function DashboardClient({
                         </td>
                       )}
 
-                      <td className="px-6 py-4 text-xs text-gray-400">
+                      <td className="px-6 py-4 text-xs text-slate-500 font-medium">
                         {new Date(app.appliedDate).toLocaleDateString([], {
                           year: 'numeric',
                           month: 'short',
@@ -1251,7 +1247,7 @@ export default function DashboardClient({
                               href={app.url}
                               target="_blank"
                               rel="noreferrer"
-                              className="p-1.5 text-gray-400 hover:text-white rounded hover:bg-white/5 cursor-pointer"
+                              className="p-1.5 text-slate-400 hover:text-slate-700 rounded hover:bg-slate-100 cursor-pointer"
                               title="Visit posting"
                             >
                               <ExternalLink className="w-4 h-4" />
@@ -1259,14 +1255,14 @@ export default function DashboardClient({
                           )}
                           <button
                             onClick={() => handleEditClick(app)}
-                            className="p-1.5 text-gray-400 hover:text-white rounded hover:bg-white/5 cursor-pointer"
+                            className="p-1.5 text-slate-400 hover:text-slate-700 rounded hover:bg-slate-100 cursor-pointer"
                             title="Edit"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(app.id)}
-                            className="p-1.5 text-gray-400 hover:text-brand-rose rounded hover:bg-brand-rose/10 cursor-pointer"
+                            className="p-1.5 text-slate-400 hover:text-brand-rose rounded hover:bg-brand-rose/10 cursor-pointer"
                             title="Delete"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -1332,6 +1328,7 @@ export default function DashboardClient({
           continuous={true}
           showSkipButton={true}
           showProgress={true}
+          disableBeacon={true}
           styles={{
             options: {
               primaryColor: '#6366f1',
