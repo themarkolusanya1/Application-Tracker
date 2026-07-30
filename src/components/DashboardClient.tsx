@@ -228,9 +228,20 @@ export default function DashboardClient({
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
     
+    const isSubmitted = (a: any) => {
+      if (a.applicationType === 'scholarship') {
+        return a.status !== 'Researching' && a.status !== 'Documents in Progress';
+      }
+      return a.status !== 'WISH_LIST';
+    };
+
     const monthlyApps = initialApplications.filter(a => {
       const d = new Date(a.appliedDate || a.createdAt);
-      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+      return (
+        d.getMonth() === currentMonth && 
+        d.getFullYear() === currentYear && 
+        isSubmitted(a)
+      );
     });
 
     const jobCount = monthlyApps.filter(a => a.applicationType === 'job' || a.applicationType === 'internship').length;
