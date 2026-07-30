@@ -184,6 +184,14 @@ export async function getCurrentUser(): Promise<UserSession | null> {
         });
       } else {
         // Migrate existing user to Clerk ID
+        // To prevent unique constraint violation on email, update the old user's email first
+        const tempEmail = `migrated_${existingUser.id}_${Date.now()}@temp.local`;
+        await db.user.update({
+          where: { id: existingUser.id },
+          data: { email: tempEmail },
+        });
+
+        // Create the new user with Clerk ID and the original email
         dbUser = await db.user.create({
           data: {
             id: userId,
@@ -195,6 +203,7 @@ export async function getCurrentUser(): Promise<UserSession | null> {
           },
         });
 
+        // Update all related records
         await db.application.updateMany({
           where: { userId: existingUser.id },
           data: { userId: userId },
@@ -205,6 +214,7 @@ export async function getCurrentUser(): Promise<UserSession | null> {
           data: { userId: userId },
         });
 
+        // Delete the old user
         await db.user.delete({ where: { id: existingUser.id } });
       }
     }

@@ -1,4 +1,4 @@
-import { getApplications } from '@/app/actions/applications';
+vimport { getApplications } from '@/app/actions/applications';
 import DashboardClient from '@/components/DashboardClient';
 import { AlertCircle } from 'lucide-react';
 
