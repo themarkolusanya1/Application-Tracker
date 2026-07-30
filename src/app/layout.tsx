@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Montserrat, Geist } from 'next/font/google';
 import './globals.css';
 import { cn } from "@/lib/utils";
+import { ClerkProvider, SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -35,8 +36,19 @@ export default function RootLayout({
         `}} />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
-        <Toaster richColors position="top-right" />
+        <ClerkProvider>
+          <header className="px-6 py-4 flex justify-end items-center bg-white border-b border-slate-150 gap-4">
+            <Show when="signed-out">
+              <SignInButton />
+              <SignUpButton />
+            </Show>
+            <Show when="signed-in">
+              <UserButton />
+            </Show>
+          </header>
+          {children}
+          <Toaster richColors position="top-right" />
+        </ClerkProvider>
       </body>
     </html>
   );
