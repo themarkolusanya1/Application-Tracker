@@ -18,6 +18,7 @@ export default async function SettingsPage() {
     name: dbUser?.name || session.name,
     email: dbUser?.email || session.email,
     role: dbUser?.role || 'STUDENT',
+    profilePicture: dbUser?.profilePicture || null,
   };
 
   const applications = await db.application.findMany({

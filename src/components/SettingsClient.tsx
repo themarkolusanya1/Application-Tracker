@@ -15,6 +15,7 @@ interface SettingsClientProps {
     name: string;
     email: string;
     role: string;
+    profilePicture?: string | null;
   };
   initialApplications: any[];
 }
@@ -23,8 +24,24 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
   const router = useRouter();
   const [profileName, setProfileName] = useState(user.name);
   const [profileRole, setProfileRole] = useState(user.role);
+  const [profilePic, setProfilePic] = useState<string | null>(user.profilePicture || null);
   const [isUpdating, startUpdateTransition] = useTransition();
   const [profileErrorMsg, setProfileErrorMsg] = useState<string | null>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('Image size must be less than 2MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePic(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const [apiKey, setApiKey] = useState('');
 
@@ -143,7 +160,7 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
     setProfileErrorMsg(null);
 
     startUpdateTransition(async () => {
-      const res = await updateUserProfile(profileName, profileRole);
+      const res = await updateUserProfile(profileName, profileRole, profilePic || undefined);
       if (res.success) {
         toast.success('Profile updated successfully!');
         router.refresh();
@@ -345,9 +362,24 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
           </h4>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-slate-100/50 border border-slate-200/85 rounded-xl">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-brand-indigo/15 border border-brand-indigo/35 flex items-center justify-center font-bold text-lg text-brand-indigo uppercase">
-                {profileName.charAt(0)}
+            <div className="flex items-center gap-4">
+              <div className="relative group/avatar w-16 h-16 rounded-full overflow-hidden border border-brand-indigo/35 flex items-center justify-center bg-brand-indigo/15 flex-shrink-0">
+                {profilePic ? (
+                  <img src={profilePic} className="w-full h-full object-cover" alt="Avatar" />
+                ) : (
+                  <span className="font-bold text-xl text-brand-indigo uppercase select-none">
+                    {profileName.charAt(0)}
+                  </span>
+                )}
+                <label className="absolute inset-0 bg-black/50 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold cursor-pointer select-none">
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
               </div>
               <div>
                 <p className="font-bold text-slate-800 text-base leading-snug">{profileName}</p>

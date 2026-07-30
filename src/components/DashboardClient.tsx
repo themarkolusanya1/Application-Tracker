@@ -8,7 +8,7 @@ import {
   Briefcase, Search, Filter, Kanban, List, Plus, 
   MapPin, DollarSign, Calendar, ExternalLink, Edit2, Trash2, ArrowUpDown, Sparkles
 } from 'lucide-react';
-import { deleteApplication } from '@/app/actions/applications';
+import { deleteApplication, updateApplication } from '@/app/actions/applications';
 type ApplicationStatus = 'WISH_LIST' | 'APPLIED' | 'INTERVIEWING' | 'OFFERED' | 'REJECTED' | 'WITHDRAWN';
 type LocationType = 'ON_SITE' | 'HYBRID' | 'REMOTE';
 import ApplicationForm from './ApplicationForm';
@@ -46,6 +46,84 @@ export default function DashboardClient({
   const [runTour, setRunTour] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [monthlyGoal, setMonthlyGoal] = useState(5);
+  const [draggedOverCol, setDraggedOverCol] = useState<string | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, app: any) => {
+    e.dataTransfer.setData('text/plain', JSON.stringify(app));
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, targetColId: string) => {
+    e.preventDefault();
+    setDraggedOverCol(null);
+    const appStr = e.dataTransfer.getData('text/plain');
+    if (!appStr) return;
+    try {
+      const dragApp = JSON.parse(appStr);
+      let newStatus = targetColId;
+
+      if (dragApp.applicationType === 'scholarship') {
+        if (tabFilter === 'combined' || tabFilter === 'job') {
+          switch (targetColId) {
+            case 'WISH_LIST':
+              newStatus = 'Researching';
+              break;
+            case 'APPLIED':
+              newStatus = 'Submitted';
+              break;
+            case 'INTERVIEWING':
+              newStatus = 'Interview';
+              break;
+            case 'OFFERED':
+              newStatus = 'Admitted';
+              break;
+            case 'REJECTED':
+              newStatus = 'Rejected';
+              break;
+          }
+        }
+      } else {
+        if (tabFilter === 'scholarship') {
+          switch (targetColId) {
+            case 'Researching':
+            case 'Documents in Progress':
+              newStatus = 'WISH_LIST';
+              break;
+            case 'Submitted':
+              newStatus = 'APPLIED';
+              break;
+            case 'Interview':
+              newStatus = 'INTERVIEWING';
+              break;
+            case 'Admitted':
+              newStatus = 'OFFERED';
+              break;
+            case 'Rejected':
+            case 'Withdrawn':
+              newStatus = 'REJECTED';
+              break;
+          }
+        }
+      }
+
+      if (dragApp.status === newStatus) return;
+
+      startTransition(async () => {
+        const res = await updateApplication(dragApp.id, { status: newStatus });
+        if (res.success) {
+          toast.success(`Updated status to ${newStatus.replace('_', ' ').toLowerCase()}`);
+        } else {
+          toast.error(res.error || 'Failed to update application status.');
+        }
+      });
+    } catch (err) {
+      console.error('Error handling drop:', err);
+    }
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -883,7 +961,18 @@ export default function DashboardClient({
             });
 
             return (
-              <div key={col.id} className="flex flex-col max-h-[80vh] bg-slate-100/50 border border-slate-200/80 rounded-2xl p-4">
+              <div 
+                key={col.id} 
+                onDragOver={handleDragOver}
+                onDragEnter={(e) => { e.preventDefault(); setDraggedOverCol(col.id); }}
+                onDragLeave={() => { if (draggedOverCol === col.id) setDraggedOverCol(null); }}
+                onDrop={(e) => handleDrop(e, col.id)}
+                className={`flex flex-col max-h-[80vh] border rounded-2xl p-4 transition-all duration-200 ${
+                  draggedOverCol === col.id 
+                    ? 'bg-brand-indigo/[0.04] border-brand-indigo/35 scale-[1.01] shadow-lg shadow-brand-indigo/[0.02]' 
+                    : 'bg-slate-100/50 border-slate-200/80'
+                }`}
+              >
                 <div className="flex justify-between items-center mb-4 flex-shrink-0">
                   <h4 className="font-display font-bold text-slate-800 text-sm tracking-wide">{col.title}</h4>
                   <span className="text-xs text-brand-indigo font-bold px-2 py-0.5 rounded-full bg-brand-indigo/10">
@@ -907,7 +996,9 @@ export default function DashboardClient({
                       <div
                         key={app.id}
                         onClick={() => handleEditClick(app)}
-                        className="glass-card rounded-xl p-4 space-y-3 text-left relative group border border-slate-200/80 card-lift cursor-pointer hover:border-brand-indigo/45 hover:shadow-md transition-all duration-200"
+                        draggable={true}
+                        onDragStart={(e) => handleDragStart(e, app)}
+                        className="glass-card rounded-xl p-4 space-y-3 text-left relative group border border-slate-200/80 card-lift cursor-pointer hover:border-brand-indigo/45 hover:shadow-md transition-all duration-200 select-none active:opacity-60 active:scale-95 drag-card"
                       >
                         <div className="flex flex-wrap gap-1.5 items-center">
                           {tabFilter === 'combined' && (

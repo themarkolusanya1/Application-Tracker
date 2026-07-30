@@ -5,6 +5,7 @@ import { Briefcase, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import SidebarNav from '@/components/SidebarNav';
 import SidebarFooter from '@/components/SidebarFooter';
+import { db } from '@/lib/db';
 
 export default async function DashboardLayout({
   children,
@@ -15,6 +16,15 @@ export default async function DashboardLayout({
 
   // Safeguard: middleware handles this, but server components should also protect
   if (!session) {
+    redirect('/login');
+  }
+
+  const user = await db.user.findUnique({
+    where: { id: session.userId },
+    select: { name: true, email: true, profilePicture: true },
+  });
+
+  if (!user) {
     redirect('/login');
   }
 
@@ -40,7 +50,7 @@ export default async function DashboardLayout({
         <SidebarNav />
 
         {/* User profile & Logout footer (Client Toggled Theme) */}
-        <SidebarFooter userName={session.name} userEmail={session.email} />
+        <SidebarFooter userName={user.name} userEmail={user.email} profilePicture={user.profilePicture || null} />
       </aside>
 
       {/* Main content wrapper */}
@@ -63,8 +73,12 @@ export default async function DashboardLayout({
           <div className="flex items-center gap-4">
             <NotificationPopover />
             {/* Mobile User Profile indicator */}
-            <div className="md:hidden w-8 h-8 rounded-full bg-brand-indigo/20 border border-brand-indigo/30 flex items-center justify-center">
-              <UserIcon className="w-4.5 h-4.5 text-brand-indigo" />
+            <div className="md:hidden w-8 h-8 rounded-full overflow-hidden border border-brand-indigo/30 flex items-center justify-center bg-brand-indigo/20">
+              {user.profilePicture ? (
+                <img src={user.profilePicture} className="w-full h-full object-cover" alt="Profile" />
+              ) : (
+                <UserIcon className="w-4.5 h-4.5 text-brand-indigo" />
+              )}
             </div>
           </div>
         </header>

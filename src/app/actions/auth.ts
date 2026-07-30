@@ -174,7 +174,7 @@ export async function getCurrentUser(): Promise<UserSession | null> {
 /**
  * Update user profile details (name and role)
  */
-export async function updateUserProfile(name: string, role: string): Promise<ActionResponse> {
+export async function updateUserProfile(name: string, role: string, profilePicture?: string): Promise<ActionResponse> {
   try {
     const session = await getCurrentUser();
     if (!session) {
@@ -183,7 +183,7 @@ export async function updateUserProfile(name: string, role: string): Promise<Act
 
     const updatedUser = await db.user.update({
       where: { id: session.userId },
-      data: { name, role },
+      data: { name, role, ...(profilePicture !== undefined ? { profilePicture } : {}) },
     });
 
     // Re-issue JWT session token
