@@ -150,6 +150,7 @@ export async function logout(): Promise<ActionResponse> {
 export async function getCurrentUser(): Promise<UserSession | null> {
   try {
     const { userId } = await auth();
+    console.log('[getCurrentUser] Clerk userId:', userId);
     if (!userId) return null;
 
     const user = await currentUser();

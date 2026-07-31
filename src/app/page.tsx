@@ -1,7 +1,10 @@
 import Link from 'next/link';
+import { auth } from '@clerk/nextjs/server';
 import { Rocket, Zap, Briefcase, GraduationCap, Brain, CheckCircle, ArrowRight, Play, ArrowLeft, ArrowRight as ArrowForward, Globe, AtSign } from 'lucide-react';
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const { userId } = await auth();
+
   return (
     <div className="bg-[#f7f9fb] text-[#191c1e] font-sans selection:bg-[#6063ee] selection:text-white">
       {/* Top Navigation */}
@@ -23,12 +26,20 @@ export default function LandingPage() {
             <a className="text-[#464554] hover:text-[#4648d4] transition-colors text-xs font-semibold tracking-[0.05em]" href="#testimonials">Testimonials</a>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="hidden sm:block text-[#4648d4] font-bold text-xs tracking-[0.05em] hover:bg-[#4648d4]/10 px-4 py-2 rounded-lg transition-all active:scale-95 duration-150">
-              Log In
-            </Link>
-            <Link href="/register" className="bg-[#4648d4] text-white px-6 py-2.5 rounded-full font-bold text-xs tracking-[0.05em] shadow-md hover:scale-105 active:scale-95 transition-all duration-150 hover:shadow-[0_0_25px_rgba(70,72,212,0.4)]">
-              Get Started
-            </Link>
+            {userId ? (
+              <Link href="/dashboard" className="bg-[#4648d4] text-white px-6 py-2.5 rounded-full font-bold text-xs tracking-[0.05em] shadow-md hover:scale-105 active:scale-95 transition-all duration-150 hover:shadow-[0_0_25px_rgba(70,72,212,0.4)]">
+                Go to Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className="hidden sm:block text-[#4648d4] font-bold text-xs tracking-[0.05em] hover:bg-[#4648d4]/10 px-4 py-2 rounded-lg transition-all active:scale-95 duration-150">
+                  Log In
+                </Link>
+                <Link href="/register" className="bg-[#4648d4] text-white px-6 py-2.5 rounded-full font-bold text-xs tracking-[0.05em] shadow-md hover:scale-105 active:scale-95 transition-all duration-150 hover:shadow-[0_0_25px_rgba(70,72,212,0.4)]">
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -49,8 +60,8 @@ export default function LandingPage() {
                 The all-in-one tracker for students and professionals to manage jobs, internships, and scholarships with precision.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/register" className="bg-[#4648d4] text-white px-8 py-4 rounded-full font-bold text-xs tracking-[0.05em] shadow-lg hover:scale-105 active:scale-95 transition-all hover:shadow-[0_0_25px_rgba(70,72,212,0.4)] text-center">
-                  Get Started for Free
+                <Link href={userId ? "/dashboard" : "/register"} className="bg-[#4648d4] text-white px-8 py-4 rounded-full font-bold text-xs tracking-[0.05em] shadow-lg hover:scale-105 active:scale-95 transition-all hover:shadow-[0_0_25px_rgba(70,72,212,0.4)] text-center">
+                  {userId ? "Go to Dashboard" : "Get Started for Free"}
                 </Link>
                 <button className="landing-glass-card px-8 py-4 rounded-full font-bold text-xs tracking-[0.05em] text-[#4648d4] hover:bg-white transition-all flex items-center justify-center gap-2">
                   <Play className="w-5 h-5" />
