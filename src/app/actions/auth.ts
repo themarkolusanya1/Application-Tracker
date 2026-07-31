@@ -137,6 +137,8 @@ export async function logout(): Promise<ActionResponse> {
   try {
     const cookieStore = await cookies();
     cookieStore.delete('session_token');
+    cookieStore.delete('__session');
+    cookieStore.delete('__client_uat');
     return { success: true };
   } catch (error) {
     console.error('Logout error:', error);

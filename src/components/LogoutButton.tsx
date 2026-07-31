@@ -18,14 +18,21 @@ export default function LogoutButton() {
         sessionStorage.clear();
       }
 
-      // 2. Clear server-side legacy session cookies
+      // 2. Clear server-side session cookies
       await serverLogout();
 
-      // 3. Sign out of Clerk completely and redirect to homepage
+      // 3. Sign out of Clerk completely
       await signOut({ redirectUrl: '/' });
+
+      // 4. Hard redirect to landing page to flush Next.js client router cache
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
     } catch (error) {
       console.error('Logout error:', error);
-      setIsPending(false);
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
     }
   };
 
@@ -40,4 +47,5 @@ export default function LogoutButton() {
     </button>
   );
 }
+
 

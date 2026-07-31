@@ -317,25 +317,27 @@ export default function DashboardClient({
       const d = new Date(a.appliedDate || a.createdAt);
       return (
         d.getMonth() === currentMonth && 
-        d.getFullYear() === currentYear && 
-        isSubmitted(a)
+        d.getFullYear() === currentYear
       );
     });
 
-    const jobCount = monthlyApps.filter(a => a.applicationType === 'job' || a.applicationType === 'internship').length;
-    const universityCount = monthlyApps.filter(a => a.applicationType === 'scholarship').length;
+    const submittedMonthlyApps = monthlyApps.filter(isSubmitted);
+    const draftMonthlyApps = monthlyApps.filter(a => !isSubmitted(a));
+
+    const jobCount = submittedMonthlyApps.filter(a => a.applicationType === 'job' || a.applicationType === 'internship').length;
+    const universityCount = submittedMonthlyApps.filter(a => a.applicationType === 'scholarship').length;
     
-    const monthlyInterviews = monthlyApps.filter(a => a.status === 'INTERVIEWING' || a.status === 'Interview').length;
-    const monthlyOffers = monthlyApps.filter(a => a.status === 'OFFERED' || a.status === 'Admitted').length;
+    const monthlyOffers = submittedMonthlyApps.filter(a => a.status === 'OFFERED' || a.status === 'Admitted').length;
+    const monthlyDrafts = draftMonthlyApps.length;
 
     return {
-      total: monthlyApps.length,
+      total: submittedMonthlyApps.length,
       jobs: jobCount,
       universities: universityCount,
-      interviews: monthlyInterviews,
+      drafts: monthlyDrafts,
       offers: monthlyOffers,
       monthName: now.toLocaleString('default', { month: 'long' }),
-      apps: monthlyApps
+      apps: submittedMonthlyApps
     };
   };
 
@@ -526,7 +528,6 @@ export default function DashboardClient({
           return (
             <div className="glass-card rounded-2xl overflow-hidden border border-slate-200/80 shadow-md flex flex-col md:flex-row items-center justify-between p-6 bg-white gap-6">
               <div className="flex-1 space-y-2 text-left">
-                <span className="text-[10px] uppercase tracking-widest text-brand-indigo font-black">{banner.badge}</span>
                 <h4 className="text-base md:text-lg font-display font-bold text-slate-800 tracking-tight leading-tight">
                   {banner.title}
                 </h4>
@@ -572,21 +573,36 @@ export default function DashboardClient({
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/40">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Interviews</span>
-                  <p className="text-xl font-bold text-brand-amber mt-1">{monthlyReport.interviews}</p>
+                <div className="bg-gradient-to-br from-amber-500/5 to-amber-500/[0.02] p-3 rounded-2xl border border-amber-500/15 shadow-sm flex flex-col justify-between min-h-[76px] transition-all hover:border-amber-500/30">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-none">In Progress</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  </div>
+                  <p className="text-2xl font-black text-amber-600 tracking-tight mt-1">{monthlyReport.drafts}</p>
                 </div>
-                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/40">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Offers</span>
-                  <p className="text-xl font-bold text-brand-emerald mt-1">{monthlyReport.offers}</p>
+
+                <div className="bg-gradient-to-br from-emerald-500/5 to-emerald-500/[0.02] p-3 rounded-2xl border border-emerald-500/15 shadow-sm flex flex-col justify-between min-h-[76px] transition-all hover:border-emerald-500/30">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-none">Offers</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  </div>
+                  <p className="text-2xl font-black text-emerald-600 tracking-tight mt-1">{monthlyReport.offers}</p>
                 </div>
-                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/40">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Job Tracks</span>
-                  <p className="text-xl font-bold text-slate-700 mt-1">{monthlyReport.jobs}</p>
+
+                <div className="bg-gradient-to-br from-indigo-500/5 to-indigo-500/[0.02] p-3 rounded-2xl border border-indigo-500/15 shadow-sm flex flex-col justify-between min-h-[76px] transition-all hover:border-indigo-500/30">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-none">Job Tracks</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                  </div>
+                  <p className="text-2xl font-black text-indigo-600 tracking-tight mt-1">{monthlyReport.jobs}</p>
                 </div>
-                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/40">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Uni Tracks</span>
-                  <p className="text-xl font-bold text-slate-700 mt-1">{monthlyReport.universities}</p>
+
+                <div className="bg-gradient-to-br from-cyan-500/5 to-cyan-500/[0.02] p-3 rounded-2xl border border-cyan-500/15 shadow-sm flex flex-col justify-between min-h-[76px] transition-all hover:border-cyan-500/30">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-none">Uni Tracks</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                  </div>
+                  <p className="text-2xl font-black text-cyan-600 tracking-tight mt-1">{monthlyReport.universities}</p>
                 </div>
               </div>
             </div>
@@ -704,12 +720,18 @@ export default function DashboardClient({
             continuous={true}
             showSkipButton={true}
             showProgress={true}
+            disableBeacon={true}
             styles={{
               options: {
-                primaryColor: '#6366f1',
-                textColor: '#1e293b',
+                primaryColor: '#4648d4',
+                textColor: '#191c1e',
                 backgroundColor: '#ffffff',
                 arrowColor: '#ffffff',
+                overlayColor: 'rgba(0, 0, 0, 0.4)',
+                zIndex: 10000,
+              },
+              beacon: {
+                display: 'none',
               },
             }}
             callback={(data: any) => {
@@ -1435,10 +1457,15 @@ export default function DashboardClient({
           disableBeacon={true}
           styles={{
             options: {
-              primaryColor: '#6366f1',
-              textColor: '#1e293b',
+              primaryColor: '#4648d4',
+              textColor: '#191c1e',
               backgroundColor: '#ffffff',
               arrowColor: '#ffffff',
+              overlayColor: 'rgba(0, 0, 0, 0.4)',
+              zIndex: 10000,
+            },
+            beacon: {
+              display: 'none',
             },
           }}
           callback={(data: any) => {
