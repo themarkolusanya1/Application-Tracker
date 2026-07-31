@@ -1,24 +1,32 @@
 'use client';
 
 import { LogOut } from 'lucide-react';
-import { logout } from '@/app/actions/auth';
-import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
+import { logout as serverLogout } from '@/app/actions/auth';
+import { useClerk } from '@clerk/nextjs';
+import { useState } from 'react';
 
 export default function LogoutButton() {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const { signOut } = useClerk();
+  const [isPending, setIsPending] = useState(false);
 
-  const handleLogout = () => {
-    startTransition(async () => {
-      const res = await logout();
-      if (res.success) {
-        router.push('/');
-        router.refresh();
-      } else {
-        alert('Failed to log out.');
+  const handleLogout = async () => {
+    setIsPending(true);
+    try {
+      // 1. Clear any client-side storage (localStorage, sessionStorage)
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
       }
-    });
+
+      // 2. Clear server-side legacy session cookies
+      await serverLogout();
+
+      // 3. Sign out of Clerk completely and redirect to homepage
+      await signOut({ redirectUrl: '/' });
+    } catch (error) {
+      console.error('Logout error:', error);
+      setIsPending(false);
+    }
   };
 
   return (
@@ -32,3 +40,4 @@ export default function LogoutButton() {
     </button>
   );
 }
+
