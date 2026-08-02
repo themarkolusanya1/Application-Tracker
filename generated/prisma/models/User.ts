@@ -31,6 +31,10 @@ export type UserMinAggregateOutputType = {
   password: string | null
   role: string | null
   profilePicture: string | null
+  emailNotificationsEnabled: boolean | null
+  deadlineRemindersEnabled: boolean | null
+  dailyMotivationEnabled: boolean | null
+  monthlyReportEnabled: boolean | null
   createdAt: Date | null
 }
 
@@ -41,6 +45,10 @@ export type UserMaxAggregateOutputType = {
   password: string | null
   role: string | null
   profilePicture: string | null
+  emailNotificationsEnabled: boolean | null
+  deadlineRemindersEnabled: boolean | null
+  dailyMotivationEnabled: boolean | null
+  monthlyReportEnabled: boolean | null
   createdAt: Date | null
 }
 
@@ -51,6 +59,10 @@ export type UserCountAggregateOutputType = {
   password: number
   role: number
   profilePicture: number
+  emailNotificationsEnabled: number
+  deadlineRemindersEnabled: number
+  dailyMotivationEnabled: number
+  monthlyReportEnabled: number
   createdAt: number
   _all: number
 }
@@ -63,6 +75,10 @@ export type UserMinAggregateInputType = {
   password?: true
   role?: true
   profilePicture?: true
+  emailNotificationsEnabled?: true
+  deadlineRemindersEnabled?: true
+  dailyMotivationEnabled?: true
+  monthlyReportEnabled?: true
   createdAt?: true
 }
 
@@ -73,6 +89,10 @@ export type UserMaxAggregateInputType = {
   password?: true
   role?: true
   profilePicture?: true
+  emailNotificationsEnabled?: true
+  deadlineRemindersEnabled?: true
+  dailyMotivationEnabled?: true
+  monthlyReportEnabled?: true
   createdAt?: true
 }
 
@@ -83,6 +103,10 @@ export type UserCountAggregateInputType = {
   password?: true
   role?: true
   profilePicture?: true
+  emailNotificationsEnabled?: true
+  deadlineRemindersEnabled?: true
+  dailyMotivationEnabled?: true
+  monthlyReportEnabled?: true
   createdAt?: true
   _all?: true
 }
@@ -166,6 +190,10 @@ export type UserGroupByOutputType = {
   password: string
   role: string
   profilePicture: string | null
+  emailNotificationsEnabled: boolean
+  deadlineRemindersEnabled: boolean
+  dailyMotivationEnabled: boolean
+  monthlyReportEnabled: boolean
   createdAt: Date
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
@@ -197,9 +225,14 @@ export type UserWhereInput = {
   password?: Prisma.StringFilter<"User"> | string
   role?: Prisma.StringFilter<"User"> | string
   profilePicture?: Prisma.StringNullableFilter<"User"> | string | null
+  emailNotificationsEnabled?: Prisma.BoolFilter<"User"> | boolean
+  deadlineRemindersEnabled?: Prisma.BoolFilter<"User"> | boolean
+  dailyMotivationEnabled?: Prisma.BoolFilter<"User"> | boolean
+  monthlyReportEnabled?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   applications?: Prisma.ApplicationListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
+  sentEmailLogs?: Prisma.SentEmailLogListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -209,9 +242,14 @@ export type UserOrderByWithRelationInput = {
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailNotificationsEnabled?: Prisma.SortOrder
+  deadlineRemindersEnabled?: Prisma.SortOrder
+  dailyMotivationEnabled?: Prisma.SortOrder
+  monthlyReportEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   applications?: Prisma.ApplicationOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
+  sentEmailLogs?: Prisma.SentEmailLogOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -224,9 +262,14 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   password?: Prisma.StringFilter<"User"> | string
   role?: Prisma.StringFilter<"User"> | string
   profilePicture?: Prisma.StringNullableFilter<"User"> | string | null
+  emailNotificationsEnabled?: Prisma.BoolFilter<"User"> | boolean
+  deadlineRemindersEnabled?: Prisma.BoolFilter<"User"> | boolean
+  dailyMotivationEnabled?: Prisma.BoolFilter<"User"> | boolean
+  monthlyReportEnabled?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   applications?: Prisma.ApplicationListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
+  sentEmailLogs?: Prisma.SentEmailLogListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -236,6 +279,10 @@ export type UserOrderByWithAggregationInput = {
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailNotificationsEnabled?: Prisma.SortOrder
+  deadlineRemindersEnabled?: Prisma.SortOrder
+  dailyMotivationEnabled?: Prisma.SortOrder
+  monthlyReportEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -252,6 +299,10 @@ export type UserScalarWhereWithAggregatesInput = {
   password?: Prisma.StringWithAggregatesFilter<"User"> | string
   role?: Prisma.StringWithAggregatesFilter<"User"> | string
   profilePicture?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  emailNotificationsEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  deadlineRemindersEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  dailyMotivationEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  monthlyReportEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
 
@@ -262,9 +313,14 @@ export type UserCreateInput = {
   password: string
   role?: string
   profilePicture?: string | null
+  emailNotificationsEnabled?: boolean
+  deadlineRemindersEnabled?: boolean
+  dailyMotivationEnabled?: boolean
+  monthlyReportEnabled?: boolean
   createdAt?: Date | string
   applications?: Prisma.ApplicationCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  sentEmailLogs?: Prisma.SentEmailLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -274,9 +330,14 @@ export type UserUncheckedCreateInput = {
   password: string
   role?: string
   profilePicture?: string | null
+  emailNotificationsEnabled?: boolean
+  deadlineRemindersEnabled?: boolean
+  dailyMotivationEnabled?: boolean
+  monthlyReportEnabled?: boolean
   createdAt?: Date | string
   applications?: Prisma.ApplicationUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  sentEmailLogs?: Prisma.SentEmailLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -286,9 +347,14 @@ export type UserUpdateInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotificationsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   applications?: Prisma.ApplicationUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  sentEmailLogs?: Prisma.SentEmailLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -298,9 +364,14 @@ export type UserUncheckedUpdateInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotificationsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   applications?: Prisma.ApplicationUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  sentEmailLogs?: Prisma.SentEmailLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -310,6 +381,10 @@ export type UserCreateManyInput = {
   password: string
   role?: string
   profilePicture?: string | null
+  emailNotificationsEnabled?: boolean
+  deadlineRemindersEnabled?: boolean
+  dailyMotivationEnabled?: boolean
+  monthlyReportEnabled?: boolean
   createdAt?: Date | string
 }
 
@@ -320,6 +395,10 @@ export type UserUpdateManyMutationInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotificationsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -330,6 +409,10 @@ export type UserUncheckedUpdateManyInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotificationsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -340,6 +423,10 @@ export type UserCountOrderByAggregateInput = {
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
+  emailNotificationsEnabled?: Prisma.SortOrder
+  deadlineRemindersEnabled?: Prisma.SortOrder
+  dailyMotivationEnabled?: Prisma.SortOrder
+  monthlyReportEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -350,6 +437,10 @@ export type UserMaxOrderByAggregateInput = {
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
+  emailNotificationsEnabled?: Prisma.SortOrder
+  deadlineRemindersEnabled?: Prisma.SortOrder
+  dailyMotivationEnabled?: Prisma.SortOrder
+  monthlyReportEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -360,6 +451,10 @@ export type UserMinOrderByAggregateInput = {
   password?: Prisma.SortOrder
   role?: Prisma.SortOrder
   profilePicture?: Prisma.SortOrder
+  emailNotificationsEnabled?: Prisma.SortOrder
+  deadlineRemindersEnabled?: Prisma.SortOrder
+  dailyMotivationEnabled?: Prisma.SortOrder
+  monthlyReportEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -374,6 +469,10 @@ export type StringFieldUpdateOperationsInput = {
 
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -408,6 +507,20 @@ export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
 }
 
+export type UserCreateNestedOneWithoutSentEmailLogsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentEmailLogsInput, Prisma.UserUncheckedCreateWithoutSentEmailLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentEmailLogsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSentEmailLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentEmailLogsInput, Prisma.UserUncheckedCreateWithoutSentEmailLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentEmailLogsInput
+  upsert?: Prisma.UserUpsertWithoutSentEmailLogsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSentEmailLogsInput, Prisma.UserUpdateWithoutSentEmailLogsInput>, Prisma.UserUncheckedUpdateWithoutSentEmailLogsInput>
+}
+
 export type UserCreateWithoutApplicationsInput = {
   id?: string
   name: string
@@ -415,8 +528,13 @@ export type UserCreateWithoutApplicationsInput = {
   password: string
   role?: string
   profilePicture?: string | null
+  emailNotificationsEnabled?: boolean
+  deadlineRemindersEnabled?: boolean
+  dailyMotivationEnabled?: boolean
+  monthlyReportEnabled?: boolean
   createdAt?: Date | string
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  sentEmailLogs?: Prisma.SentEmailLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutApplicationsInput = {
@@ -426,8 +544,13 @@ export type UserUncheckedCreateWithoutApplicationsInput = {
   password: string
   role?: string
   profilePicture?: string | null
+  emailNotificationsEnabled?: boolean
+  deadlineRemindersEnabled?: boolean
+  dailyMotivationEnabled?: boolean
+  monthlyReportEnabled?: boolean
   createdAt?: Date | string
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  sentEmailLogs?: Prisma.SentEmailLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutApplicationsInput = {
@@ -453,8 +576,13 @@ export type UserUpdateWithoutApplicationsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotificationsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  sentEmailLogs?: Prisma.SentEmailLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutApplicationsInput = {
@@ -464,8 +592,13 @@ export type UserUncheckedUpdateWithoutApplicationsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotificationsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  sentEmailLogs?: Prisma.SentEmailLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -475,8 +608,13 @@ export type UserCreateWithoutNotificationsInput = {
   password: string
   role?: string
   profilePicture?: string | null
+  emailNotificationsEnabled?: boolean
+  deadlineRemindersEnabled?: boolean
+  dailyMotivationEnabled?: boolean
+  monthlyReportEnabled?: boolean
   createdAt?: Date | string
   applications?: Prisma.ApplicationCreateNestedManyWithoutUserInput
+  sentEmailLogs?: Prisma.SentEmailLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -486,8 +624,13 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   password: string
   role?: string
   profilePicture?: string | null
+  emailNotificationsEnabled?: boolean
+  deadlineRemindersEnabled?: boolean
+  dailyMotivationEnabled?: boolean
+  monthlyReportEnabled?: boolean
   createdAt?: Date | string
   applications?: Prisma.ApplicationUncheckedCreateNestedManyWithoutUserInput
+  sentEmailLogs?: Prisma.SentEmailLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -513,8 +656,13 @@ export type UserUpdateWithoutNotificationsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotificationsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   applications?: Prisma.ApplicationUpdateManyWithoutUserNestedInput
+  sentEmailLogs?: Prisma.SentEmailLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -524,8 +672,93 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotificationsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   applications?: Prisma.ApplicationUncheckedUpdateManyWithoutUserNestedInput
+  sentEmailLogs?: Prisma.SentEmailLogUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSentEmailLogsInput = {
+  id?: string
+  name: string
+  email: string
+  password: string
+  role?: string
+  profilePicture?: string | null
+  emailNotificationsEnabled?: boolean
+  deadlineRemindersEnabled?: boolean
+  dailyMotivationEnabled?: boolean
+  monthlyReportEnabled?: boolean
+  createdAt?: Date | string
+  applications?: Prisma.ApplicationCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSentEmailLogsInput = {
+  id?: string
+  name: string
+  email: string
+  password: string
+  role?: string
+  profilePicture?: string | null
+  emailNotificationsEnabled?: boolean
+  deadlineRemindersEnabled?: boolean
+  dailyMotivationEnabled?: boolean
+  monthlyReportEnabled?: boolean
+  createdAt?: Date | string
+  applications?: Prisma.ApplicationUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSentEmailLogsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentEmailLogsInput, Prisma.UserUncheckedCreateWithoutSentEmailLogsInput>
+}
+
+export type UserUpsertWithoutSentEmailLogsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSentEmailLogsInput, Prisma.UserUncheckedUpdateWithoutSentEmailLogsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentEmailLogsInput, Prisma.UserUncheckedCreateWithoutSentEmailLogsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSentEmailLogsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSentEmailLogsInput, Prisma.UserUncheckedUpdateWithoutSentEmailLogsInput>
+}
+
+export type UserUpdateWithoutSentEmailLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotificationsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  applications?: Prisma.ApplicationUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSentEmailLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  profilePicture?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotificationsEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  applications?: Prisma.ApplicationUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -536,11 +769,13 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
 export type UserCountOutputType = {
   applications: number
   notifications: number
+  sentEmailLogs: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   applications?: boolean | UserCountOutputTypeCountApplicationsArgs
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
+  sentEmailLogs?: boolean | UserCountOutputTypeCountSentEmailLogsArgs
 }
 
 /**
@@ -567,6 +802,13 @@ export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.NotificationWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSentEmailLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SentEmailLogWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -575,9 +817,14 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   password?: boolean
   role?: boolean
   profilePicture?: boolean
+  emailNotificationsEnabled?: boolean
+  deadlineRemindersEnabled?: boolean
+  dailyMotivationEnabled?: boolean
+  monthlyReportEnabled?: boolean
   createdAt?: boolean
   applications?: boolean | Prisma.User$applicationsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
+  sentEmailLogs?: boolean | Prisma.User$sentEmailLogsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -588,6 +835,10 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   password?: boolean
   role?: boolean
   profilePicture?: boolean
+  emailNotificationsEnabled?: boolean
+  deadlineRemindersEnabled?: boolean
+  dailyMotivationEnabled?: boolean
+  monthlyReportEnabled?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["user"]>
 
@@ -598,6 +849,10 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   password?: boolean
   role?: boolean
   profilePicture?: boolean
+  emailNotificationsEnabled?: boolean
+  deadlineRemindersEnabled?: boolean
+  dailyMotivationEnabled?: boolean
+  monthlyReportEnabled?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["user"]>
 
@@ -608,13 +863,18 @@ export type UserSelectScalar = {
   password?: boolean
   role?: boolean
   profilePicture?: boolean
+  emailNotificationsEnabled?: boolean
+  deadlineRemindersEnabled?: boolean
+  dailyMotivationEnabled?: boolean
+  monthlyReportEnabled?: boolean
   createdAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "role" | "profilePicture" | "createdAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "role" | "profilePicture" | "emailNotificationsEnabled" | "deadlineRemindersEnabled" | "dailyMotivationEnabled" | "monthlyReportEnabled" | "createdAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   applications?: boolean | Prisma.User$applicationsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
+  sentEmailLogs?: boolean | Prisma.User$sentEmailLogsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -625,6 +885,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     applications: Prisma.$ApplicationPayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
+    sentEmailLogs: Prisma.$SentEmailLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -633,6 +894,10 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     password: string
     role: string
     profilePicture: string | null
+    emailNotificationsEnabled: boolean
+    deadlineRemindersEnabled: boolean
+    dailyMotivationEnabled: boolean
+    monthlyReportEnabled: boolean
     createdAt: Date
   }, ExtArgs["result"]["user"]>
   composites: {}
@@ -1030,6 +1295,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   applications<T extends Prisma.User$applicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$applicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sentEmailLogs<T extends Prisma.User$sentEmailLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentEmailLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SentEmailLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1065,6 +1331,10 @@ export interface UserFieldRefs {
   readonly password: Prisma.FieldRef<"User", 'String'>
   readonly role: Prisma.FieldRef<"User", 'String'>
   readonly profilePicture: Prisma.FieldRef<"User", 'String'>
+  readonly emailNotificationsEnabled: Prisma.FieldRef<"User", 'Boolean'>
+  readonly deadlineRemindersEnabled: Prisma.FieldRef<"User", 'Boolean'>
+  readonly dailyMotivationEnabled: Prisma.FieldRef<"User", 'Boolean'>
+  readonly monthlyReportEnabled: Prisma.FieldRef<"User", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
 }
     
@@ -1499,6 +1769,30 @@ export type User$notificationsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
+}
+
+/**
+ * User.sentEmailLogs
+ */
+export type User$sentEmailLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SentEmailLog
+   */
+  select?: Prisma.SentEmailLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SentEmailLog
+   */
+  omit?: Prisma.SentEmailLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SentEmailLogInclude<ExtArgs> | null
+  where?: Prisma.SentEmailLogWhereInput
+  orderBy?: Prisma.SentEmailLogOrderByWithRelationInput | Prisma.SentEmailLogOrderByWithRelationInput[]
+  cursor?: Prisma.SentEmailLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SentEmailLogScalarFieldEnum | Prisma.SentEmailLogScalarFieldEnum[]
 }
 
 /**

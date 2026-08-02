@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/daily-motivation",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/deadline-reminders",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/monthly-report",
+      "schedule": "0 9 1 * *"
+    }
+  ]
+}

@@ -11,15 +11,20 @@ generator client {
 }
 
 model User {
-  id             String         @id @default(cuid())
-  name           String
-  email          String         @unique
-  password       String // Hashed password
-  role           String         @default("STUDENT") // "STUDENT" or "PROFESSIONAL"
-  profilePicture String? // Base64 profile avatar representation
-  applications   Application[]
-  notifications  Notification[]
-  createdAt      DateTime       @default(now())
+  id                         String         @id @default(cuid())
+  name                       String
+  email                      String         @unique
+  password                   String // Hashed password
+  role                       String         @default("STUDENT") // "STUDENT" or "PROFESSIONAL"
+  profilePicture             String? // Base64 profile avatar representation
+  emailNotificationsEnabled Boolean        @default(true)
+  deadlineRemindersEnabled  Boolean        @default(true)
+  dailyMotivationEnabled     Boolean        @default(true)
+  monthlyReportEnabled       Boolean        @default(true)
+  applications               Application[]
+  notifications              Notification[]
+  sentEmailLogs              SentEmailLog[]
+  createdAt                  DateTime       @default(now())
 }
 
 model Application {
@@ -68,3 +73,13 @@ model Notification {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+model SentEmailLog {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String?
+  emailType     String   // "DEADLINE_REMINDER", "DAILY_MOTIVATION", "MONTHLY_REPORT"
+  sentAt        DateTime @default(now())
+}
+

@@ -11,4 +11,5 @@
 export type * from './models/User'
 export type * from './models/Application'
 export type * from './models/Notification'
+export type * from './models/SentEmailLog'
 export type * from './commonInputTypes'

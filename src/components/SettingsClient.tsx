@@ -6,7 +6,7 @@ import {
   Settings as SettingsIcon, User, Shield, HelpCircle, 
   RotateCcw, Sparkles, CheckCircle2, Bell, Mail
 } from 'lucide-react';
-import { updateUserProfile } from '@/app/actions/auth';
+import { updateUserProfile, getNotificationPreferences, updateNotificationPreferences } from '@/app/actions/auth';
 import { sendSimulatedNotification, generateDailyNotificationSummary } from '@/app/actions/applications';
 import { toast } from 'sonner';
 
@@ -46,6 +46,8 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
   const [apiKey, setApiKey] = useState('');
 
   // Preference Settings States
+  const [emailNotifsEnabled, setEmailNotifsEnabled] = useState(true);
+  const [deadlineReminder, setDeadlineReminder] = useState(true);
   const [monthlyNotif, setMonthlyNotif] = useState(true);
   const [dailyReminder, setDailyReminder] = useState(true);
   const [showOnboardingGuide, setShowOnboardingGuide] = useState(true);
@@ -64,18 +66,25 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
       setAiProvider(localStorage.getItem('applyhub_ai_provider') || 'gemini');
       setMonthlyNotif(localStorage.getItem('applyhub_monthly_notif') !== 'false');
       setDailyReminder(localStorage.getItem('applyhub_daily_reminder') !== 'false');
+      setDeadlineReminder(localStorage.getItem('applyhub_deadline_reminder') !== 'false');
+      setEmailNotifsEnabled(localStorage.getItem('applyhub_email_notifs_enabled') !== 'false');
       setShowOnboardingGuide(localStorage.getItem('apptracker_show_onboarding_guide') !== 'false');
       const savedGoal = localStorage.getItem('applyhub_monthly_goal');
       if (savedGoal) {
         setMonthlyGoal(parseInt(savedGoal, 10));
       }
     }
-  }, []);
 
-  const handleToggleMonthlyNotif = (val: boolean) => {
-    setMonthlyNotif(val);
-    localStorage.setItem('applyhub_monthly_notif', String(val));
-  };
+    // Fetch synced preferences from DB
+    getNotificationPreferences().then(res => {
+      if (res.success && res.data) {
+        setEmailNotifsEnabled(res.data.emailNotificationsEnabled ?? true);
+        setDeadlineReminder(res.data.deadlineRemindersEnabled ?? true);
+        setDailyReminder(res.data.dailyMotivationEnabled ?? true);
+        setMonthlyNotif(res.data.monthlyReportEnabled ?? true);
+      }
+    });
+  }, []);
 
   const handleGoalChange = (val: number) => {
     setMonthlyGoal(val);
@@ -95,9 +104,32 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
     toast.success('API Configuration saved successfully!');
   };
 
+  const handleToggleEmailNotifsEnabled = (val: boolean) => {
+    setEmailNotifsEnabled(val);
+    localStorage.setItem('applyhub_email_notifs_enabled', String(val));
+    updateNotificationPreferences({ emailNotificationsEnabled: val });
+    toast.success(`Email notifications ${val ? 'enabled' : 'disabled'}.`);
+  };
+
+  const handleToggleDeadlineReminder = (val: boolean) => {
+    setDeadlineReminder(val);
+    localStorage.setItem('applyhub_deadline_reminder', String(val));
+    updateNotificationPreferences({ deadlineRemindersEnabled: val });
+    toast.success(`Deadline reminders (5, 4, 3, 2, 1 days out) ${val ? 'enabled' : 'disabled'}.`);
+  };
+
+  const handleToggleMonthlyNotif = (val: boolean) => {
+    setMonthlyNotif(val);
+    localStorage.setItem('applyhub_monthly_notif', String(val));
+    updateNotificationPreferences({ monthlyReportEnabled: val });
+    toast.success(`Monthly progress report ${val ? 'enabled' : 'disabled'}.`);
+  };
+
   const handleToggleDailyReminder = (val: boolean) => {
     setDailyReminder(val);
     localStorage.setItem('applyhub_daily_reminder', String(val));
+    updateNotificationPreferences({ dailyMotivationEnabled: val });
+    toast.success(`Daily motivation emails ${val ? 'enabled' : 'disabled'}.`);
   };
 
   const handleToggleOnboardingGuide = (val: boolean) => {
@@ -293,12 +325,50 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
 
 
           <div className="space-y-5">
-            {/* Toggle 1: Monthly Reports */}
+            {/* Toggle 0: Master Email Notifications */}
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
-                <p className="text-sm font-bold text-slate-800">Monthly Progress Notification</p>
+                <p className="text-sm font-bold text-slate-800">Email Notifications (Resend Integration)</p>
                 <p className="text-xs text-slate-500 leading-normal">
-                  Receive a summary of applications logged, active interviews, and progress stats in your notification inbox at the end of every calendar month.
+                  Master toggle for all automated email alerts delivered to <strong>{user.email}</strong>.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer select-none">
+                <input 
+                  type="checkbox" 
+                  checked={emailNotifsEnabled}
+                  onChange={(e) => handleToggleEmailNotifsEnabled(e.target.checked)}
+                  className="sr-only peer" 
+                />
+                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
+              </label>
+            </div>
+
+            {/* Toggle 1: Deadline Countdown Reminders */}
+            <div className="flex items-start justify-between gap-4 border-t border-slate-100 pt-5">
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-slate-800">Deadline Countdown Reminders (5, 4, 3, 2 & 1 Days Out)</p>
+                <p className="text-xs text-slate-500 leading-normal">
+                  Receive automated email alerts as your Job, Internship, or Scholarship application deadlines draw near (sent daily 5, 4, 3, 2, and 1 day before due date).
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer select-none">
+                <input 
+                  type="checkbox" 
+                  checked={deadlineReminder}
+                  onChange={(e) => handleToggleDeadlineReminder(e.target.checked)}
+                  className="sr-only peer" 
+                />
+                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
+              </label>
+            </div>
+
+            {/* Toggle 2: Monthly Reports */}
+            <div className="flex items-start justify-between gap-4 border-t border-slate-100 pt-5">
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-slate-800">Monthly Progress Report Email</p>
+                <p className="text-xs text-slate-500 leading-normal">
+                  Receive a summary email at the end of every calendar month with applications logged, active interviews, offers, and target goal metrics.
                 </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer select-none">
@@ -312,12 +382,12 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
               </label>
             </div>
 
-            {/* Toggle 2: Daily Reminders */}
+            {/* Toggle 3: Daily Reminders */}
             <div className="flex items-start justify-between gap-4 border-t border-slate-100 pt-5">
               <div className="space-y-1">
-                <p className="text-sm font-bold text-slate-800">Daily Motivational Email Reminders</p>
+                <p className="text-sm font-bold text-slate-800">Daily Motivational & Focus Email</p>
                 <p className="text-xs text-slate-500 leading-normal">
-                  Get a daily email with professional advice, quote, and reminder to log new applications and follow up on interviews.
+                  Get a daily morning email with an inspiring career/academic quote and summary of applications waiting in progress.
                 </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer select-none">

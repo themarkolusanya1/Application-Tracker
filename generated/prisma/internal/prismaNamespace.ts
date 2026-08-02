@@ -392,7 +392,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: 'User',
   Application: 'Application',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  SentEmailLog: 'SentEmailLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -408,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "application" | "notification"
+    modelProps: "user" | "application" | "notification" | "sentEmailLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -634,6 +635,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SentEmailLog: {
+      payload: Prisma.$SentEmailLogPayload<ExtArgs>
+      fields: Prisma.SentEmailLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SentEmailLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentEmailLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SentEmailLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentEmailLogPayload>
+        }
+        findFirst: {
+          args: Prisma.SentEmailLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentEmailLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SentEmailLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentEmailLogPayload>
+        }
+        findMany: {
+          args: Prisma.SentEmailLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentEmailLogPayload>[]
+        }
+        create: {
+          args: Prisma.SentEmailLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentEmailLogPayload>
+        }
+        createMany: {
+          args: Prisma.SentEmailLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SentEmailLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentEmailLogPayload>[]
+        }
+        delete: {
+          args: Prisma.SentEmailLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentEmailLogPayload>
+        }
+        update: {
+          args: Prisma.SentEmailLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentEmailLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.SentEmailLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SentEmailLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SentEmailLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentEmailLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.SentEmailLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentEmailLogPayload>
+        }
+        aggregate: {
+          args: Prisma.SentEmailLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSentEmailLog>
+        }
+        groupBy: {
+          args: Prisma.SentEmailLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SentEmailLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SentEmailLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SentEmailLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -680,6 +755,10 @@ export const UserScalarFieldEnum = {
   password: 'password',
   role: 'role',
   profilePicture: 'profilePicture',
+  emailNotificationsEnabled: 'emailNotificationsEnabled',
+  deadlineRemindersEnabled: 'deadlineRemindersEnabled',
+  dailyMotivationEnabled: 'dailyMotivationEnabled',
+  monthlyReportEnabled: 'monthlyReportEnabled',
   createdAt: 'createdAt'
 } as const
 
@@ -729,6 +808,17 @@ export const NotificationScalarFieldEnum = {
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
+export const SentEmailLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  applicationId: 'applicationId',
+  emailType: 'emailType',
+  sentAt: 'sentAt'
+} as const
+
+export type SentEmailLogScalarFieldEnum = (typeof SentEmailLogScalarFieldEnum)[keyof typeof SentEmailLogScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -774,6 +864,13 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -784,13 +881,6 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
-    
-
-
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -897,6 +987,7 @@ export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   application?: Prisma.ApplicationOmit
   notification?: Prisma.NotificationOmit
+  sentEmailLog?: Prisma.SentEmailLogOmit
 }
 
 /* Types for Logging */

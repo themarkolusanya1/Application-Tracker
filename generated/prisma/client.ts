@@ -56,3 +56,8 @@ export type Application = Prisma.ApplicationModel
  * 
  */
 export type Notification = Prisma.NotificationModel
+/**
+ * Model SentEmailLog
+ * 
+ */
+export type SentEmailLog = Prisma.SentEmailLogModel

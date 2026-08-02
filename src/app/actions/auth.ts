@@ -432,3 +432,62 @@ export async function loginWithGoogle(email: string, name: string): Promise<Acti
     return { success: false, error: 'Failed to authenticate with Google.' };
   }
 }
+
+/**
+ * Get user notification preference settings
+ */
+export async function getNotificationPreferences(): Promise<ActionResponse<any>> {
+  try {
+    const session = await getCurrentUser();
+    if (!session) {
+      return { success: false, error: 'Unauthorized.' };
+    }
+
+    const user = await db.user.findUnique({
+      where: { id: session.userId },
+      select: {
+        emailNotificationsEnabled: true,
+        deadlineRemindersEnabled: true,
+        dailyMotivationEnabled: true,
+        monthlyReportEnabled: true,
+      },
+    });
+
+    if (!user) {
+      return { success: false, error: 'User not found.' };
+    }
+
+    return { success: true, data: user };
+  } catch (error: any) {
+    console.error('getNotificationPreferences error:', error);
+    return { success: false, error: 'Failed to retrieve notification settings.' };
+  }
+}
+
+/**
+ * Update user notification preference settings
+ */
+export async function updateNotificationPreferences(payload: {
+  emailNotificationsEnabled?: boolean;
+  deadlineRemindersEnabled?: boolean;
+  dailyMotivationEnabled?: boolean;
+  monthlyReportEnabled?: boolean;
+}): Promise<ActionResponse> {
+  try {
+    const session = await getCurrentUser();
+    if (!session) {
+      return { success: false, error: 'Unauthorized.' };
+    }
+
+    await db.user.update({
+      where: { id: session.userId },
+      data: payload,
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('updateNotificationPreferences error:', error);
+    return { success: false, error: 'Failed to update notification settings.' };
+  }
+}
+

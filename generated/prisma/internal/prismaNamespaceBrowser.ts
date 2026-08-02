@@ -51,7 +51,8 @@ export const AnyNull = runtime.objectEnumValues.instances.AnyNull
 export const ModelName = {
   User: 'User',
   Application: 'Application',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  SentEmailLog: 'SentEmailLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -77,6 +78,10 @@ export const UserScalarFieldEnum = {
   password: 'password',
   role: 'role',
   profilePicture: 'profilePicture',
+  emailNotificationsEnabled: 'emailNotificationsEnabled',
+  deadlineRemindersEnabled: 'deadlineRemindersEnabled',
+  dailyMotivationEnabled: 'dailyMotivationEnabled',
+  monthlyReportEnabled: 'monthlyReportEnabled',
   createdAt: 'createdAt'
 } as const
 
@@ -124,6 +129,17 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const SentEmailLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  applicationId: 'applicationId',
+  emailType: 'emailType',
+  sentAt: 'sentAt'
+} as const
+
+export type SentEmailLogScalarFieldEnum = (typeof SentEmailLogScalarFieldEnum)[keyof typeof SentEmailLogScalarFieldEnum]
 
 
 export const SortOrder = {
