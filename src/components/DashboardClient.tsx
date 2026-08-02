@@ -281,8 +281,7 @@ export default function DashboardClient({
 
     const totalApps = tabApps.length;
 
-    const scholarships = tabApps.filter(a => a.applicationType === 'scholarship');
-    const upcomingDeadlines = scholarships.filter(s => {
+    const upcomingDeadlines = tabApps.filter(s => {
       if (!s.deadline) return false;
       const d = new Date(s.deadline);
       return d >= now && d <= thirtyDaysFromNow;
@@ -1148,7 +1147,7 @@ export default function DashboardClient({
 
                         {/* Bottom date, deadline, and link */}
                         <div className="flex justify-between items-center pt-2 border-t border-white/5 text-[10px] text-gray-500">
-                          {app.applicationType === 'scholarship' && app.deadline ? (
+                          {app.deadline ? (
                             (() => {
                               const d = new Date(app.deadline);
                               const isUrgent = d.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000;

@@ -18,13 +18,13 @@ export default function CalendarClient({ initialApplications }: CalendarClientPr
   const now = new Date();
 
   initialApplications.forEach(app => {
-    // 1. Scholarship deadlines are forward-looking key events
-    if (app.applicationType === 'scholarship' && app.deadline) {
+    // 1. Application deadlines are forward-looking key events
+    if (app.deadline) {
       events.push({
         id: `deadline-${app.id}`,
         appId: app.id,
-        applicationType: 'scholarship',
-        title: `${app.title} Application Deadline`,
+        applicationType: app.applicationType || 'job',
+        title: `${app.organization} - ${app.title} Deadline`,
         organization: app.organization,
         date: new Date(app.deadline),
         type: 'deadline',

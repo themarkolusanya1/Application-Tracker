@@ -248,6 +248,7 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
         status,
         url: url.trim() || undefined,
         appliedDate: appliedDate || undefined,
+        deadline: deadline || undefined,
         notes: notes.trim() || undefined,
         currency,
         hasCoverLetter,
@@ -256,7 +257,6 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
       if (applicationType === 'scholarship') {
         payload.fundingType = fundingType;
         payload.stipendAmount = stipendAmount.trim() || '0';
-        payload.deadline = deadline || undefined;
         payload.degreeLevel = degreeLevel;
         payload.hasTranscripts = hasTranscripts;
         payload.hasReferences = hasReferences;
@@ -594,8 +594,8 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
             )}
           </div>
 
-          {/* Group 3: Financial & Deadlines */}
-          <div className={`grid grid-cols-1 ${applicationType === 'scholarship' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-4`}>
+          {/* Group 3: Financial */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Currency Selector */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700" htmlFor="currency">
@@ -614,44 +614,24 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
             </div>
 
             {applicationType === 'scholarship' ? (
-              <>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700" htmlFor="stipend">
-                    Stipend Amount
-                  </label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-xs font-bold">
-                      {getCurrencySymbol(currency)}
-                    </span>
-                    <input
-                      id="stipend"
-                      type="text"
-                      value={stipendAmount}
-                      onChange={(e) => setStipendAmount(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 glass-input text-sm"
-                      placeholder="e.g. 45,000"
-                    />
-                  </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700" htmlFor="stipend">
+                  Stipend Amount
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-xs font-bold">
+                    {getCurrencySymbol(currency)}
+                  </span>
+                  <input
+                    id="stipend"
+                    type="text"
+                    value={stipendAmount}
+                    onChange={(e) => setStipendAmount(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 glass-input text-sm"
+                    placeholder="e.g. 45,000"
+                  />
                 </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700" htmlFor="deadline">
-                    Application Deadline
-                  </label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                      <Calendar className="w-4 h-4" />
-                    </span>
-                    <input
-                      id="deadline"
-                      type="date"
-                      value={deadline}
-                      onChange={(e) => setDeadline(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 glass-input text-sm"
-                    />
-                  </div>
-                </div>
-              </>
+              </div>
             ) : (
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700" htmlFor="salary">
@@ -694,6 +674,7 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
             </div>
           </div>
 
+          {/* Dates: Applied Date & Application Deadline */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700" htmlFor="appliedDate">
@@ -713,8 +694,27 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
               </div>
             </div>
 
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700" htmlFor="deadline">
+                Application Deadline
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                  <Calendar className="w-4 h-4 text-brand-indigo" />
+                </span>
+                <input
+                  id="deadline"
+                  type="date"
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 glass-input text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
             {applicationType === 'scholarship' && (
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 pt-2">
                 <label className="text-xs font-bold text-slate-700" htmlFor="funding">
                   Funding Type
                 </label>
@@ -730,7 +730,6 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
                 </select>
               </div>
             )}
-          </div>
 
           {/* Group 4: PhD Supervisor / Advisor contact */}
           {applicationType === 'scholarship' && degreeLevel === 'PhD' && (
