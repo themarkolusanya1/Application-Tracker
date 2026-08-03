@@ -41,6 +41,7 @@ export type ApplicationMinAggregateOutputType = {
   currency: string | null
   fundingType: string | null
   stipendAmount: string | null
+  openingDate: Date | null
   deadline: Date | null
   hasSop: boolean | null
   hasTranscripts: boolean | null
@@ -70,6 +71,7 @@ export type ApplicationMaxAggregateOutputType = {
   currency: string | null
   fundingType: string | null
   stipendAmount: string | null
+  openingDate: Date | null
   deadline: Date | null
   hasSop: boolean | null
   hasTranscripts: boolean | null
@@ -99,6 +101,7 @@ export type ApplicationCountAggregateOutputType = {
   currency: number
   fundingType: number
   stipendAmount: number
+  openingDate: number
   deadline: number
   hasSop: number
   hasTranscripts: number
@@ -130,6 +133,7 @@ export type ApplicationMinAggregateInputType = {
   currency?: true
   fundingType?: true
   stipendAmount?: true
+  openingDate?: true
   deadline?: true
   hasSop?: true
   hasTranscripts?: true
@@ -159,6 +163,7 @@ export type ApplicationMaxAggregateInputType = {
   currency?: true
   fundingType?: true
   stipendAmount?: true
+  openingDate?: true
   deadline?: true
   hasSop?: true
   hasTranscripts?: true
@@ -188,6 +193,7 @@ export type ApplicationCountAggregateInputType = {
   currency?: true
   fundingType?: true
   stipendAmount?: true
+  openingDate?: true
   deadline?: true
   hasSop?: true
   hasTranscripts?: true
@@ -290,6 +296,7 @@ export type ApplicationGroupByOutputType = {
   currency: string
   fundingType: string | null
   stipendAmount: string | null
+  openingDate: Date | null
   deadline: Date | null
   hasSop: boolean
   hasTranscripts: boolean
@@ -340,6 +347,7 @@ export type ApplicationWhereInput = {
   currency?: Prisma.StringFilter<"Application"> | string
   fundingType?: Prisma.StringNullableFilter<"Application"> | string | null
   stipendAmount?: Prisma.StringNullableFilter<"Application"> | string | null
+  openingDate?: Prisma.DateTimeNullableFilter<"Application"> | Date | string | null
   deadline?: Prisma.DateTimeNullableFilter<"Application"> | Date | string | null
   hasSop?: Prisma.BoolFilter<"Application"> | boolean
   hasTranscripts?: Prisma.BoolFilter<"Application"> | boolean
@@ -370,6 +378,7 @@ export type ApplicationOrderByWithRelationInput = {
   currency?: Prisma.SortOrder
   fundingType?: Prisma.SortOrderInput | Prisma.SortOrder
   stipendAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  openingDate?: Prisma.SortOrderInput | Prisma.SortOrder
   deadline?: Prisma.SortOrderInput | Prisma.SortOrder
   hasSop?: Prisma.SortOrder
   hasTranscripts?: Prisma.SortOrder
@@ -403,6 +412,7 @@ export type ApplicationWhereUniqueInput = Prisma.AtLeast<{
   currency?: Prisma.StringFilter<"Application"> | string
   fundingType?: Prisma.StringNullableFilter<"Application"> | string | null
   stipendAmount?: Prisma.StringNullableFilter<"Application"> | string | null
+  openingDate?: Prisma.DateTimeNullableFilter<"Application"> | Date | string | null
   deadline?: Prisma.DateTimeNullableFilter<"Application"> | Date | string | null
   hasSop?: Prisma.BoolFilter<"Application"> | boolean
   hasTranscripts?: Prisma.BoolFilter<"Application"> | boolean
@@ -433,6 +443,7 @@ export type ApplicationOrderByWithAggregationInput = {
   currency?: Prisma.SortOrder
   fundingType?: Prisma.SortOrderInput | Prisma.SortOrder
   stipendAmount?: Prisma.SortOrderInput | Prisma.SortOrder
+  openingDate?: Prisma.SortOrderInput | Prisma.SortOrder
   deadline?: Prisma.SortOrderInput | Prisma.SortOrder
   hasSop?: Prisma.SortOrder
   hasTranscripts?: Prisma.SortOrder
@@ -468,6 +479,7 @@ export type ApplicationScalarWhereWithAggregatesInput = {
   currency?: Prisma.StringWithAggregatesFilter<"Application"> | string
   fundingType?: Prisma.StringNullableWithAggregatesFilter<"Application"> | string | null
   stipendAmount?: Prisma.StringNullableWithAggregatesFilter<"Application"> | string | null
+  openingDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Application"> | Date | string | null
   deadline?: Prisma.DateTimeNullableWithAggregatesFilter<"Application"> | Date | string | null
   hasSop?: Prisma.BoolWithAggregatesFilter<"Application"> | boolean
   hasTranscripts?: Prisma.BoolWithAggregatesFilter<"Application"> | boolean
@@ -496,6 +508,7 @@ export type ApplicationCreateInput = {
   currency?: string
   fundingType?: string | null
   stipendAmount?: string | null
+  openingDate?: Date | string | null
   deadline?: Date | string | null
   hasSop?: boolean
   hasTranscripts?: boolean
@@ -526,6 +539,7 @@ export type ApplicationUncheckedCreateInput = {
   currency?: string
   fundingType?: string | null
   stipendAmount?: string | null
+  openingDate?: Date | string | null
   deadline?: Date | string | null
   hasSop?: boolean
   hasTranscripts?: boolean
@@ -554,6 +568,7 @@ export type ApplicationUpdateInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   fundingType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stipendAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  openingDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   hasSop?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hasTranscripts?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -584,6 +599,7 @@ export type ApplicationUncheckedUpdateInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   fundingType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stipendAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  openingDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   hasSop?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hasTranscripts?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -613,6 +629,7 @@ export type ApplicationCreateManyInput = {
   currency?: string
   fundingType?: string | null
   stipendAmount?: string | null
+  openingDate?: Date | string | null
   deadline?: Date | string | null
   hasSop?: boolean
   hasTranscripts?: boolean
@@ -641,6 +658,7 @@ export type ApplicationUpdateManyMutationInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   fundingType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stipendAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  openingDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   hasSop?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hasTranscripts?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -670,6 +688,7 @@ export type ApplicationUncheckedUpdateManyInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   fundingType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stipendAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  openingDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   hasSop?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hasTranscripts?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -709,6 +728,7 @@ export type ApplicationCountOrderByAggregateInput = {
   currency?: Prisma.SortOrder
   fundingType?: Prisma.SortOrder
   stipendAmount?: Prisma.SortOrder
+  openingDate?: Prisma.SortOrder
   deadline?: Prisma.SortOrder
   hasSop?: Prisma.SortOrder
   hasTranscripts?: Prisma.SortOrder
@@ -738,6 +758,7 @@ export type ApplicationMaxOrderByAggregateInput = {
   currency?: Prisma.SortOrder
   fundingType?: Prisma.SortOrder
   stipendAmount?: Prisma.SortOrder
+  openingDate?: Prisma.SortOrder
   deadline?: Prisma.SortOrder
   hasSop?: Prisma.SortOrder
   hasTranscripts?: Prisma.SortOrder
@@ -767,6 +788,7 @@ export type ApplicationMinOrderByAggregateInput = {
   currency?: Prisma.SortOrder
   fundingType?: Prisma.SortOrder
   stipendAmount?: Prisma.SortOrder
+  openingDate?: Prisma.SortOrder
   deadline?: Prisma.SortOrder
   hasSop?: Prisma.SortOrder
   hasTranscripts?: Prisma.SortOrder
@@ -841,6 +863,7 @@ export type ApplicationCreateWithoutUserInput = {
   currency?: string
   fundingType?: string | null
   stipendAmount?: string | null
+  openingDate?: Date | string | null
   deadline?: Date | string | null
   hasSop?: boolean
   hasTranscripts?: boolean
@@ -869,6 +892,7 @@ export type ApplicationUncheckedCreateWithoutUserInput = {
   currency?: string
   fundingType?: string | null
   stipendAmount?: string | null
+  openingDate?: Date | string | null
   deadline?: Date | string | null
   hasSop?: boolean
   hasTranscripts?: boolean
@@ -927,6 +951,7 @@ export type ApplicationScalarWhereInput = {
   currency?: Prisma.StringFilter<"Application"> | string
   fundingType?: Prisma.StringNullableFilter<"Application"> | string | null
   stipendAmount?: Prisma.StringNullableFilter<"Application"> | string | null
+  openingDate?: Prisma.DateTimeNullableFilter<"Application"> | Date | string | null
   deadline?: Prisma.DateTimeNullableFilter<"Application"> | Date | string | null
   hasSop?: Prisma.BoolFilter<"Application"> | boolean
   hasTranscripts?: Prisma.BoolFilter<"Application"> | boolean
@@ -955,6 +980,7 @@ export type ApplicationCreateManyUserInput = {
   currency?: string
   fundingType?: string | null
   stipendAmount?: string | null
+  openingDate?: Date | string | null
   deadline?: Date | string | null
   hasSop?: boolean
   hasTranscripts?: boolean
@@ -983,6 +1009,7 @@ export type ApplicationUpdateWithoutUserInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   fundingType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stipendAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  openingDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   hasSop?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hasTranscripts?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1011,6 +1038,7 @@ export type ApplicationUncheckedUpdateWithoutUserInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   fundingType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stipendAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  openingDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   hasSop?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hasTranscripts?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1039,6 +1067,7 @@ export type ApplicationUncheckedUpdateManyWithoutUserInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   fundingType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stipendAmount?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  openingDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   hasSop?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hasTranscripts?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1070,6 +1099,7 @@ export type ApplicationSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   currency?: boolean
   fundingType?: boolean
   stipendAmount?: boolean
+  openingDate?: boolean
   deadline?: boolean
   hasSop?: boolean
   hasTranscripts?: boolean
@@ -1100,6 +1130,7 @@ export type ApplicationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   currency?: boolean
   fundingType?: boolean
   stipendAmount?: boolean
+  openingDate?: boolean
   deadline?: boolean
   hasSop?: boolean
   hasTranscripts?: boolean
@@ -1130,6 +1161,7 @@ export type ApplicationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   currency?: boolean
   fundingType?: boolean
   stipendAmount?: boolean
+  openingDate?: boolean
   deadline?: boolean
   hasSop?: boolean
   hasTranscripts?: boolean
@@ -1160,6 +1192,7 @@ export type ApplicationSelectScalar = {
   currency?: boolean
   fundingType?: boolean
   stipendAmount?: boolean
+  openingDate?: boolean
   deadline?: boolean
   hasSop?: boolean
   hasTranscripts?: boolean
@@ -1172,7 +1205,7 @@ export type ApplicationSelectScalar = {
   potentialAdvisor?: boolean
 }
 
-export type ApplicationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "applicationType" | "organization" | "title" | "status" | "url" | "notes" | "salary" | "locationType" | "appliedDate" | "createdAt" | "updatedAt" | "currency" | "fundingType" | "stipendAmount" | "deadline" | "hasSop" | "hasTranscripts" | "hasReferences" | "hasTestScores" | "hasCvResume" | "hasPersonalStatement" | "hasCoverLetter" | "degreeLevel" | "potentialAdvisor", ExtArgs["result"]["application"]>
+export type ApplicationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "applicationType" | "organization" | "title" | "status" | "url" | "notes" | "salary" | "locationType" | "appliedDate" | "createdAt" | "updatedAt" | "currency" | "fundingType" | "stipendAmount" | "openingDate" | "deadline" | "hasSop" | "hasTranscripts" | "hasReferences" | "hasTestScores" | "hasCvResume" | "hasPersonalStatement" | "hasCoverLetter" | "degreeLevel" | "potentialAdvisor", ExtArgs["result"]["application"]>
 export type ApplicationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -1205,6 +1238,7 @@ export type $ApplicationPayload<ExtArgs extends runtime.Types.Extensions.Interna
     currency: string
     fundingType: string | null
     stipendAmount: string | null
+    openingDate: Date | null
     deadline: Date | null
     hasSop: boolean
     hasTranscripts: boolean
@@ -1655,6 +1689,7 @@ export interface ApplicationFieldRefs {
   readonly currency: Prisma.FieldRef<"Application", 'String'>
   readonly fundingType: Prisma.FieldRef<"Application", 'String'>
   readonly stipendAmount: Prisma.FieldRef<"Application", 'String'>
+  readonly openingDate: Prisma.FieldRef<"Application", 'DateTime'>
   readonly deadline: Prisma.FieldRef<"Application", 'DateTime'>
   readonly hasSop: Prisma.FieldRef<"Application", 'Boolean'>
   readonly hasTranscripts: Prisma.FieldRef<"Application", 'Boolean'>

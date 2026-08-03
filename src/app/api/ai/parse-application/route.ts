@@ -80,6 +80,8 @@ If it is a JOB or INTERNSHIP:
   "url": "URL if found, else empty string",
   "salary": "numerical value or range if found, e.g. '120000', else empty string",
   "currency": "three-letter code e.g. 'USD', 'EUR', 'GBP', else 'USD'",
+  "openingDate": "portal opening or start date formatted as YYYY-MM-DD if found, else empty string",
+  "deadline": "application deadline formatted as YYYY-MM-DD if found, else empty string",
   "notes": "Short summary of responsibilities, requirements, and candidate expectations"
 }
 
@@ -89,7 +91,8 @@ If it is a UNIVERSITY program or SCHOLARSHIP:
   "organization": "University or Institution Name",
   "title": "Program or Scholarship Name",
   "degreeLevel": "Bachelors", "Masters", or "PhD",
-  "deadline": "deadline date formatted as YYYY-MM-DD if found, else empty string",
+  "openingDate": "portal opening date formatted as YYYY-MM-DD if found, else empty string",
+  "deadline": "application deadline formatted as YYYY-MM-DD if found, else empty string",
   "fundingType": "fully funded", "partial tuition", or "no funding",
   "stipendAmount": "stipend or scholarship value if found, else empty string",
   "notes": "Short summary of program description, required documents, or research focus"
@@ -227,6 +230,36 @@ function getSimulatedParseResult(text: string) {
 
   const extractedDeadline = extractDate(cleanText);
 
+  // Opening Date helper
+  function extractOpeningDate(str: string): string {
+    const openingRegexes = [
+      /(?:open in|opens in|available from|opens|portal open):?\s*([A-Za-z]+ \d{1,2},? \d{4})/i,
+      /(?:open in|opens in|available from|portal open):?\s*(late|early|mid)?\s*([A-Za-z]+(?:\s+\d{4})?)/i,
+    ];
+
+    if (str.toLowerCase().includes('october')) {
+      const yearMatch = str.match(/202[6-9]/);
+      const year = yearMatch ? yearMatch[0] : '2026';
+      return `${year}-10-20`;
+    }
+
+    for (const regex of openingRegexes) {
+      const match = str.match(regex);
+      if (match && match[1]) {
+        const parsedDate = new Date(match[1]);
+        if (!isNaN(parsedDate.getTime())) {
+          const yyyy = parsedDate.getFullYear();
+          const mm = String(parsedDate.getMonth() + 1).padStart(2, '0');
+          const dd = String(parsedDate.getDate()).padStart(2, '0');
+          return `${yyyy}-${mm}-${dd}`;
+        }
+      }
+    }
+    return '';
+  }
+
+  const extractedOpeningDate = extractOpeningDate(cleanText);
+
   if (isScholarship) {
     let degree = 'Masters';
     if (lower.includes('phd') || lower.includes('ph.d') || lower.includes('doctoral') || lower.includes('doctor')) {
@@ -308,6 +341,7 @@ function getSimulatedParseResult(text: string) {
       organization: school,
       title: title || 'Graduate Program',
       degreeLevel: degree,
+      openingDate: extractedOpeningDate || '',
       deadline: extractedDeadline || '2026-12-15',
       fundingType: funding,
       stipendAmount: stipend,

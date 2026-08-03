@@ -67,6 +67,7 @@ export async function createApplication(payload: {
   appliedDate?: string;
   fundingType?: string;
   stipendAmount?: string;
+  openingDate?: string;
   deadline?: string;
   hasSop?: boolean;
   hasTranscripts?: boolean;
@@ -87,7 +88,7 @@ export async function createApplication(payload: {
 
     const { 
       applicationType, organization, title, status, url, notes, salary, locationType, appliedDate,
-      fundingType, stipendAmount, deadline, hasSop, hasTranscripts, hasReferences, hasTestScores,
+      fundingType, stipendAmount, openingDate, deadline, hasSop, hasTranscripts, hasReferences, hasTestScores,
       hasCvResume, hasPersonalStatement, hasCoverLetter, currency, degreeLevel, potentialAdvisor
     } = payload;
 
@@ -96,6 +97,7 @@ export async function createApplication(payload: {
     }
 
     const parsedAppliedDate = appliedDate ? new Date(appliedDate) : new Date();
+    const parsedOpeningDate = openingDate ? new Date(openingDate) : null;
     const parsedDeadline = deadline ? new Date(deadline) : null;
 
     // Create the application
@@ -113,6 +115,7 @@ export async function createApplication(payload: {
         appliedDate: parsedAppliedDate,
         fundingType: fundingType || null,
         stipendAmount: stipendAmount || null,
+        openingDate: parsedOpeningDate,
         deadline: parsedDeadline,
         hasSop: hasSop || false,
         hasTranscripts: hasTranscripts || false,
@@ -161,6 +164,7 @@ export async function updateApplication(
     appliedDate?: string;
     fundingType?: string;
     stipendAmount?: string;
+    openingDate?: string;
     deadline?: string;
     hasSop?: boolean;
     hasTranscripts?: boolean;
@@ -191,7 +195,7 @@ export async function updateApplication(
 
     const { 
       applicationType, organization, title, status, url, notes, salary, locationType, appliedDate,
-      fundingType, stipendAmount, deadline, hasSop, hasTranscripts, hasReferences, hasTestScores,
+      fundingType, stipendAmount, openingDate, deadline, hasSop, hasTranscripts, hasReferences, hasTestScores,
       hasCvResume, hasPersonalStatement, hasCoverLetter, currency, degreeLevel, potentialAdvisor
     } = payload;
 
@@ -207,6 +211,7 @@ export async function updateApplication(
     if (appliedDate !== undefined) updateData.appliedDate = new Date(appliedDate);
     if (fundingType !== undefined) updateData.fundingType = fundingType || null;
     if (stipendAmount !== undefined) updateData.stipendAmount = stipendAmount || null;
+    if (openingDate !== undefined) updateData.openingDate = openingDate ? new Date(openingDate) : null;
     if (deadline !== undefined) updateData.deadline = deadline ? new Date(deadline) : null;
     if (hasSop !== undefined) updateData.hasSop = hasSop;
     if (hasTranscripts !== undefined) updateData.hasTranscripts = hasTranscripts;

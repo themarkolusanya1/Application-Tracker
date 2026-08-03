@@ -1145,28 +1145,39 @@ export default function DashboardClient({
                           </p>
                         )}
 
-                        {/* Bottom date, deadline, and link */}
-                        <div className="flex justify-between items-center pt-2 border-t border-white/5 text-[10px] text-gray-500">
-                          {app.deadline ? (
-                            (() => {
-                              const d = new Date(app.deadline);
-                              const isUrgent = d.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000;
-                              return (
-                                <span className={`inline-flex items-center gap-1 font-bold ${isUrgent ? 'text-brand-rose' : 'text-gray-400'}`}>
-                                  <Calendar className="w-3.5 h-3.5" />
-                                  Due {d.toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                        {/* Bottom date, deadline, opening date, and link */}
+                        <div className="flex justify-between items-center pt-2 border-t border-white/5 text-[10px] text-gray-500 gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {app.openingDate && (
+                              <span className="inline-flex items-center gap-1 font-bold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                                <Calendar className="w-3 h-3 text-emerald-600" />
+                                Opens {new Date(app.openingDate).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                              </span>
+                            )}
+
+                            {app.deadline ? (
+                              (() => {
+                                const d = new Date(app.deadline);
+                                const isUrgent = d.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000;
+                                return (
+                                  <span className={`inline-flex items-center gap-1 font-bold ${isUrgent ? 'text-brand-rose' : 'text-gray-400'}`}>
+                                    <Calendar className="w-3.5 h-3.5" />
+                                    Due {d.toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                                  </span>
+                                );
+                              })()
+                            ) : (
+                              !app.openingDate && (
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="w-3 h-3 text-brand-indigo" />
+                                  {new Date(app.appliedDate).toLocaleDateString([], {
+                                    month: 'short',
+                                    day: 'numeric',
+                                  })}
                                 </span>
-                              );
-                            })()
-                          ) : (
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3 text-brand-indigo" />
-                              {new Date(app.appliedDate).toLocaleDateString([], {
-                                month: 'short',
-                                day: 'numeric',
-                              })}
-                            </span>
-                          )}
+                              )
+                            )}
+                          </div>
 
                           {app.url && (
                             <a

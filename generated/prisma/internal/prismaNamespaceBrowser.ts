@@ -105,6 +105,7 @@ export const ApplicationScalarFieldEnum = {
   currency: 'currency',
   fundingType: 'fundingType',
   stipendAmount: 'stipendAmount',
+  openingDate: 'openingDate',
   deadline: 'deadline',
   hasSop: 'hasSop',
   hasTranscripts: 'hasTranscripts',

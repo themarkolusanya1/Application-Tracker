@@ -92,12 +92,15 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
         
         if (data.applicationType === 'scholarship') {
           setDegreeLevel(data.degreeLevel || 'Masters');
-          setDeadline(data.deadline || '');
+          if (data.openingDate) setOpeningDate(data.openingDate);
+          if (data.deadline) setDeadline(data.deadline);
           setFundingType(data.fundingType || 'fully funded');
           setStipendAmount(data.stipendAmount || '');
           setStatus('Researching');
         } else {
           setLocationType(data.locationType || 'ON_SITE');
+          if (data.openingDate) setOpeningDate(data.openingDate);
+          if (data.deadline) setDeadline(data.deadline);
           setSalary(data.salary || '');
           setCurrency(data.currency || 'USD');
           setStatus('WISH_LIST');
@@ -125,10 +128,11 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
     }
   };
 
-  // New checklist / currency fields
+  // New checklist / currency / opening date fields
   const [currency, setCurrency] = useState('USD');
   const [fundingType, setFundingType] = useState('fully funded');
   const [stipendAmount, setStipendAmount] = useState('');
+  const [openingDate, setOpeningDate] = useState('');
   const [deadline, setDeadline] = useState('');
   const [degreeLevel, setDegreeLevel] = useState('Masters');
   const [potentialAdvisor, setPotentialAdvisor] = useState('');
@@ -174,6 +178,11 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
       setFundingType(applicationToEdit.fundingType || 'fully funded');
       setStipendAmount(applicationToEdit.stipendAmount || '');
       
+      const openDate = applicationToEdit.openingDate 
+        ? new Date(applicationToEdit.openingDate).toISOString().substring(0, 10)
+        : '';
+      setOpeningDate(openDate);
+
       const deadlineDate = applicationToEdit.deadline 
         ? new Date(applicationToEdit.deadline).toISOString().substring(0, 10)
         : '';
@@ -203,6 +212,7 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
 
       setFundingType('fully funded');
       setStipendAmount('');
+      setOpeningDate('');
       setDeadline('');
       setDegreeLevel('Masters');
       setPotentialAdvisor('');
@@ -248,6 +258,7 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
         status,
         url: url.trim() || undefined,
         appliedDate: appliedDate || undefined,
+        openingDate: openingDate || undefined,
         deadline: deadline || undefined,
         notes: notes.trim() || undefined,
         currency,
@@ -674,8 +685,8 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
             </div>
           </div>
 
-          {/* Dates: Applied Date & Application Deadline */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Dates: Applied Date, Portal Opening Date, & Application Deadline */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700" htmlFor="appliedDate">
                 Applied Date
@@ -695,12 +706,32 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700" htmlFor="deadline">
-                Application Deadline
+              <label className="text-xs font-bold text-slate-700 flex items-center justify-between" htmlFor="openingDate">
+                <span>Portal Opening Date</span>
+                <span className="text-[10px] font-semibold text-emerald-600">Opens</span>
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                  <Calendar className="w-4 h-4 text-brand-indigo" />
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-emerald-600">
+                  <Calendar className="w-4 h-4" />
+                </span>
+                <input
+                  id="openingDate"
+                  type="date"
+                  value={openingDate}
+                  onChange={(e) => setOpeningDate(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 glass-input text-sm border-emerald-500/30 focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700 flex items-center justify-between" htmlFor="deadline">
+                <span>Application Deadline</span>
+                <span className="text-[10px] font-semibold text-rose-500">Closes</span>
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-rose-500">
+                  <Calendar className="w-4 h-4" />
                 </span>
                 <input
                   id="deadline"

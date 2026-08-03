@@ -18,6 +18,21 @@ export default function CalendarClient({ initialApplications }: CalendarClientPr
   const now = new Date();
 
   initialApplications.forEach(app => {
+    // 0. Application portal opening date
+    if (app.openingDate) {
+      events.push({
+        id: `opening-${app.id}`,
+        appId: app.id,
+        applicationType: app.applicationType || 'job',
+        title: `${app.organization} - Portal Opens`,
+        organization: app.organization,
+        date: new Date(app.openingDate),
+        type: 'opening',
+        status: app.status,
+        url: app.url,
+      });
+    }
+
     // 1. Application deadlines are forward-looking key events
     if (app.deadline) {
       events.push({
