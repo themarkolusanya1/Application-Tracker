@@ -35,6 +35,7 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [showDuplicateAlert, setShowDuplicateAlert] = useState(false);
 
 
 
@@ -262,8 +263,6 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
       default: return '$';
     }
   };
-
-  const [showDuplicateAlert, setShowDuplicateAlert] = useState(false);
 
   const executeSave = (forceAllowDuplicate = false) => {
     setError(null);

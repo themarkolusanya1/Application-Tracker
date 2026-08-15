@@ -912,6 +912,7 @@ export default function DashboardClient({
                 <option value="all">All Positions</option>
                 <option value="job">Jobs Only</option>
                 <option value="internship">Internships Only</option>
+                <option value="fellowship">Fellowships Only</option>
               </select>
               <Filter className="absolute right-3 top-0 bottom-0 my-auto w-3.5 h-3.5 text-gray-500 pointer-events-none" />
             </div>
