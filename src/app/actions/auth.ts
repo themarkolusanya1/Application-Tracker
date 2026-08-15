@@ -151,75 +151,88 @@ export async function logout(): Promise<ActionResponse> {
  */
 export async function getCurrentUser(): Promise<UserSession | null> {
   try {
-    const { userId } = await auth();
-    console.log('[getCurrentUser] Clerk userId:', userId);
+    const { userId, sessionClaims } = await auth();
     if (!userId) return null;
 
-    const user = await currentUser();
-    if (!user) return null;
-
-    const email = user.emailAddresses[0]?.emailAddress;
-    if (!email) return null;
-
-    const name = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User';
-
-    // Find user by Clerk ID
+    // 1. Check DB first (instant local index lookup, avoiding external network latency)
     let dbUser = await db.user.findUnique({
       where: { id: userId },
     });
 
-    if (!dbUser) {
-      // Check if user exists by email (pre-Clerk migration)
-      const existingUser = await db.user.findUnique({
-        where: { email: email.toLowerCase() },
+    if (dbUser) {
+      return {
+        userId: dbUser.id,
+        email: dbUser.email,
+        name: dbUser.name,
+      };
+    }
+
+    // 2. User not in DB yet (fresh registration / first login). Fetch details from Clerk
+    let user = await currentUser();
+    let email = user?.emailAddresses?.[0]?.emailAddress || (sessionClaims as any)?.email || (sessionClaims as any)?.email_address;
+    let name = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : (sessionClaims as any)?.name || 'User';
+
+    // If email isn't available yet due to Clerk API propagation delay, retry after 200ms
+    if (!email) {
+      await new Promise((res) => setTimeout(res, 200));
+      user = await currentUser();
+      email = user?.emailAddresses?.[0]?.emailAddress || (sessionClaims as any)?.email || (sessionClaims as any)?.email_address;
+      name = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : (sessionClaims as any)?.name || 'User';
+    }
+
+    if (!email) {
+      email = `${userId}@clerk.user`;
+    }
+    if (!name || name === 'User') {
+      name = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User' : 'User';
+    }
+
+    // Check if user exists by email (pre-Clerk migration)
+    const existingUser = await db.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (!existingUser) {
+      // Auto-create new user in database
+      dbUser = await db.user.create({
+        data: {
+          id: userId,
+          name,
+          email: email.toLowerCase(),
+          password: 'clerk_managed',
+          role: 'STUDENT',
+        },
+      });
+    } else {
+      // Migrate existing user to Clerk ID
+      const tempEmail = `migrated_${existingUser.id}_${Date.now()}@temp.local`;
+      await db.user.update({
+        where: { id: existingUser.id },
+        data: { email: tempEmail },
       });
 
-      if (!existingUser) {
-        // Auto-create new user
-        dbUser = await db.user.create({
-          data: {
-            id: userId,
-            name,
-            email: email.toLowerCase(),
-            password: 'clerk_managed',
-            role: 'STUDENT',
-          },
-        });
-      } else {
-        // Migrate existing user to Clerk ID
-        // To prevent unique constraint violation on email, update the old user's email first
-        const tempEmail = `migrated_${existingUser.id}_${Date.now()}@temp.local`;
-        await db.user.update({
-          where: { id: existingUser.id },
-          data: { email: tempEmail },
-        });
+      dbUser = await db.user.create({
+        data: {
+          id: userId,
+          name,
+          email: email.toLowerCase(),
+          password: 'clerk_managed',
+          role: existingUser.role,
+          profilePicture: existingUser.profilePicture,
+        },
+      });
 
-        // Create the new user with Clerk ID and the original email
-        dbUser = await db.user.create({
-          data: {
-            id: userId,
-            name,
-            email: email.toLowerCase(),
-            password: 'clerk_managed',
-            role: existingUser.role,
-            profilePicture: existingUser.profilePicture,
-          },
-        });
+      await db.application.updateMany({
+        where: { userId: existingUser.id },
+        data: { userId: userId },
+      });
 
-        // Update all related records
-        await db.application.updateMany({
-          where: { userId: existingUser.id },
-          data: { userId: userId },
-        });
+      await db.notification.updateMany({
+        where: { userId: existingUser.id },
+        data: { userId: userId },
+      });
 
-        await db.notification.updateMany({
-          where: { userId: existingUser.id },
-          data: { userId: userId },
-        });
-
-        // Delete the old user
-        await db.user.delete({ where: { id: existingUser.id } });
-      }
+      await db.user.delete({ where: { id: existingUser.id } });
     }
 
     return {
