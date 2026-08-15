@@ -348,8 +348,9 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent showCloseButton={false} className="sm:max-w-2xl w-full p-0 overflow-hidden bg-slate-50 border border-slate-200/85 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+    <>
+      <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+        <DialogContent showCloseButton={false} className="sm:max-w-2xl w-full p-0 overflow-hidden bg-slate-50 border border-slate-200/85 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-6 border-b border-slate-200/80 flex justify-between items-center bg-slate-50">
           <div className="flex items-center gap-3">
@@ -983,67 +984,68 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
           )}
         </div>
       </DialogContent>
-
-      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the application.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => {
-              if (applicationToEdit) {
-                startTransition(async () => {
-                  const res = await deleteApplication(applicationToEdit.id);
-                  if (res.success) {
-                    toast.success('Application deleted successfully!');
-                    onClose();
-                  } else {
-                    setError(res.error || 'Failed to delete application.');
-                  }
-                });
-              }
-              setShowDeleteAlert(false);
-            }}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Shadcn Duplicate Alert Dialog */}
-      <AlertDialog open={showDuplicateAlert} onOpenChange={setShowDuplicateAlert}>
-        <AlertDialogContent className="glass-card border-amber-500/40 bg-slate-950 text-white max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-amber-400 font-bold text-lg">
-              <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
-              Duplicate Application Detected
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-300 text-sm leading-relaxed mt-2">
-              You already have an existing entry for <strong className="text-white">{organization}</strong> (<em>{title}</em>).
-              <br /><br />
-              Would you like to add another copy anyway, or cancel?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 mt-4">
-            <AlertDialogCancel className="px-4 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                setShowDuplicateAlert(false);
-                executeSave(true);
-              }}
-              className="px-4 py-2 text-xs font-bold rounded-lg bg-amber-600 hover:bg-amber-500 text-white"
-            >
-              Add Duplicate Copy
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Dialog>
-  );
+
+    <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete the application.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={() => {
+            if (applicationToEdit) {
+              startTransition(async () => {
+                const res = await deleteApplication(applicationToEdit.id);
+                if (res.success) {
+                  toast.success('Application deleted successfully!');
+                  onClose();
+                } else {
+                  setError(res.error || 'Failed to delete application.');
+                }
+              });
+            }
+            setShowDeleteAlert(false);
+          }}>
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
+    {/* Shadcn Duplicate Alert Dialog */}
+    <AlertDialog open={showDuplicateAlert} onOpenChange={setShowDuplicateAlert}>
+      <AlertDialogContent className="glass-card border-amber-500/40 bg-slate-950 text-white max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2 text-amber-400 font-bold text-lg">
+            <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
+            Duplicate Application Detected
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-slate-300 text-sm leading-relaxed mt-2">
+            You already have an existing entry for <strong className="text-white">{organization}</strong> (<em>{title}</em>).
+            <br /><br />
+            Would you like to add another copy anyway, or cancel?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="gap-2 mt-4">
+          <AlertDialogCancel className="px-4 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              setShowDuplicateAlert(false);
+              executeSave(true);
+            }}
+            className="px-4 py-2 text-xs font-bold rounded-lg bg-amber-600 hover:bg-amber-500 text-white"
+          >
+            Add Duplicate Copy
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
+);
 }
