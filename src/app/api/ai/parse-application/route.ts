@@ -68,19 +68,23 @@ export async function POST(req: Request) {
 Analyze the following text copy-pasted from a job post, university admission site, scholarship page, or internship listing.
 Identify whether this is primarily a Job / Internship position or a University / Scholarship application.
 
+CRITICAL CLASSIFICATION RULES:
+- Any internship, research intern, student researcher position, co-op, or trainee program (e.g. Mila Researcher Program, Research Internship, AI Intern) MUST be classified as an INTERNSHIP with "applicationType": "internship". These belong under Jobs & Internships.
+- ONLY set "applicationType": "scholarship" if the text is specifically for a university degree program admission (Bachelors, Masters, PhD degree admission) or an academic scholarship award.
+
 Extract the relevant details into a raw JSON object with the following schema depending on the application type.
 Do not wrap the output in markdown or code blocks. Return ONLY the raw JSON.
 
 If it is a JOB or INTERNSHIP:
 {
   "applicationType": "job" or "internship",
-  "organization": "Company Name",
-  "title": "Job Title",
+  "organization": "Company or Institute Name",
+  "title": "Job or Internship Title",
   "locationType": "ON_SITE", "HYBRID", or "REMOTE",
+  "location": "City and Country e.g. 'Zurich, Switzerland' or 'London, UK' if found, else empty string",
   "url": "URL if found, else empty string",
   "salary": "numerical value or range if found, e.g. '120000', else empty string",
   "currency": "three-letter code e.g. 'USD', 'EUR', 'GBP', else 'USD'",
-  "openingDate": "portal opening or start date formatted as YYYY-MM-DD if found, else empty string",
   "deadline": "application deadline formatted as YYYY-MM-DD if found, else empty string",
   "notes": "Short summary of responsibilities, requirements, and candidate expectations"
 }
@@ -91,7 +95,7 @@ If it is a UNIVERSITY program or SCHOLARSHIP:
   "organization": "University or Institution Name",
   "title": "Program or Scholarship Name",
   "degreeLevel": "Bachelors", "Masters", or "PhD",
-  "openingDate": "portal opening date formatted as YYYY-MM-DD if found, else empty string",
+  "location": "City and Country e.g. 'Cambridge, UK' or 'Boston, USA' if found, else empty string",
   "deadline": "application deadline formatted as YYYY-MM-DD if found, else empty string",
   "fundingType": "fully funded", "partial tuition", or "no funding",
   "stipendAmount": "stipend or scholarship value if found, else empty string",
@@ -170,8 +174,12 @@ function getSimulatedParseResult(text: string) {
   const firstLine = lines[0] || '';
   const firstLineClean = firstLine.replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '').trim();
 
-  // 1. Determine if it is a Scholarship/Admissions/University Application
-  const isScholarship = lower.includes('phd') || 
+  // Check if internship keyword exists
+  const isInternship = lower.includes('intern') || lower.includes('internship') || lower.includes('trainee') || lower.includes('co-op') || lower.includes('coop') || lower.includes('researcher program');
+
+  // Determine if it is a Scholarship/Admissions/University Application (degree degree programs)
+  const isScholarship = !isInternship && (
+                        lower.includes('phd') || 
                         lower.includes('doctor') || 
                         lower.includes('master') || 
                         lower.includes('msc') || 
@@ -181,14 +189,9 @@ function getSimulatedParseResult(text: string) {
                         lower.includes('scholarship') || 
                         lower.includes('admission') ||
                         lower.includes('academic') ||
-                        lower.includes('student') ||
-                        lower.includes('professor') ||
-                        lower.includes('supervisor') ||
-                        lower.includes('faculty') ||
-                        lower.includes('program') ||
                         lower.includes('funding') ||
                         lower.includes('stipend') ||
-                        lower.includes('degree');
+                        lower.includes('degree'));
 
   // Date parser helper
   function extractDate(str: string): string {

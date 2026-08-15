@@ -776,6 +776,7 @@ export const ApplicationScalarFieldEnum = {
   notes: 'notes',
   salary: 'salary',
   locationType: 'locationType',
+  location: 'location',
   appliedDate: 'appliedDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',

@@ -38,7 +38,8 @@ model Application {
   url             String?
   notes           String?
   salary          String? // Represents salary (job)
-  locationType    String   @default("ON_SITE") // Represents location (job)
+  locationType    String   @default("ON_SITE") // Represents location type (ON_SITE, HYBRID, REMOTE)
+  location        String?  // Represents Location / City & Country (e.g. Zurich, Switzerland)
   appliedDate     DateTime @default(now())
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

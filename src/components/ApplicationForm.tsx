@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition, useState, useEffect } from 'react';
-import { X, Briefcase, DollarSign, Link as LinkIcon, Calendar, FileText, MapPin, Layers, GraduationCap, Trash2, CheckCircle2 } from 'lucide-react';
+import { X, Briefcase, DollarSign, Link as LinkIcon, Calendar, FileText, MapPin, Layers, GraduationCap, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -89,17 +89,16 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
         setOrganization(data.organization || '');
         setTitle(data.title || '');
         setUrl(data.url || '');
-        
-        if (data.applicationType === 'scholarship') {
+              if (data.applicationType === 'scholarship') {
           setDegreeLevel(data.degreeLevel || 'Masters');
-          if (data.openingDate) setOpeningDate(data.openingDate);
+          if (data.location) setLocation(data.location);
           if (data.deadline) setDeadline(data.deadline);
           setFundingType(data.fundingType || 'fully funded');
           setStipendAmount(data.stipendAmount || '');
           setStatus('Researching');
         } else {
           setLocationType(data.locationType || 'ON_SITE');
-          if (data.openingDate) setOpeningDate(data.openingDate);
+          if (data.location) setLocation(data.location);
           if (data.deadline) setDeadline(data.deadline);
           setSalary(data.salary || '');
           setCurrency(data.currency || 'USD');
@@ -111,7 +110,7 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
         setAiSuccessMsg(
           result.simulated
             ? '✨ Simulating AI parsing: Filled fields successfully!'
-            : '✨ AI parsed details successfully! Switched to manual form to review.'
+            : '✨ Application details parsed and filled automatically!'
         );
         // Switch back to manual form so they can inspect and confirm
         setTimeout(() => {
@@ -128,11 +127,11 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
     }
   };
 
-  // New checklist / currency / opening date fields
+  // New checklist / currency / location fields
   const [currency, setCurrency] = useState('USD');
   const [fundingType, setFundingType] = useState('fully funded');
   const [stipendAmount, setStipendAmount] = useState('');
-  const [openingDate, setOpeningDate] = useState('');
+  const [location, setLocation] = useState('');
   const [deadline, setDeadline] = useState('');
   const [degreeLevel, setDegreeLevel] = useState('Masters');
   const [potentialAdvisor, setPotentialAdvisor] = useState('');
@@ -165,6 +164,7 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
       setTitle(applicationToEdit.title || '');
       setStatus(applicationToEdit.status || 'WISH_LIST');
       setLocationType(applicationToEdit.locationType || 'ON_SITE');
+      setLocation(applicationToEdit.location || '');
       setUrl(applicationToEdit.url || '');
       setSalary(applicationToEdit.salary || '');
       setCurrency(applicationToEdit.currency || 'USD');
@@ -178,11 +178,6 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
       setFundingType(applicationToEdit.fundingType || 'fully funded');
       setStipendAmount(applicationToEdit.stipendAmount || '');
       
-      const openDate = applicationToEdit.openingDate 
-        ? new Date(applicationToEdit.openingDate).toISOString().substring(0, 10)
-        : '';
-      setOpeningDate(openDate);
-
       const deadlineDate = applicationToEdit.deadline 
         ? new Date(applicationToEdit.deadline).toISOString().substring(0, 10)
         : '';
@@ -204,6 +199,7 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
       setTitle('');
       setStatus('WISH_LIST');
       setLocationType('ON_SITE');
+      setLocation('');
       setUrl('');
       setSalary('');
       setCurrency('USD');
@@ -212,7 +208,6 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
 
       setFundingType('fully funded');
       setStipendAmount('');
-      setOpeningDate('');
       setDeadline('');
       setDegreeLevel('Masters');
       setPotentialAdvisor('');
@@ -227,6 +222,34 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
     setError(null);
   }, [applicationToEdit, isOpen]);
 
+  const handleTrackChange = (newType: string) => {
+    if (newType === applicationType) return;
+    setApplicationType(newType);
+
+    if (newType === 'scholarship') {
+      const map: Record<string, string> = {
+        WISH_LIST: 'Researching',
+        APPLIED: 'Submitted',
+        INTERVIEWING: 'Interview',
+        OFFERED: 'Admitted',
+        REJECTED: 'Rejected',
+        WITHDRAWN: 'Withdrawn'
+      };
+      setStatus(map[status] || 'Researching');
+    } else {
+      const map: Record<string, string> = {
+        Researching: 'WISH_LIST',
+        'Documents in Progress': 'WISH_LIST',
+        Submitted: 'APPLIED',
+        Interview: 'INTERVIEWING',
+        Admitted: 'OFFERED',
+        Rejected: 'REJECTED',
+        Withdrawn: 'WITHDRAWN'
+      };
+      setStatus(map[status] || 'WISH_LIST');
+    }
+  };
+
   if (!isOpen) return null;
 
   const getCurrencySymbol = (code: string) => {
@@ -240,15 +263,10 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const [showDuplicateAlert, setShowDuplicateAlert] = useState(false);
+
+  const executeSave = (forceAllowDuplicate = false) => {
     setError(null);
-
-    if (!organization.trim() || !title.trim()) {
-      setError('Organization/Institution and Title/Program are required.');
-      return;
-    }
-
     startTransition(async () => {
       let res;
       const payload: any = {
@@ -257,12 +275,13 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
         title,
         status,
         url: url.trim() || undefined,
+        location: location.trim() || undefined,
         appliedDate: appliedDate || undefined,
-        openingDate: openingDate || undefined,
         deadline: deadline || undefined,
         notes: notes.trim() || undefined,
         currency,
         hasCoverLetter,
+        allowDuplicate: forceAllowDuplicate
       };
 
       if (applicationType === 'scholarship') {
@@ -305,9 +324,22 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
         toast.success(applicationToEdit ? 'Application updated successfully!' : 'Application logged successfully!');
         onClose();
       } else {
-        setError(res.error || 'Failed to save application.');
+        if (res.error?.includes('Duplicate Entry Detected')) {
+          setShowDuplicateAlert(true);
+        } else {
+          setError(res.error || 'Failed to save application.');
+        }
       }
     });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!organization.trim() || !title.trim()) {
+      setError('Organization/Institution and Title/Program are required.');
+      return;
+    }
+    executeSave(false);
   };
 
   const handleDelete = () => {
@@ -349,49 +381,47 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
           )}
 
           {/* Group 0: Application Type Selection */}
-          {!applicationToEdit && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700">Application Track</label>
-              <div className="grid grid-cols-3 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setApplicationType('job')}
-                  className={`flex items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
-                    applicationType === 'job'
-                      ? 'bg-brand-indigo border-brand-indigo/50 text-white shadow-md'
-                      : 'bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100'
-                  }`}
-                >
-                  <Briefcase className="w-4 h-4" />
-                  <span>Job</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setApplicationType('internship')}
-                  className={`flex items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
-                    applicationType === 'internship'
-                      ? 'bg-brand-indigo border-brand-indigo/50 text-white shadow-md'
-                      : 'bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100'
-                  }`}
-                >
-                  <Layers className="w-4 h-4" />
-                  <span>Internship</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setApplicationType('scholarship')}
-                  className={`flex items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
-                    applicationType === 'scholarship'
-                      ? 'bg-brand-amber border-brand-amber/50 text-white shadow-md shadow-brand-amber/10'
-                      : 'bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100'
-                  }`}
-                >
-                  <GraduationCap className="w-4 h-4" />
-                  <span>University</span>
-                </button>
-              </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700">Application Track</label>
+            <div className="grid grid-cols-3 gap-3">
+              <button
+                type="button"
+                onClick={() => handleTrackChange('job')}
+                className={`flex items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
+                  applicationType === 'job'
+                    ? 'bg-brand-indigo border-brand-indigo/50 text-white shadow-md'
+                    : 'bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                }`}
+              >
+                <Briefcase className="w-4 h-4" />
+                <span>Job</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTrackChange('internship')}
+                className={`flex items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
+                  applicationType === 'internship'
+                    ? 'bg-brand-indigo border-brand-indigo/50 text-white shadow-md'
+                    : 'bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                }`}
+              >
+                <Layers className="w-4 h-4" />
+                <span>Internship</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTrackChange('scholarship')}
+                className={`flex items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
+                  applicationType === 'scholarship'
+                    ? 'bg-brand-amber border-brand-amber/50 text-white shadow-md shadow-brand-amber/10'
+                    : 'bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                }`}
+              >
+                <GraduationCap className="w-4 h-4" />
+                <span>University</span>
+              </button>
             </div>
-          )}
+          </div>
 
           {/* Mode Switcher */}
           {!applicationToEdit && (
@@ -588,11 +618,11 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
               </div>
             ) : (
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700" htmlFor="location">
+                <label className="text-xs font-bold text-slate-700" htmlFor="locationType">
                   Location Type
                 </label>
                 <select
-                  id="location"
+                  id="locationType"
                   value={locationType}
                   onChange={(e) => setLocationType(e.target.value)}
                   className="w-full px-3 py-2 glass-input text-sm bg-white"
@@ -603,6 +633,26 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
                 </select>
               </div>
             )}
+
+            {/* Location / Country field */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700" htmlFor="location">
+                Location / Country
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                  <MapPin className="w-4 h-4 text-brand-indigo" />
+                </span>
+                <input
+                  id="location"
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 glass-input text-sm"
+                  placeholder="e.g. Zurich, Switzerland"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Group 3: Financial */}
@@ -685,8 +735,8 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
             </div>
           </div>
 
-          {/* Dates: Applied Date, Portal Opening Date, & Application Deadline */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Dates: Applied Date & Application Deadline */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700" htmlFor="appliedDate">
                 Applied Date
@@ -706,32 +756,12 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 flex items-center justify-between" htmlFor="openingDate">
-                <span>Portal Opening Date</span>
-                <span className="text-[10px] font-semibold text-emerald-600">Opens</span>
+              <label className="text-xs font-bold text-slate-700" htmlFor="deadline">
+                Application Deadline
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-emerald-600">
-                  <Calendar className="w-4 h-4" />
-                </span>
-                <input
-                  id="openingDate"
-                  type="date"
-                  value={openingDate}
-                  onChange={(e) => setOpeningDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 glass-input text-sm border-emerald-500/30 focus:border-emerald-500"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 flex items-center justify-between" htmlFor="deadline">
-                <span>Application Deadline</span>
-                <span className="text-[10px] font-semibold text-rose-500">Closes</span>
-              </label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-rose-500">
-                  <Calendar className="w-4 h-4" />
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                  <Calendar className="w-4 h-4 text-brand-indigo" />
                 </span>
                 <input
                   id="deadline"
@@ -979,6 +1009,37 @@ export default function ApplicationForm({ isOpen, onClose, applicationToEdit }: 
               setShowDeleteAlert(false);
             }}>
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Shadcn Duplicate Alert Dialog */}
+      <AlertDialog open={showDuplicateAlert} onOpenChange={setShowDuplicateAlert}>
+        <AlertDialogContent className="glass-card border-amber-500/40 bg-slate-950 text-white max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-amber-400 font-bold text-lg">
+              <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
+              Duplicate Application Detected
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-300 text-sm leading-relaxed mt-2">
+              You already have an existing entry for <strong className="text-white">{organization}</strong> (<em>{title}</em>).
+              <br /><br />
+              Would you like to add another copy anyway, or cancel?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 mt-4">
+            <AlertDialogCancel className="px-4 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowDuplicateAlert(false);
+                executeSave(true);
+              }}
+              className="px-4 py-2 text-xs font-bold rounded-lg bg-amber-600 hover:bg-amber-500 text-white"
+            >
+              Add Duplicate Copy
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

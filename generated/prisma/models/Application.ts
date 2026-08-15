@@ -35,6 +35,7 @@ export type ApplicationMinAggregateOutputType = {
   notes: string | null
   salary: string | null
   locationType: string | null
+  location: string | null
   appliedDate: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -65,6 +66,7 @@ export type ApplicationMaxAggregateOutputType = {
   notes: string | null
   salary: string | null
   locationType: string | null
+  location: string | null
   appliedDate: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -95,6 +97,7 @@ export type ApplicationCountAggregateOutputType = {
   notes: number
   salary: number
   locationType: number
+  location: number
   appliedDate: number
   createdAt: number
   updatedAt: number
@@ -127,6 +130,7 @@ export type ApplicationMinAggregateInputType = {
   notes?: true
   salary?: true
   locationType?: true
+  location?: true
   appliedDate?: true
   createdAt?: true
   updatedAt?: true
@@ -157,6 +161,7 @@ export type ApplicationMaxAggregateInputType = {
   notes?: true
   salary?: true
   locationType?: true
+  location?: true
   appliedDate?: true
   createdAt?: true
   updatedAt?: true
@@ -187,6 +192,7 @@ export type ApplicationCountAggregateInputType = {
   notes?: true
   salary?: true
   locationType?: true
+  location?: true
   appliedDate?: true
   createdAt?: true
   updatedAt?: true
@@ -290,6 +296,7 @@ export type ApplicationGroupByOutputType = {
   notes: string | null
   salary: string | null
   locationType: string
+  location: string | null
   appliedDate: Date
   createdAt: Date
   updatedAt: Date
@@ -341,6 +348,7 @@ export type ApplicationWhereInput = {
   notes?: Prisma.StringNullableFilter<"Application"> | string | null
   salary?: Prisma.StringNullableFilter<"Application"> | string | null
   locationType?: Prisma.StringFilter<"Application"> | string
+  location?: Prisma.StringNullableFilter<"Application"> | string | null
   appliedDate?: Prisma.DateTimeFilter<"Application"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Application"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Application"> | Date | string
@@ -372,6 +380,7 @@ export type ApplicationOrderByWithRelationInput = {
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   salary?: Prisma.SortOrderInput | Prisma.SortOrder
   locationType?: Prisma.SortOrder
+  location?: Prisma.SortOrderInput | Prisma.SortOrder
   appliedDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -406,6 +415,7 @@ export type ApplicationWhereUniqueInput = Prisma.AtLeast<{
   notes?: Prisma.StringNullableFilter<"Application"> | string | null
   salary?: Prisma.StringNullableFilter<"Application"> | string | null
   locationType?: Prisma.StringFilter<"Application"> | string
+  location?: Prisma.StringNullableFilter<"Application"> | string | null
   appliedDate?: Prisma.DateTimeFilter<"Application"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Application"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Application"> | Date | string
@@ -437,6 +447,7 @@ export type ApplicationOrderByWithAggregationInput = {
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   salary?: Prisma.SortOrderInput | Prisma.SortOrder
   locationType?: Prisma.SortOrder
+  location?: Prisma.SortOrderInput | Prisma.SortOrder
   appliedDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -473,6 +484,7 @@ export type ApplicationScalarWhereWithAggregatesInput = {
   notes?: Prisma.StringNullableWithAggregatesFilter<"Application"> | string | null
   salary?: Prisma.StringNullableWithAggregatesFilter<"Application"> | string | null
   locationType?: Prisma.StringWithAggregatesFilter<"Application"> | string
+  location?: Prisma.StringNullableWithAggregatesFilter<"Application"> | string | null
   appliedDate?: Prisma.DateTimeWithAggregatesFilter<"Application"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Application"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Application"> | Date | string
@@ -502,6 +514,7 @@ export type ApplicationCreateInput = {
   notes?: string | null
   salary?: string | null
   locationType?: string
+  location?: string | null
   appliedDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -533,6 +546,7 @@ export type ApplicationUncheckedCreateInput = {
   notes?: string | null
   salary?: string | null
   locationType?: string
+  location?: string | null
   appliedDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -562,6 +576,7 @@ export type ApplicationUpdateInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationType?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -593,6 +608,7 @@ export type ApplicationUncheckedUpdateInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationType?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -623,6 +639,7 @@ export type ApplicationCreateManyInput = {
   notes?: string | null
   salary?: string | null
   locationType?: string
+  location?: string | null
   appliedDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -652,6 +669,7 @@ export type ApplicationUpdateManyMutationInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationType?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -682,6 +700,7 @@ export type ApplicationUncheckedUpdateManyInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationType?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -722,6 +741,7 @@ export type ApplicationCountOrderByAggregateInput = {
   notes?: Prisma.SortOrder
   salary?: Prisma.SortOrder
   locationType?: Prisma.SortOrder
+  location?: Prisma.SortOrder
   appliedDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -752,6 +772,7 @@ export type ApplicationMaxOrderByAggregateInput = {
   notes?: Prisma.SortOrder
   salary?: Prisma.SortOrder
   locationType?: Prisma.SortOrder
+  location?: Prisma.SortOrder
   appliedDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -782,6 +803,7 @@ export type ApplicationMinOrderByAggregateInput = {
   notes?: Prisma.SortOrder
   salary?: Prisma.SortOrder
   locationType?: Prisma.SortOrder
+  location?: Prisma.SortOrder
   appliedDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -857,6 +879,7 @@ export type ApplicationCreateWithoutUserInput = {
   notes?: string | null
   salary?: string | null
   locationType?: string
+  location?: string | null
   appliedDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -886,6 +909,7 @@ export type ApplicationUncheckedCreateWithoutUserInput = {
   notes?: string | null
   salary?: string | null
   locationType?: string
+  location?: string | null
   appliedDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -945,6 +969,7 @@ export type ApplicationScalarWhereInput = {
   notes?: Prisma.StringNullableFilter<"Application"> | string | null
   salary?: Prisma.StringNullableFilter<"Application"> | string | null
   locationType?: Prisma.StringFilter<"Application"> | string
+  location?: Prisma.StringNullableFilter<"Application"> | string | null
   appliedDate?: Prisma.DateTimeFilter<"Application"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Application"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Application"> | Date | string
@@ -974,6 +999,7 @@ export type ApplicationCreateManyUserInput = {
   notes?: string | null
   salary?: string | null
   locationType?: string
+  location?: string | null
   appliedDate?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1003,6 +1029,7 @@ export type ApplicationUpdateWithoutUserInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationType?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1032,6 +1059,7 @@ export type ApplicationUncheckedUpdateWithoutUserInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationType?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1061,6 +1089,7 @@ export type ApplicationUncheckedUpdateManyWithoutUserInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   locationType?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   appliedDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1093,6 +1122,7 @@ export type ApplicationSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   notes?: boolean
   salary?: boolean
   locationType?: boolean
+  location?: boolean
   appliedDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1124,6 +1154,7 @@ export type ApplicationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   notes?: boolean
   salary?: boolean
   locationType?: boolean
+  location?: boolean
   appliedDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1155,6 +1186,7 @@ export type ApplicationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   notes?: boolean
   salary?: boolean
   locationType?: boolean
+  location?: boolean
   appliedDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1186,6 +1218,7 @@ export type ApplicationSelectScalar = {
   notes?: boolean
   salary?: boolean
   locationType?: boolean
+  location?: boolean
   appliedDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1205,7 +1238,7 @@ export type ApplicationSelectScalar = {
   potentialAdvisor?: boolean
 }
 
-export type ApplicationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "applicationType" | "organization" | "title" | "status" | "url" | "notes" | "salary" | "locationType" | "appliedDate" | "createdAt" | "updatedAt" | "currency" | "fundingType" | "stipendAmount" | "openingDate" | "deadline" | "hasSop" | "hasTranscripts" | "hasReferences" | "hasTestScores" | "hasCvResume" | "hasPersonalStatement" | "hasCoverLetter" | "degreeLevel" | "potentialAdvisor", ExtArgs["result"]["application"]>
+export type ApplicationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "applicationType" | "organization" | "title" | "status" | "url" | "notes" | "salary" | "locationType" | "location" | "appliedDate" | "createdAt" | "updatedAt" | "currency" | "fundingType" | "stipendAmount" | "openingDate" | "deadline" | "hasSop" | "hasTranscripts" | "hasReferences" | "hasTestScores" | "hasCvResume" | "hasPersonalStatement" | "hasCoverLetter" | "degreeLevel" | "potentialAdvisor", ExtArgs["result"]["application"]>
 export type ApplicationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -1232,6 +1265,7 @@ export type $ApplicationPayload<ExtArgs extends runtime.Types.Extensions.Interna
     notes: string | null
     salary: string | null
     locationType: string
+    location: string | null
     appliedDate: Date
     createdAt: Date
     updatedAt: Date
@@ -1683,6 +1717,7 @@ export interface ApplicationFieldRefs {
   readonly notes: Prisma.FieldRef<"Application", 'String'>
   readonly salary: Prisma.FieldRef<"Application", 'String'>
   readonly locationType: Prisma.FieldRef<"Application", 'String'>
+  readonly location: Prisma.FieldRef<"Application", 'String'>
   readonly appliedDate: Prisma.FieldRef<"Application", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Application", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Application", 'DateTime'>

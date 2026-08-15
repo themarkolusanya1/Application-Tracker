@@ -52,6 +52,12 @@ export async function getApplicationById(id: string): Promise<ActionResponse<any
   }
 }
 
+function parseSafeDate(d?: string | null): Date | null {
+  if (!d || typeof d !== 'string' || d.trim() === '') return null;
+  const parsed = new Date(d);
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
+
 /**
  * Create a new application
  */
@@ -64,6 +70,7 @@ export async function createApplication(payload: {
   notes?: string;
   salary?: string;
   locationType?: string;
+  location?: string;
   appliedDate?: string;
   fundingType?: string;
   stipendAmount?: string;
@@ -79,6 +86,7 @@ export async function createApplication(payload: {
   currency?: string;
   degreeLevel?: string;
   potentialAdvisor?: string;
+  allowDuplicate?: boolean;
 }): Promise<ActionResponse> {
   try {
     const session = await getCurrentUser();
@@ -87,18 +95,36 @@ export async function createApplication(payload: {
     }
 
     const { 
-      applicationType, organization, title, status, url, notes, salary, locationType, appliedDate,
+      applicationType, organization, title, status, url, notes, salary, locationType, location, appliedDate,
       fundingType, stipendAmount, openingDate, deadline, hasSop, hasTranscripts, hasReferences, hasTestScores,
-      hasCvResume, hasPersonalStatement, hasCoverLetter, currency, degreeLevel, potentialAdvisor
+      hasCvResume, hasPersonalStatement, hasCoverLetter, currency, degreeLevel, potentialAdvisor, allowDuplicate
     } = payload;
 
     if (!organization || !title) {
       return { success: false, error: 'Organization/Institution and Title/Program Name are required.' };
     }
 
-    const parsedAppliedDate = appliedDate ? new Date(appliedDate) : new Date();
-    const parsedOpeningDate = openingDate ? new Date(openingDate) : null;
-    const parsedDeadline = deadline ? new Date(deadline) : null;
+    // Duplicate detection
+    if (!allowDuplicate) {
+      const existingDuplicate = await db.application.findFirst({
+        where: {
+          userId: session.userId,
+          organization: { equals: organization.trim(), mode: 'insensitive' },
+          title: { equals: title.trim(), mode: 'insensitive' },
+        },
+      });
+
+      if (existingDuplicate) {
+        return {
+          success: false,
+          error: `Duplicate Entry Detected: You already have an application for "${organization.trim()}" (${title.trim()}).`,
+        };
+      }
+    }
+
+    const parsedAppliedDate = parseSafeDate(appliedDate) || new Date();
+    const parsedOpeningDate = parseSafeDate(openingDate);
+    const parsedDeadline = parseSafeDate(deadline);
 
     // Create the application
     const application = await db.application.create({
@@ -112,6 +138,7 @@ export async function createApplication(payload: {
         notes: notes || null,
         salary: salary || null,
         locationType: locationType || 'ON_SITE',
+        location: location || null,
         appliedDate: parsedAppliedDate,
         fundingType: fundingType || null,
         stipendAmount: stipendAmount || null,
@@ -131,7 +158,7 @@ export async function createApplication(payload: {
     });
 
     // Create a notification for the creation
-    const typeLabel = applicationType === 'scholarship' ? 'scholarship program' : 'job';
+    const typeLabel = applicationType === 'scholarship' ? 'scholarship program' : (applicationType === 'internship' ? 'internship' : 'job');
     await db.notification.create({
       data: {
         userId: session.userId,
@@ -143,7 +170,7 @@ export async function createApplication(payload: {
     return { success: true, data: application };
   } catch (error: any) {
     console.error('createApplication error:', error);
-    return { success: false, error: 'Failed to create application.' };
+    return { success: false, error: error?.message || 'Failed to create application.' };
   }
 }
 
@@ -161,6 +188,7 @@ export async function updateApplication(
     notes?: string;
     salary?: string;
     locationType?: string;
+    location?: string;
     appliedDate?: string;
     fundingType?: string;
     stipendAmount?: string;
@@ -194,7 +222,7 @@ export async function updateApplication(
     }
 
     const { 
-      applicationType, organization, title, status, url, notes, salary, locationType, appliedDate,
+      applicationType, organization, title, status, url, notes, salary, locationType, location, appliedDate,
       fundingType, stipendAmount, openingDate, deadline, hasSop, hasTranscripts, hasReferences, hasTestScores,
       hasCvResume, hasPersonalStatement, hasCoverLetter, currency, degreeLevel, potentialAdvisor
     } = payload;
@@ -208,11 +236,15 @@ export async function updateApplication(
     if (notes !== undefined) updateData.notes = notes || null;
     if (salary !== undefined) updateData.salary = salary || null;
     if (locationType !== undefined) updateData.locationType = locationType;
-    if (appliedDate !== undefined) updateData.appliedDate = new Date(appliedDate);
+    if (location !== undefined) updateData.location = location || null;
+    if (appliedDate !== undefined) {
+      const d = parseSafeDate(appliedDate);
+      if (d) updateData.appliedDate = d;
+    }
     if (fundingType !== undefined) updateData.fundingType = fundingType || null;
     if (stipendAmount !== undefined) updateData.stipendAmount = stipendAmount || null;
-    if (openingDate !== undefined) updateData.openingDate = openingDate ? new Date(openingDate) : null;
-    if (deadline !== undefined) updateData.deadline = deadline ? new Date(deadline) : null;
+    if (openingDate !== undefined) updateData.openingDate = parseSafeDate(openingDate);
+    if (deadline !== undefined) updateData.deadline = parseSafeDate(deadline);
     if (hasSop !== undefined) updateData.hasSop = hasSop;
     if (hasTranscripts !== undefined) updateData.hasTranscripts = hasTranscripts;
     if (hasReferences !== undefined) updateData.hasReferences = hasReferences;

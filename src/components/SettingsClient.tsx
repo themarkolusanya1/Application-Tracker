@@ -4,7 +4,8 @@ import { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Settings as SettingsIcon, User, Shield, HelpCircle, 
-  RotateCcw, Sparkles, CheckCircle2, Bell, Mail
+  RotateCcw, Sparkles, CheckCircle2, Bell, Mail, Search,
+  Sliders, Cpu, Monitor, Eye, Key, Check, Info
 } from 'lucide-react';
 import { updateUserProfile, getNotificationPreferences, updateNotificationPreferences } from '@/app/actions/auth';
 import { sendSimulatedNotification, generateDailyNotificationSummary } from '@/app/actions/applications';
@@ -22,6 +23,10 @@ interface SettingsClientProps {
 
 export default function SettingsClient({ user, initialApplications }: SettingsClientProps) {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'profile' | 'goals' | 'ai' | 'notifications' | 'onboarding'>('profile');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // User Profile States
   const [profileName, setProfileName] = useState(user.name);
   const [profileRole, setProfileRole] = useState(user.role);
   const [profilePic, setProfilePic] = useState<string | null>(user.profilePicture || null);
@@ -142,20 +147,28 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
+
+    const isSubmitted = (a: any) => {
+      if (a.applicationType === 'scholarship') {
+        return a.status !== 'Researching' && a.status !== 'Documents in Progress';
+      }
+      return a.status !== 'WISH_LIST';
+    };
     
-    const monthlyApps = initialApplications.filter(a => {
+    const monthlySubmittedApps = initialApplications.filter(a => {
+      if (!isSubmitted(a)) return false;
       const d = new Date(a.appliedDate || a.createdAt);
       return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
     });
 
-    const jobCount = monthlyApps.filter(a => a.applicationType === 'job' || a.applicationType === 'internship').length;
-    const universityCount = monthlyApps.filter(a => a.applicationType === 'scholarship').length;
+    const jobCount = initialApplications.filter(a => (a.applicationType === 'job' || a.applicationType === 'internship' || a.applicationType === 'fellowship') && isSubmitted(a)).length;
+    const universityCount = initialApplications.filter(a => a.applicationType === 'scholarship' && isSubmitted(a)).length;
     
-    const monthlyInterviews = monthlyApps.filter(a => a.status === 'INTERVIEWING' || a.status === 'Interview').length;
-    const monthlyOffers = monthlyApps.filter(a => a.status === 'OFFERED' || a.status === 'Admitted').length;
+    const monthlyInterviews = initialApplications.filter(a => a.status === 'INTERVIEWING' || a.status === 'Interview').length;
+    const monthlyOffers = initialApplications.filter(a => a.status === 'OFFERED' || a.status === 'Admitted').length;
 
     return {
-      total: monthlyApps.length,
+      total: monthlySubmittedApps.length,
       jobs: jobCount,
       universities: universityCount,
       interviews: monthlyInterviews,
@@ -210,71 +223,236 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
     }, 1500);
   };
 
+  const report = getMonthlyReport();
+  const goalProgress = Math.min(100, Math.round((report.total / monthlyGoal) * 100));
+
+  const navItems = [
+    { id: 'profile', label: 'User Profile', icon: User, badge: null },
+    { id: 'goals', label: 'Goals & Insights', icon: Sparkles, badge: 'Monthly' },
+    { id: 'notifications', label: 'Emails & Notifications', icon: Bell, badge: 'Resend' },
+    { id: 'ai', label: 'AI Configuration', icon: Cpu, badge: 'Models' },
+    { id: 'onboarding', label: 'Appearance & Tour', icon: Monitor, badge: null },
+  ] as const;
+
+  const matchesSearch = (text: string) => {
+    if (!searchQuery.trim()) return true;
+    return text.toLowerCase().includes(searchQuery.toLowerCase());
+  };
+
   return (
-    <div className="space-y-8 max-w-3xl mx-auto">
-      <div>
-        <h3 className="text-xl font-display font-extrabold text-slate-850 tracking-tight">Account Settings</h3>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Manage your user profile settings, toggle light/dark theme, and adjust tour guides.
-        </p>
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
+      {/* Top Header & Search Settings Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-5 rounded-2xl border border-slate-200/80 shadow-md">
+        <div>
+          <h3 className="text-xl font-display font-extrabold text-slate-850 tracking-tight flex items-center gap-2">
+            <SettingsIcon className="w-5 h-5 text-brand-indigo" />
+            <span>Settings</span>
+          </h3>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Manage your account preferences, notification alerts, target goals, and AI models.
+          </p>
+        </div>
+
+        {/* Search Input Bar */}
+        <div className="relative w-full sm:w-80">
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search settings..."
+            className="w-full pl-9 pr-4 py-2 text-xs bg-slate-50/80 border border-slate-250 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-indigo/30 focus:border-brand-indigo transition-all font-sans"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="space-y-6">
-        {/* Monthly Progress Report Card */}
-        {(() => {
-          const report = getMonthlyReport();
-          const goalProgress = Math.min(100, Math.round((report.total / monthlyGoal) * 100));
-          
-          return (
-            <section className="glass-panel border border-slate-200/80 rounded-2xl p-6 shadow-xl space-y-5 text-left">
-              <div className="flex justify-between items-center">
-                <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-brand-indigo animate-pulse" />
-                  <span>{report.monthName} Progress Report & Goals</span>
+      {/* Main 2-Column Sidebar Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+        {/* Left Sticky Sidebar Navigation */}
+        <div className="md:col-span-4 lg:col-span-3 space-y-1 glass-panel p-3 rounded-2xl border border-slate-200/80 shadow-md sticky top-6">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 py-2 select-none">
+            Categories
+          </p>
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setSearchQuery('');
+                }}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer select-none ${
+                  isActive
+                    ? 'bg-brand-indigo/15 text-brand-indigo font-bold border-l-4 border-brand-indigo shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-brand-indigo' : 'text-slate-400'}`} />
+                  <span>{item.label}</span>
+                </div>
+                {item.badge && (
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider ${
+                    isActive ? 'bg-brand-indigo text-white' : 'bg-slate-200 text-slate-600'
+                  }`}>
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Right Content Area */}
+        <div className="md:col-span-8 lg:col-span-9 space-y-6">
+          {/* SECTION 1: User Profile & Account */}
+          {(activeTab === 'profile' || searchQuery.length > 0) && (matchesSearch('profile user name email role picture avatar account') || searchQuery === '') && (
+            <section id="profile" className="glass-panel border border-slate-200/80 rounded-2xl p-6 shadow-xl space-y-5 text-left">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+                <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                  <User className="w-4 h-4 text-brand-indigo" />
+                  <span>User Profile & Account</span>
                 </h4>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-indigo/10 text-brand-indigo uppercase tracking-wider select-none">
-                  Monthly Insights
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 uppercase tracking-wider">
+                  Account Details
                 </span>
               </div>
 
-              {/* Set Target reminder banner */}
+              {profileErrorMsg && (
+                <div className="p-3 text-xs bg-red-50 text-red-600 border border-red-200 rounded-xl font-semibold">
+                  {profileErrorMsg}
+                </div>
+              )}
+
+              <form onSubmit={handleUpdateProfile} className="space-y-4">
+                <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-slate-50/70 border border-slate-200/60 rounded-xl">
+                  <div className="relative group">
+                    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-brand-indigo bg-brand-indigo/10 flex items-center justify-center text-brand-indigo font-bold text-xl">
+                      {profilePic ? (
+                        <img src={profilePic} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        user.name ? user.name.charAt(0).toUpperCase() : 'U'
+                      )}
+                    </div>
+                    <label className="absolute inset-0 bg-black/40 text-white rounded-full flex items-center justify-center text-[10px] font-bold opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                      Change
+                      <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                    </label>
+                  </div>
+
+                  <div className="flex-1 text-center sm:text-left">
+                    <p className="text-sm font-bold text-slate-800">{user.name}</p>
+                    <p className="text-xs text-slate-500">{user.email}</p>
+                    <span className="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-brand-indigo/10 text-brand-indigo rounded-md">
+                      {user.role}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700" htmlFor="profile-name">
+                      Full Name
+                    </label>
+                    <input
+                      id="profile-name"
+                      type="text"
+                      value={profileName}
+                      onChange={(e) => setProfileName(e.target.value)}
+                      required
+                      className="w-full px-3 py-2 text-xs glass-input font-sans bg-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700" htmlFor="profile-role">
+                      Primary Target Track
+                    </label>
+                    <select
+                      id="profile-role"
+                      value={profileRole}
+                      onChange={(e) => setProfileRole(e.target.value)}
+                      className="w-full px-3 py-2 text-xs glass-input font-sans bg-white"
+                    >
+                      <option value="STUDENT">Student / Graduate Candidate</option>
+                      <option value="PROFESSIONAL">Job Seeker / Working Professional</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={isUpdating}
+                    className="px-5 py-2.5 text-xs font-bold text-white bg-brand-indigo hover:bg-brand-indigo/90 rounded-xl shadow-md disabled:opacity-50 transition-all cursor-pointer"
+                  >
+                    {isUpdating ? 'Saving Profile...' : 'Save Profile Changes'}
+                  </button>
+                </div>
+              </form>
+            </section>
+          )}
+
+          {/* SECTION 2: Goals & Performance */}
+          {(activeTab === 'goals' || searchQuery.length > 0) && (matchesSearch('goals performance target monthly log stats report slider') || searchQuery === '') && (
+            <section id="goals" className="glass-panel border border-slate-200/80 rounded-2xl p-6 shadow-xl space-y-5 text-left">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+                <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-brand-indigo animate-pulse" />
+                  <span>{report.monthName} Target Goals & Performance</span>
+                </h4>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-indigo/10 text-brand-indigo uppercase tracking-wider">
+                  Monthly Metrics
+                </span>
+              </div>
+
               {monthlyGoal === 5 && (
-                <div className="p-3 bg-brand-amber/10 border border-brand-amber/20 text-brand-amber text-xs rounded-lg flex items-center gap-2 font-semibold animate-pulse">
-                  <span className="text-sm">⚠️</span>
-                  <span>Reminder: You are using the default target of 5 applications. Use the input field in the goal section below to set your custom monthly goal!</span>
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-700 text-xs rounded-xl flex items-center gap-2 font-semibold">
+                  <span className="text-sm">💡</span>
+                  <span>Default monthly target is set to 5 applications. Adjust your target goal below!</span>
                 </div>
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/50">
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
                   <p className="text-[10px] font-bold text-slate-500 uppercase">Monthly Logged</p>
                   <p className="text-lg font-black text-slate-800 mt-1">{report.total} Applications</p>
                   <p className="text-[10px] text-slate-400 mt-0.5">{report.jobs} Jobs &bull; {report.universities} University</p>
                 </div>
 
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/50">
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
                   <p className="text-[10px] font-bold text-slate-500 uppercase">Active Interviews</p>
-                  <p className="text-lg font-black text-brand-amber mt-1">{report.interviews} Scheduled</p>
+                  <p className="text-lg font-black text-amber-600 mt-1">{report.interviews} Scheduled</p>
                   <p className="text-[10px] text-slate-400 mt-0.5">Move to Interviewing stage</p>
                 </div>
 
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/50">
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
                   <p className="text-[10px] font-bold text-slate-500 uppercase">Offers Secured</p>
-                  <p className="text-lg font-black text-brand-emerald mt-1">{report.offers} Secured</p>
+                  <p className="text-lg font-black text-emerald-600 mt-1">{report.offers} Secured</p>
                   <p className="text-[10px] text-slate-400 mt-0.5">Keep up the momentum!</p>
                 </div>
               </div>
 
-              {/* Progress Goal Slider & Input Target */}
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/50 space-y-3">
+              {/* Target Goal Input & Progress Bar */}
+              <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/60 space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="text-xs font-bold text-slate-600">
-                    <span className="tracking-wide">Monthly Application Target ({goalProgress}%)</span>
+                    <span>Monthly Target Goal ({goalProgress}%)</span>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <label className="text-[10px] font-bold text-slate-500 uppercase" htmlFor="settings-goal">
-                      Set Target:
+                      Target Count:
                     </label>
                     <input
                       id="settings-goal"
@@ -283,12 +461,12 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
                       max={50}
                       value={monthlyGoal}
                       onChange={(e) => handleGoalChange(parseInt(e.target.value, 10) || 1)}
-                      className="w-16 px-2 py-1 text-center font-bold text-slate-800 bg-white border border-slate-200 rounded-lg text-xs"
+                      className="w-16 px-2 py-1 text-center font-bold text-slate-800 bg-white border border-slate-250 rounded-lg text-xs"
                     />
                   </div>
                 </div>
 
-                <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden border border-slate-350/5">
+                <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden border border-slate-300/30">
                   <div 
                     className="h-full bg-gradient-to-r from-brand-indigo to-brand-cyan transition-all duration-500" 
                     style={{ width: `${goalProgress}%` }}
@@ -300,334 +478,259 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
                   <span>Target: {monthlyGoal} applications</span>
                 </div>
               </div>
+            </section>
+          )}
 
-              <div className="text-xs text-slate-600 leading-relaxed border-t border-slate-200 pt-4 flex items-start gap-2">
-                <span className="font-bold text-brand-indigo shrink-0">AI Insights:</span>
-                <span>
-                  {report.total === 0
-                    ? `You haven't logged any applications yet. Set your monthly target and add your first application to start tracking!`
-                    : `You are tracking well. Logged ${report.total} applications total this month. Keep submitting applications and updating checklist files.`}
+          {/* SECTION 3: Automated Emails & Notifications */}
+          {(activeTab === 'notifications' || searchQuery.length > 0) && (matchesSearch('notifications emails resend deadline daily motivation monthly report alerts') || searchQuery === '') && (
+            <section id="notifications" className="glass-panel border border-slate-200/80 rounded-2xl p-6 shadow-xl space-y-6 text-left">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+                <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-brand-indigo" />
+                  <span>Automated Emails & Notifications (Resend)</span>
+                </h4>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 uppercase tracking-wider">
+                  Live System
                 </span>
               </div>
+
+              <div className="space-y-5">
+                {/* Master Email Toggle */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-slate-800">Email Notifications (Resend Integration)</p>
+                    <p className="text-xs text-slate-500 leading-normal">
+                      Master switch for all automated email notifications sent to <strong>{user.email}</strong>.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer select-none">
+                    <input 
+                      type="checkbox" 
+                      checked={emailNotifsEnabled}
+                      onChange={(e) => handleToggleEmailNotifsEnabled(e.target.checked)}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
+                  </label>
+                </div>
+
+                {/* Deadline Countdown Toggle */}
+                <div className="flex items-start justify-between gap-4 border-t border-slate-100 pt-5">
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-slate-800">Deadline & Opening Reminders (5, 4, 3, 2 & 1 Days Out)</p>
+                    <p className="text-xs text-slate-500 leading-normal">
+                      Receive automated email alerts as application deadlines and portal opening dates draw near.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer select-none">
+                    <input 
+                      type="checkbox" 
+                      checked={deadlineReminder}
+                      onChange={(e) => handleToggleDeadlineReminder(e.target.checked)}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
+                  </label>
+                </div>
+
+                {/* Monthly Report Toggle */}
+                <div className="flex items-start justify-between gap-4 border-t border-slate-100 pt-5">
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-slate-800">Monthly Performance Report Email</p>
+                    <p className="text-xs text-slate-500 leading-normal">
+                      Receive a monthly progress email at the end of each calendar month summarizing logged applications and goal status.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer select-none">
+                    <input 
+                      type="checkbox" 
+                      checked={monthlyNotif}
+                      onChange={(e) => handleToggleMonthlyNotif(e.target.checked)}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
+                  </label>
+                </div>
+
+                {/* Daily Motivation Toggle */}
+                <div className="flex items-start justify-between gap-4 border-t border-slate-100 pt-5">
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-slate-800">Daily Motivational & Focus Email</p>
+                    <p className="text-xs text-slate-500 leading-normal">
+                      Receive a morning email with an inspiring quote and active pipeline reminder to keep you motivated.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer select-none">
+                    <input 
+                      type="checkbox" 
+                      checked={dailyReminder}
+                      onChange={(e) => handleToggleDailyReminder(e.target.checked)}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
+                  </label>
+                </div>
+
+                {/* Dev Simulation Triggers */}
+                <div className="pt-5 border-t border-slate-200 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleTriggerMonthlyReport}
+                    className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg border border-slate-250 transition-all cursor-pointer"
+                  >
+                    <Bell className="w-3.5 h-3.5" />
+                    <span>Simulate Monthly Report</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleTriggerDailyMotivation}
+                    className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg border border-slate-250 transition-all cursor-pointer"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Simulate Daily Motivation Email</span>
+                  </button>
+                </div>
+              </div>
             </section>
-          );
-        })()}
+          )}
 
-        {/* Progression & Motivation Email Settings */}
-        <section className="glass-panel border border-slate-200/80 rounded-2xl p-6 shadow-xl space-y-6 text-left">
-          <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-            <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-              <Bell className="w-4 h-4 text-brand-indigo animate-bounce" />
-              <span>Automated Reminders & Progress Reports</span>
-            </h4>
-          </div>
-
-
-
-          <div className="space-y-5">
-            {/* Toggle 0: Master Email Notifications */}
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-slate-800">Email Notifications (Resend Integration)</p>
-                <p className="text-xs text-slate-500 leading-normal">
-                  Master toggle for all automated email alerts delivered to <strong>{user.email}</strong>.
-                </p>
+          {/* SECTION 4: AI Models & API Keys */}
+          {(activeTab === 'ai' || searchQuery.length > 0) && (matchesSearch('ai models gemini openai groq api key configuration provider') || searchQuery === '') && (
+            <section id="ai" className="glass-panel border border-slate-200/80 rounded-2xl p-6 shadow-xl space-y-5 text-left">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+                <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                  <Cpu className="w-4 h-4 text-brand-indigo" />
+                  <span>AI Models & API Configuration</span>
+                </h4>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-indigo/10 text-brand-indigo uppercase tracking-wider">
+                  AI Integration
+                </span>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer select-none">
-                <input 
-                  type="checkbox" 
-                  checked={emailNotifsEnabled}
-                  onChange={(e) => handleToggleEmailNotifsEnabled(e.target.checked)}
-                  className="sr-only peer" 
-                />
-                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
-              </label>
-            </div>
 
-            {/* Toggle 1: Deadline Countdown Reminders */}
-            <div className="flex items-start justify-between gap-4 border-t border-slate-100 pt-5">
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-slate-800">Deadline Countdown Reminders (5, 4, 3, 2 & 1 Days Out)</p>
-                <p className="text-xs text-slate-500 leading-normal">
-                  Receive automated email alerts as your Job, Internship, or Scholarship application deadlines draw near (sent daily 5, 4, 3, 2, and 1 day before due date).
-                </p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer select-none">
-                <input 
-                  type="checkbox" 
-                  checked={deadlineReminder}
-                  onChange={(e) => handleToggleDeadlineReminder(e.target.checked)}
-                  className="sr-only peer" 
-                />
-                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
-              </label>
-            </div>
+              <form onSubmit={handleSaveAiConfig} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700" htmlFor="ai-provider">
+                    Primary AI Model Provider
+                  </label>
+                  <select
+                    id="ai-provider"
+                    value={aiProvider}
+                    onChange={(e) => setAiProvider(e.target.value)}
+                    className="w-full px-3 py-2 text-xs glass-input font-sans bg-white"
+                  >
+                    <option value="gemini">Google Gemini AI (Recommended - Free Tier)</option>
+                    <option value="groq">Groq (Llama-3 70B - High Speed)</option>
+                    <option value="openai">OpenAI (GPT-4o Mini)</option>
+                  </select>
+                </div>
 
-            {/* Toggle 2: Monthly Reports */}
-            <div className="flex items-start justify-between gap-4 border-t border-slate-100 pt-5">
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-slate-800">Monthly Progress Report Email</p>
-                <p className="text-xs text-slate-500 leading-normal">
-                  Receive a summary email at the end of every calendar month with applications logged, active interviews, offers, and target goal metrics.
-                </p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer select-none">
-                <input 
-                  type="checkbox" 
-                  checked={monthlyNotif}
-                  onChange={(e) => handleToggleMonthlyNotif(e.target.checked)}
-                  className="sr-only peer" 
-                />
-                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
-              </label>
-            </div>
-
-            {/* Toggle 3: Daily Reminders */}
-            <div className="flex items-start justify-between gap-4 border-t border-slate-100 pt-5">
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-slate-800">Daily Motivational & Focus Email</p>
-                <p className="text-xs text-slate-500 leading-normal">
-                  Get a daily morning email with an inspiring career/academic quote and summary of applications waiting in progress.
-                </p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer select-none">
-                <input 
-                  type="checkbox" 
-                  checked={dailyReminder}
-                  onChange={(e) => handleToggleDailyReminder(e.target.checked)}
-                  className="sr-only peer" 
-                />
-                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
-              </label>
-            </div>
-
-            {/* Simulation triggers for dev verification */}
-            <div className="pt-5 border-t border-slate-200 flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={handleTriggerMonthlyReport}
-                className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-800 rounded-lg border border-slate-250 transition-all cursor-pointer"
-              >
-                <Bell className="w-3.5 h-3.5" />
-                <span>Simulate Monthly Progress Report</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleTriggerDailyMotivation}
-                className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-800 rounded-lg border border-slate-250 transition-all cursor-pointer"
-              >
-                <Mail className="w-3.5 h-3.5" />
-                <span>Simulate Daily Motivation Email</span>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* Profile Card */}
-        <section className="glass-panel border border-slate-200/80 rounded-2xl p-6 shadow-xl space-y-6">
-          <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-            <User className="w-4 h-4 text-brand-indigo" />
-            <span>Profile Account Details</span>
-          </h4>
-
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-slate-100/50 border border-slate-200/85 rounded-xl">
-            <div className="flex items-center gap-4">
-              <div className="relative group/avatar w-16 h-16 rounded-full overflow-hidden border border-brand-indigo/35 flex items-center justify-center bg-brand-indigo/15 flex-shrink-0">
-                {profilePic ? (
-                  <img src={profilePic} className="w-full h-full object-cover" alt="Avatar" />
-                ) : (
-                  <span className="font-bold text-xl text-brand-indigo uppercase select-none">
-                    {profileName.charAt(0)}
-                  </span>
+                {aiProvider === 'gemini' && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700" htmlFor="gemini-key">
+                      Google Gemini API Key (Optional custom key)
+                    </label>
+                    <input
+                      id="gemini-key"
+                      type="password"
+                      value={apiKey}
+                      onChange={(e) => setApiKey(e.target.value)}
+                      placeholder="AIzaSy..."
+                      className="w-full px-3 py-2 text-xs glass-input font-sans bg-white"
+                    />
+                  </div>
                 )}
-                <label className="absolute inset-0 bg-black/50 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold cursor-pointer select-none">
-                  Upload
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                </label>
+
+                {aiProvider === 'groq' && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700" htmlFor="groq-key">
+                      Groq API Key
+                    </label>
+                    <input
+                      id="groq-key"
+                      type="password"
+                      value={groqApiKey}
+                      onChange={(e) => setGroqApiKey(e.target.value)}
+                      placeholder="gsk_..."
+                      className="w-full px-3 py-2 text-xs glass-input font-sans bg-white"
+                    />
+                  </div>
+                )}
+
+                {aiProvider === 'openai' && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700" htmlFor="openai-key">
+                      OpenAI API Key
+                    </label>
+                    <input
+                      id="openai-key"
+                      type="password"
+                      value={openaiApiKey}
+                      onChange={(e) => setOpenaiApiKey(e.target.value)}
+                      placeholder="sk-..."
+                      className="w-full px-3 py-2 text-xs glass-input font-sans bg-white"
+                    />
+                  </div>
+                )}
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 text-xs font-bold text-white bg-brand-indigo hover:bg-brand-indigo/90 rounded-xl shadow-md transition-all cursor-pointer"
+                  >
+                    Save AI Configuration
+                  </button>
+                </div>
+              </form>
+            </section>
+          )}
+
+          {/* SECTION 5: Appearance & Tour Options */}
+          {(activeTab === 'onboarding' || searchQuery.length > 0) && (matchesSearch('appearance onboarding guide tour reset replay theme') || searchQuery === '') && (
+            <section id="onboarding" className="glass-panel border border-slate-200/80 rounded-2xl p-6 shadow-xl space-y-5 text-left">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+                <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                  <Monitor className="w-4 h-4 text-brand-indigo" />
+                  <span>Appearance & Tour Guide Options</span>
+                </h4>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 uppercase tracking-wider">
+                  Interface
+                </span>
               </div>
-              <div>
-                <p className="font-bold text-slate-800 text-base leading-snug">{profileName}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{user.email}</p>
+
+              <div className="space-y-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-slate-800">Onboarding Interactive Tour</p>
+                    <p className="text-xs text-slate-500 leading-normal">
+                      Enable or disable the instant popup guide for new users across the dashboard.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer select-none">
+                    <input 
+                      type="checkbox" 
+                      checked={showOnboardingGuide}
+                      onChange={(e) => handleToggleOnboardingGuide(e.target.checked)}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
+                  </label>
+                </div>
+
+                <div className="pt-4 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={handleReplayTour}
+                    className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-250 transition-all cursor-pointer"
+                  >
+                    <RotateCcw className="w-4 h-4 text-brand-indigo" />
+                    <span>Replay Onboarding Guide Tour</span>
+                  </button>
+                </div>
               </div>
-            </div>
-            <span className="text-[10px] text-brand-indigo bg-brand-indigo/10 border border-brand-indigo/20 px-2.5 py-1 rounded-full font-bold uppercase select-none tracking-wide">
-              {profileRole === 'STUDENT' ? 'Student Role' : 'Professional Role'}
-            </span>
-          </div>
-
-          <form onSubmit={handleUpdateProfile} className="space-y-4 pt-4 border-t border-slate-200/50">
-            {profileErrorMsg && (
-              <div className="p-3 bg-brand-rose/10 border border-brand-rose/20 text-brand-rose text-xs rounded-lg">
-                {profileErrorMsg}
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-600" htmlFor="settings-name">
-                  Full Name
-                </label>
-                <input
-                  id="settings-name"
-                  type="text"
-                  value={profileName}
-                  onChange={(e) => setProfileName(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 glass-input text-sm"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-600" htmlFor="settings-role">
-                  Profile Role Type
-                </label>
-                <select
-                  id="settings-role"
-                  value={profileRole}
-                  onChange={(e) => setProfileRole(e.target.value)}
-                  className="w-full px-3 py-2.5 glass-input text-sm bg-white"
-                >
-                  <option value="STUDENT">Student</option>
-                  <option value="PROFESSIONAL">Professional</option>
-                </select>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isUpdating}
-              className="px-4 py-2.5 text-xs font-semibold text-white bg-gradient-to-r from-brand-indigo to-brand-cyan hover:opacity-95 rounded-lg shadow-md shadow-brand-indigo/15 transition-all disabled:opacity-50 cursor-pointer"
-            >
-              {isUpdating ? 'Saving Profile...' : 'Save Profile Changes'}
-            </button>
-          </form>
-        </section>
-
-
-
-        {/* API Settings */}
-        <section className="glass-panel border border-slate-200/80 rounded-2xl p-6 shadow-xl space-y-4">
-          <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-            <Shield className="w-4 h-4 text-brand-cyan" />
-            <span>AI Provider Configuration</span>
-          </h4>
-
-          <form onSubmit={handleSaveAiConfig} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-600" htmlFor="settings-ai-provider">
-                AI Service Provider
-              </label>
-              <select
-                id="settings-ai-provider"
-                value={aiProvider}
-                onChange={(e) => setAiProvider(e.target.value)}
-                className="w-full px-3 py-2.5 glass-input text-sm bg-white"
-              >
-                <option value="gemini">Google Gemini AI (default)</option>
-                <option value="openai">OpenAI (GPT-4o-mini)</option>
-                <option value="groq">Groq AI (Llama 3.3 Superfast)</option>
-              </select>
-            </div>
-
-            <div className="space-y-1">
-              <p className="font-bold text-slate-800 text-sm">
-                {aiProvider === 'openai' ? 'OpenAI API Key' : aiProvider === 'groq' ? 'Groq API Key' : 'Gemini API Key'}
-              </p>
-              <p className="text-xs text-slate-500">
-                {aiProvider === 'openai' 
-                  ? 'Provide your OpenAI developer API key to power ATS optimization reviews, mock interviews, and details extraction.'
-                  : aiProvider === 'groq'
-                    ? 'Provide your Groq developer API key (gsk-...) to power superfast Llama-3 inference matching.'
-                    : 'Provide your Google AI Studio developer key to power ATS optimization reviews, mock interviews, and details extraction.'
-                } Saved locally in your browser.
-              </p>
-            </div>
-
-            <div className="flex gap-2">
-              <input
-                type="password"
-                value={aiProvider === 'openai' ? openaiApiKey : aiProvider === 'groq' ? groqApiKey : apiKey}
-                onChange={(e) => {
-                  if (aiProvider === 'openai') setOpenaiApiKey(e.target.value);
-                  else if (aiProvider === 'groq') setGroqApiKey(e.target.value);
-                  else setApiKey(e.target.value);
-                }}
-                placeholder={aiProvider === 'openai' ? 'sk-proj-...' : aiProvider === 'groq' ? 'gsk-...' : 'AIzaSy...'}
-                className="flex-1 px-3 py-2.5 glass-input text-xs"
-              />
-              <button
-                type="submit"
-                className="px-4 py-2 text-xs font-semibold text-white bg-slate-800 hover:bg-slate-900 rounded-lg shadow cursor-pointer transition-colors shrink-0 font-sans"
-              >
-                Save Config
-              </button>
-            </div>
-          </form>
-        </section>
-
-        {/* Guided Tour Reset Section */}
-        <section className="glass-panel border border-slate-200/80 rounded-2xl p-6 shadow-xl space-y-4">
-          <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-            <HelpCircle className="w-4 h-4 text-brand-cyan" />
-            <span>Interactive Onboarding Guide</span>
-          </h4>
-
-          <div className="space-y-5">
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-slate-800">Show Guided Onboarding Tour</p>
-                <p className="text-xs text-slate-500 leading-normal">
-                  Automatically show the interactive guided tour when visiting the dashboard for the first time.
-                </p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer select-none">
-                <input 
-                  type="checkbox" 
-                  checked={showOnboardingGuide}
-                  onChange={(e) => handleToggleOnboardingGuide(e.target.checked)}
-                  className="sr-only peer" 
-                />
-                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
-              </label>
-            </div>
-
-            <div className="pt-4 border-t border-slate-100 space-y-3">
-              <p className="text-sm text-slate-600 leading-relaxed">
-                If you would like to manually trigger and replay the dashboard walkthrough step-by-step, use the button below to clear onboarding progress and start over.
-              </p>
-              <button
-                onClick={handleReplayTour}
-                className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-gradient-to-r from-brand-indigo to-brand-cyan hover:opacity-95 rounded-lg shadow-md shadow-brand-indigo/15 transition-all cursor-pointer"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Replay Guided Tour</span>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* App Version / License */}
-        <section className="glass-panel border border-slate-200/80 rounded-2xl p-6 shadow-xl space-y-4">
-          <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-            <Shield className="w-4 h-4 text-brand-rose" />
-            <span>App Status</span>
-          </h4>
-
-          <div className="flex justify-between items-center text-sm text-slate-600">
-            <span>Version</span>
-            <span className="font-semibold text-slate-800">v1.2.0 (Student Release)</span>
-          </div>
-          <div className="flex justify-between items-center text-sm text-slate-600 border-t border-slate-200 pt-3">
-            <span>Environment</span>
-            <span className="font-semibold text-brand-emerald">Local Development Mode</span>
-          </div>
-        </section>
+            </section>
+          )}
+        </div>
       </div>
     </div>
   );

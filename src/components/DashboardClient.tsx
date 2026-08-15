@@ -272,7 +272,7 @@ export default function DashboardClient({
   const getStats = () => {
     const tabApps = initialApplications.filter(a => {
       if (tabFilter === 'job') {
-        return a.applicationType === 'job' || a.applicationType === 'internship';
+        return a.applicationType === 'job' || a.applicationType === 'internship' || a.applicationType === 'fellowship';
       } else if (tabFilter === 'scholarship') {
         return a.applicationType === 'scholarship';
       }
@@ -312,31 +312,50 @@ export default function DashboardClient({
       return a.status !== 'WISH_LIST';
     };
 
-    const monthlyApps = initialApplications.filter(a => {
+    const isJobOrInternship = (a: any) => {
+      return a.applicationType === 'job' || a.applicationType === 'internship' || a.applicationType === 'fellowship';
+    };
+
+    const isScholarship = (a: any) => {
+      return a.applicationType === 'scholarship';
+    };
+
+    // 1. Submitted applications for current month (towards Monthly Target Goal)
+    const monthlySubmittedApps = initialApplications.filter(a => {
+      if (!isSubmitted(a)) return false;
       const d = new Date(a.appliedDate || a.createdAt);
-      return (
-        d.getMonth() === currentMonth && 
-        d.getFullYear() === currentYear
-      );
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
     });
 
-    const submittedMonthlyApps = monthlyApps.filter(isSubmitted);
-    const draftMonthlyApps = monthlyApps.filter(a => !isSubmitted(a));
-
-    const jobCount = submittedMonthlyApps.filter(a => a.applicationType === 'job' || a.applicationType === 'internship').length;
-    const universityCount = submittedMonthlyApps.filter(a => a.applicationType === 'scholarship').length;
+    // 2. Real-time SUBMITTED counts across ALL applications in account
+    const submittedJobTracks = initialApplications.filter(a => isJobOrInternship(a) && isSubmitted(a)).length;
+    const submittedUniTracks = initialApplications.filter(a => isScholarship(a) && isSubmitted(a)).length;
     
-    const monthlyOffers = submittedMonthlyApps.filter(a => a.status === 'OFFERED' || a.status === 'Admitted').length;
-    const monthlyDrafts = draftMonthlyApps.length;
+    // In Progress = Applications in Wish List / Researching / Docs in Progress stage (not yet submitted)
+    const inProgressDrafts = initialApplications.filter(a => 
+      !isSubmitted(a) &&
+      a.status !== 'REJECTED' && 
+      a.status !== 'WITHDRAWN' && 
+      a.status !== 'Rejected' && 
+      a.status !== 'Withdrawn'
+    ).length;
+
+    // Total offers secured across entire account
+    const totalOffers = initialApplications.filter(a => 
+      a.status === 'OFFERED' || a.status === 'Admitted'
+    ).length;
+
+    // 3. Submitted applications only (for Top 5 Applications list)
+    const allSubmittedApps = initialApplications.filter(isSubmitted);
 
     return {
-      total: submittedMonthlyApps.length,
-      jobs: jobCount,
-      universities: universityCount,
-      drafts: monthlyDrafts,
-      offers: monthlyOffers,
+      total: monthlySubmittedApps.length,
+      jobs: submittedJobTracks,
+      universities: submittedUniTracks,
+      drafts: inProgressDrafts,
+      offers: totalOffers,
       monthName: now.toLocaleString('default', { month: 'long' }),
-      apps: submittedMonthlyApps
+      apps: allSubmittedApps
     };
   };
 
@@ -345,7 +364,7 @@ export default function DashboardClient({
     // 1. Filter by application type tab
     if (tabFilter === 'job') {
       if (jobSubType === 'all') {
-        if (app.applicationType !== 'job' && app.applicationType !== 'internship') return false;
+        if (app.applicationType !== 'job' && app.applicationType !== 'internship' && app.applicationType !== 'fellowship') return false;
       } else {
         if (app.applicationType !== jobSubType) return false;
       }
@@ -629,13 +648,14 @@ export default function DashboardClient({
               </div>
 
               {topFiveApps.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-6 text-center text-slate-400 space-y-2">
-                  <p className="text-xs">No applications logged in {monthlyReport.monthName} yet.</p>
+                <div className="flex flex-col items-center justify-center py-6 text-center text-slate-400 space-y-1.5">
+                  <p className="text-xs font-medium text-slate-600">No submitted applications yet.</p>
+                  <p className="text-[11px] text-slate-400">Move an application to 'Applied' or 'Submitted' to feature it here!</p>
                   <button 
                     onClick={handleAddClick}
-                    className="text-xs font-semibold text-brand-indigo hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-xs font-semibold text-brand-indigo hover:underline flex items-center gap-1 cursor-pointer pt-1"
                   >
-                    Log your first card →
+                    + Add Application →
                   </button>
                 </div>
               ) : (
@@ -1069,10 +1089,10 @@ export default function DashboardClient({
                         {/* Middle metadata fields: Conditional based on type */}
                         {app.applicationType === 'scholarship' ? (
                           <div className="space-y-2">
-                            <div className="flex flex-wrap gap-1.5 items-center">
+                            <div className="flex flex-wrap items-center gap-2">
                               {app.degreeLevel && (
-                                <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded bg-brand-amber/10 border border-brand-amber/20 text-brand-amber">
-                                  {app.degreeLevel === 'Bachelors' ? "Bachelor's" : app.degreeLevel === 'Masters' ? "Master's" : "PhD"}
+                                <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded bg-brand-cyan/10 text-brand-cyan">
+                                  {app.degreeLevel}
                                 </span>
                               )}
                               {app.fundingType && (
@@ -1127,17 +1147,29 @@ export default function DashboardClient({
                               )}
                             </div>
                           </div>
-                        ) : (
-                          <div className="flex flex-wrap gap-2">
-                            {getLocationBadge(app.locationType)}
-                            {app.salary && (
-                              <span className="inline-flex items-center gap-0.5 text-[11px] text-gray-400 font-semibold" title="Salary / Compensation">
-                                <span className="text-brand-cyan font-bold mr-0.5">{getCurrencySymbol(app.currency || 'USD')}</span>
-                                {app.salary}
-                              </span>
-                            )}
-                          </div>
-                        )}
+                        ) : null}
+
+                        {/* Location / Country and Salary badges */}
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          {app.location && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md" title={`Location: ${app.location}`}>
+                              <MapPin className="w-3 h-3 text-brand-indigo" />
+                              {app.location}
+                            </span>
+                          )}
+
+                          {app.applicationType !== 'scholarship' && (
+                            <>
+                              {getLocationBadge(app.locationType)}
+                              {app.salary && (
+                                <span className="inline-flex items-center gap-0.5 text-[11px] text-gray-400 font-semibold" title="Salary / Compensation">
+                                  <span className="text-brand-cyan font-bold mr-0.5">{getCurrencySymbol(app.currency || 'USD')}</span>
+                                  {app.salary}
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </div>
 
                         {app.notes && (
                           <p className="text-[11px] text-gray-500 line-clamp-2 bg-gray-950/20 p-2 rounded-lg leading-relaxed">
