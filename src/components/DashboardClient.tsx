@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 const Joyride = dynamic<any>(() => import('react-joyride').then((mod: any) => ({ default: mod.Joyride })), { ssr: false });
 import { 
   Briefcase, Search, Filter, Kanban, List, Plus, 
-  MapPin, DollarSign, Calendar, ExternalLink, Edit2, Trash2, ArrowUpDown, Sparkles
+  MapPin, DollarSign, Calendar, ExternalLink, Edit2, Trash2, ArrowUpDown, Sparkles, AlertCircle, ArrowRight
 } from 'lucide-react';
 import { deleteApplication, updateApplication } from '@/app/actions/applications';
 type ApplicationStatus = 'WISH_LIST' | 'APPLIED' | 'INTERVIEWING' | 'OFFERED' | 'REJECTED' | 'WITHDRAWN';
@@ -537,6 +537,19 @@ export default function DashboardClient({
     .slice(0, 5);
   const goalProgress = monthlyGoal > 0 ? Math.min(100, Math.round((monthlyReport.total / monthlyGoal) * 100)) : 0;
 
+  // Applications closing in the next 7 days that require urgent attention (active / in progress)
+  const urgentClosingApps = initialApplications
+    .filter(a => {
+      if (!a.deadline) return false;
+      const status = a.status || '';
+      if (status === 'REJECTED' || status === 'WITHDRAWN' || status === 'Rejected' || status === 'Withdrawn' || status === 'OFFERED' || status === 'Admitted') return false;
+      const d = new Date(a.deadline);
+      const diffMs = d.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      return diffDays >= 0 && diffDays <= 7;
+    })
+    .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime());
+
   if (initialTab === 'combined') {
     return (
       <div className="space-y-8 max-w-7xl mx-auto">
@@ -556,6 +569,77 @@ export default function DashboardClient({
             </div>
           );
         })()}
+
+        {/* 🚨 Applications Closing Soon (Urgent Attention Required) Banner */}
+        {urgentClosingApps.length > 0 && (
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-rose-500/5 border border-rose-500/30 shadow-lg shadow-rose-500/5 backdrop-blur-sm animate-fade-in text-left">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center shadow-md text-white shrink-0">
+                  <AlertCircle className="w-5 h-5 animate-pulse" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-extrabold text-sm text-slate-900 tracking-tight">
+                      Applications Closing Soon!
+                    </h3>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-rose-600 bg-rose-500/15 px-2.5 py-0.5 rounded-full border border-rose-500/30">
+                      {urgentClosingApps.length} Urgent
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 font-medium mt-0.5">
+                    {urgentClosingApps.length === 1
+                      ? `1 application deadline is approaching in the next 7 days. Complete it early before the portal closes!`
+                      : `${urgentClosingApps.length} application deadlines are approaching in the next 7 days. Take action to complete them!`
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Grid of urgent closing cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 mt-4 pt-3.5 border-t border-rose-500/20">
+              {urgentClosingApps.map((app) => {
+                const daysLeft = Math.ceil((new Date(app.deadline!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                const daysText = daysLeft <= 0 ? 'Closes Today!' : daysLeft === 1 ? 'Closes Tomorrow!' : `Closes in ${daysLeft} Days`;
+
+                return (
+                  <div key={app.id} className="bg-white p-4 rounded-xl border border-rose-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block truncate">
+                          {app.organization}
+                        </span>
+                        <h4 className="text-xs font-extrabold text-slate-800 truncate mt-0.5" title={app.title}>
+                          {app.title}
+                        </h4>
+                      </div>
+                      <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-md whitespace-nowrap ${
+                        daysLeft <= 1 ? 'bg-rose-500 text-white animate-pulse' : 'bg-amber-500/15 text-amber-800 border border-amber-500/30'
+                      }`}>
+                        ⏱️ {daysText}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] pt-2 border-t border-slate-100">
+                      <span className="text-slate-500 font-semibold flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5 text-rose-500" />
+                        {new Date(app.deadline!).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                      <button
+                        onClick={() => handleEditClick(app)}
+                        className="text-xs font-bold text-brand-indigo hover:text-brand-cyan transition-colors flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Take Action</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Monthly Overview & Analytics Section */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
