@@ -60,6 +60,29 @@ export default function NotificationPopover() {
     }
   };
 
+  const formatNotificationDate = (dateInput: Date | string) => {
+    const date = new Date(dateInput);
+    const now = new Date();
+
+    const isToday =
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth() &&
+      date.getDate() === now.getDate();
+
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday =
+      date.getFullYear() === yesterday.getFullYear() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getDate() === yesterday.getDate();
+
+    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    if (isToday) return `Today · ${timeStr}`;
+    if (isYesterday) return `Yesterday · ${timeStr}`;
+    return `${date.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} · ${timeStr}`;
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
@@ -109,10 +132,7 @@ export default function NotificationPopover() {
                         {notification.message}
                       </p>
                       <span className="text-[10px] text-slate-400 mt-1 block">
-                        {new Date(notification.createdAt).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
+                        {formatNotificationDate(notification.createdAt)}
                       </span>
                     </div>
                     {!notification.isRead && (

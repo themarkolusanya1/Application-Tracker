@@ -463,6 +463,9 @@ export async function getNotificationPreferences(): Promise<ActionResponse<any>>
         deadlineRemindersEnabled: true,
         dailyMotivationEnabled: true,
         monthlyReportEnabled: true,
+        reminderDays: true,
+        reminderTime: true,
+        userTimezone: true,
       },
     });
 
@@ -485,6 +488,9 @@ export async function updateNotificationPreferences(payload: {
   deadlineRemindersEnabled?: boolean;
   dailyMotivationEnabled?: boolean;
   monthlyReportEnabled?: boolean;
+  reminderDays?: string;    // comma-separated, e.g. "30,15,5,3,1"
+  reminderTime?: string;    // HH:MM in UTC
+  userTimezone?: string;    // IANA timezone string
 }): Promise<ActionResponse> {
   try {
     const session = await getCurrentUser();

@@ -21,11 +21,16 @@ model User {
   deadlineRemindersEnabled  Boolean        @default(true)
   dailyMotivationEnabled     Boolean        @default(true)
   monthlyReportEnabled       Boolean        @default(true)
+  // Customizable reminder schedule
+  reminderDays               String         @default("5,4,3,2,1") // Comma-separated days before deadline
+  reminderTime               String         @default("08:00")     // HH:MM in UTC
+  userTimezone               String         @default("UTC")       // IANA timezone, e.g. "Europe/London"
   applications               Application[]
   notifications              Notification[]
   sentEmailLogs              SentEmailLog[]
   createdAt                  DateTime       @default(now())
 }
+
 
 model Application {
   id              String   @id @default(cuid())

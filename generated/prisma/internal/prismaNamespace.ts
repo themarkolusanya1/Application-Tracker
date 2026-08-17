@@ -759,6 +759,9 @@ export const UserScalarFieldEnum = {
   deadlineRemindersEnabled: 'deadlineRemindersEnabled',
   dailyMotivationEnabled: 'dailyMotivationEnabled',
   monthlyReportEnabled: 'monthlyReportEnabled',
+  reminderDays: 'reminderDays',
+  reminderTime: 'reminderTime',
+  userTimezone: 'userTimezone',
   createdAt: 'createdAt'
 } as const
 

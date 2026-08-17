@@ -54,7 +54,7 @@ export default function CalendarClient({ initialApplications }: CalendarClientPr
         id: `applied-${app.id}`,
         appId: app.id,
         applicationType: app.applicationType,
-        title: app.applicationType === 'scholarship' ? 'Program Application Started' : `Applied to ${app.title}`,
+        title: app.title || (app.applicationType === 'scholarship' ? 'Program Application' : 'Job Application'),
         organization: app.organization,
         date: new Date(app.appliedDate),
         type: 'applied',
@@ -167,7 +167,7 @@ export default function CalendarClient({ initialApplications }: CalendarClientPr
                     </span>
 
                     {/* Timeline card wrapper */}
-                    <div className="glass-panel border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-all duration-300 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden">
+                    <div className="glass-panel border border-slate-200/80 rounded-2xl p-5 hover:border-slate-300 transition-all duration-300 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden">
                       {isUrgent && (
                         <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-rose" />
                       )}
@@ -179,11 +179,11 @@ export default function CalendarClient({ initialApplications }: CalendarClientPr
                           }`}>
                             {event.applicationType}
                           </span>
-                          <span className="text-xs text-gray-500 font-semibold">{formatEventDate(event.date)}</span>
+                          <span className="text-xs text-slate-400 font-semibold">{formatEventDate(event.date)}</span>
                         </div>
 
-                        <h5 className="font-bold text-white text-base leading-snug">{event.title}</h5>
-                        <p className="text-sm text-gray-400">{event.organization}</p>
+                        <h5 className="font-bold text-slate-800 text-base leading-snug">{event.title}</h5>
+                        <p className="text-sm text-slate-500">{event.organization}</p>
                       </div>
 
                       <div className="flex flex-row md:flex-col items-start md:items-end justify-between md:justify-center gap-3">
@@ -243,21 +243,21 @@ export default function CalendarClient({ initialApplications }: CalendarClientPr
                     </span>
 
                     {/* Timeline card wrapper */}
-                    <div className="glass-panel border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-all duration-300 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="glass-panel border border-slate-200/80 rounded-2xl p-5 hover:border-slate-300 transition-all duration-300 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase bg-white/5 text-gray-500">
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase bg-slate-100 text-slate-500">
                             {event.applicationType}
                           </span>
-                          <span className="text-xs text-gray-500 font-semibold">{formatEventDate(event.date)}</span>
+                          <span className="text-xs text-slate-400 font-semibold">{formatEventDate(event.date)}</span>
                         </div>
 
-                        <h5 className="font-bold text-white text-base leading-snug">{event.title}</h5>
-                        <p className="text-sm text-gray-400">{event.organization}</p>
+                        <h5 className="font-bold text-slate-800 text-base leading-snug">{event.title}</h5>
+                        <p className="text-sm text-slate-500">{event.organization}</p>
                       </div>
 
                       <div className="flex flex-row md:flex-col items-start md:items-end justify-between md:justify-center gap-3">
-                        <span className="text-xs text-gray-500 font-semibold bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                        <span className="text-xs text-slate-500 font-semibold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                           {daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : `${daysAgo} days ago`}
                         </span>
                       </div>

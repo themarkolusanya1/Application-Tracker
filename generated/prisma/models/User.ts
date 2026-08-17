@@ -35,6 +35,9 @@ export type UserMinAggregateOutputType = {
   deadlineRemindersEnabled: boolean | null
   dailyMotivationEnabled: boolean | null
   monthlyReportEnabled: boolean | null
+  reminderDays: string | null
+  reminderTime: string | null
+  userTimezone: string | null
   createdAt: Date | null
 }
 
@@ -49,6 +52,9 @@ export type UserMaxAggregateOutputType = {
   deadlineRemindersEnabled: boolean | null
   dailyMotivationEnabled: boolean | null
   monthlyReportEnabled: boolean | null
+  reminderDays: string | null
+  reminderTime: string | null
+  userTimezone: string | null
   createdAt: Date | null
 }
 
@@ -63,6 +69,9 @@ export type UserCountAggregateOutputType = {
   deadlineRemindersEnabled: number
   dailyMotivationEnabled: number
   monthlyReportEnabled: number
+  reminderDays: number
+  reminderTime: number
+  userTimezone: number
   createdAt: number
   _all: number
 }
@@ -79,6 +88,9 @@ export type UserMinAggregateInputType = {
   deadlineRemindersEnabled?: true
   dailyMotivationEnabled?: true
   monthlyReportEnabled?: true
+  reminderDays?: true
+  reminderTime?: true
+  userTimezone?: true
   createdAt?: true
 }
 
@@ -93,6 +105,9 @@ export type UserMaxAggregateInputType = {
   deadlineRemindersEnabled?: true
   dailyMotivationEnabled?: true
   monthlyReportEnabled?: true
+  reminderDays?: true
+  reminderTime?: true
+  userTimezone?: true
   createdAt?: true
 }
 
@@ -107,6 +122,9 @@ export type UserCountAggregateInputType = {
   deadlineRemindersEnabled?: true
   dailyMotivationEnabled?: true
   monthlyReportEnabled?: true
+  reminderDays?: true
+  reminderTime?: true
+  userTimezone?: true
   createdAt?: true
   _all?: true
 }
@@ -194,6 +212,9 @@ export type UserGroupByOutputType = {
   deadlineRemindersEnabled: boolean
   dailyMotivationEnabled: boolean
   monthlyReportEnabled: boolean
+  reminderDays: string
+  reminderTime: string
+  userTimezone: string
   createdAt: Date
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
@@ -229,6 +250,9 @@ export type UserWhereInput = {
   deadlineRemindersEnabled?: Prisma.BoolFilter<"User"> | boolean
   dailyMotivationEnabled?: Prisma.BoolFilter<"User"> | boolean
   monthlyReportEnabled?: Prisma.BoolFilter<"User"> | boolean
+  reminderDays?: Prisma.StringFilter<"User"> | string
+  reminderTime?: Prisma.StringFilter<"User"> | string
+  userTimezone?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   applications?: Prisma.ApplicationListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
@@ -246,6 +270,9 @@ export type UserOrderByWithRelationInput = {
   deadlineRemindersEnabled?: Prisma.SortOrder
   dailyMotivationEnabled?: Prisma.SortOrder
   monthlyReportEnabled?: Prisma.SortOrder
+  reminderDays?: Prisma.SortOrder
+  reminderTime?: Prisma.SortOrder
+  userTimezone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   applications?: Prisma.ApplicationOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
@@ -266,6 +293,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   deadlineRemindersEnabled?: Prisma.BoolFilter<"User"> | boolean
   dailyMotivationEnabled?: Prisma.BoolFilter<"User"> | boolean
   monthlyReportEnabled?: Prisma.BoolFilter<"User"> | boolean
+  reminderDays?: Prisma.StringFilter<"User"> | string
+  reminderTime?: Prisma.StringFilter<"User"> | string
+  userTimezone?: Prisma.StringFilter<"User"> | string
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   applications?: Prisma.ApplicationListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
@@ -283,6 +313,9 @@ export type UserOrderByWithAggregationInput = {
   deadlineRemindersEnabled?: Prisma.SortOrder
   dailyMotivationEnabled?: Prisma.SortOrder
   monthlyReportEnabled?: Prisma.SortOrder
+  reminderDays?: Prisma.SortOrder
+  reminderTime?: Prisma.SortOrder
+  userTimezone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -303,6 +336,9 @@ export type UserScalarWhereWithAggregatesInput = {
   deadlineRemindersEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   dailyMotivationEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   monthlyReportEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  reminderDays?: Prisma.StringWithAggregatesFilter<"User"> | string
+  reminderTime?: Prisma.StringWithAggregatesFilter<"User"> | string
+  userTimezone?: Prisma.StringWithAggregatesFilter<"User"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
 
@@ -317,6 +353,9 @@ export type UserCreateInput = {
   deadlineRemindersEnabled?: boolean
   dailyMotivationEnabled?: boolean
   monthlyReportEnabled?: boolean
+  reminderDays?: string
+  reminderTime?: string
+  userTimezone?: string
   createdAt?: Date | string
   applications?: Prisma.ApplicationCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
@@ -334,6 +373,9 @@ export type UserUncheckedCreateInput = {
   deadlineRemindersEnabled?: boolean
   dailyMotivationEnabled?: boolean
   monthlyReportEnabled?: boolean
+  reminderDays?: string
+  reminderTime?: string
+  userTimezone?: string
   createdAt?: Date | string
   applications?: Prisma.ApplicationUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
@@ -351,6 +393,9 @@ export type UserUpdateInput = {
   deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reminderDays?: Prisma.StringFieldUpdateOperationsInput | string
+  reminderTime?: Prisma.StringFieldUpdateOperationsInput | string
+  userTimezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   applications?: Prisma.ApplicationUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
@@ -368,6 +413,9 @@ export type UserUncheckedUpdateInput = {
   deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reminderDays?: Prisma.StringFieldUpdateOperationsInput | string
+  reminderTime?: Prisma.StringFieldUpdateOperationsInput | string
+  userTimezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   applications?: Prisma.ApplicationUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
@@ -385,6 +433,9 @@ export type UserCreateManyInput = {
   deadlineRemindersEnabled?: boolean
   dailyMotivationEnabled?: boolean
   monthlyReportEnabled?: boolean
+  reminderDays?: string
+  reminderTime?: string
+  userTimezone?: string
   createdAt?: Date | string
 }
 
@@ -399,6 +450,9 @@ export type UserUpdateManyMutationInput = {
   deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reminderDays?: Prisma.StringFieldUpdateOperationsInput | string
+  reminderTime?: Prisma.StringFieldUpdateOperationsInput | string
+  userTimezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -413,6 +467,9 @@ export type UserUncheckedUpdateManyInput = {
   deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reminderDays?: Prisma.StringFieldUpdateOperationsInput | string
+  reminderTime?: Prisma.StringFieldUpdateOperationsInput | string
+  userTimezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -427,6 +484,9 @@ export type UserCountOrderByAggregateInput = {
   deadlineRemindersEnabled?: Prisma.SortOrder
   dailyMotivationEnabled?: Prisma.SortOrder
   monthlyReportEnabled?: Prisma.SortOrder
+  reminderDays?: Prisma.SortOrder
+  reminderTime?: Prisma.SortOrder
+  userTimezone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -441,6 +501,9 @@ export type UserMaxOrderByAggregateInput = {
   deadlineRemindersEnabled?: Prisma.SortOrder
   dailyMotivationEnabled?: Prisma.SortOrder
   monthlyReportEnabled?: Prisma.SortOrder
+  reminderDays?: Prisma.SortOrder
+  reminderTime?: Prisma.SortOrder
+  userTimezone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -455,6 +518,9 @@ export type UserMinOrderByAggregateInput = {
   deadlineRemindersEnabled?: Prisma.SortOrder
   dailyMotivationEnabled?: Prisma.SortOrder
   monthlyReportEnabled?: Prisma.SortOrder
+  reminderDays?: Prisma.SortOrder
+  reminderTime?: Prisma.SortOrder
+  userTimezone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -532,6 +598,9 @@ export type UserCreateWithoutApplicationsInput = {
   deadlineRemindersEnabled?: boolean
   dailyMotivationEnabled?: boolean
   monthlyReportEnabled?: boolean
+  reminderDays?: string
+  reminderTime?: string
+  userTimezone?: string
   createdAt?: Date | string
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   sentEmailLogs?: Prisma.SentEmailLogCreateNestedManyWithoutUserInput
@@ -548,6 +617,9 @@ export type UserUncheckedCreateWithoutApplicationsInput = {
   deadlineRemindersEnabled?: boolean
   dailyMotivationEnabled?: boolean
   monthlyReportEnabled?: boolean
+  reminderDays?: string
+  reminderTime?: string
+  userTimezone?: string
   createdAt?: Date | string
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   sentEmailLogs?: Prisma.SentEmailLogUncheckedCreateNestedManyWithoutUserInput
@@ -580,6 +652,9 @@ export type UserUpdateWithoutApplicationsInput = {
   deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reminderDays?: Prisma.StringFieldUpdateOperationsInput | string
+  reminderTime?: Prisma.StringFieldUpdateOperationsInput | string
+  userTimezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   sentEmailLogs?: Prisma.SentEmailLogUpdateManyWithoutUserNestedInput
@@ -596,6 +671,9 @@ export type UserUncheckedUpdateWithoutApplicationsInput = {
   deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reminderDays?: Prisma.StringFieldUpdateOperationsInput | string
+  reminderTime?: Prisma.StringFieldUpdateOperationsInput | string
+  userTimezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   sentEmailLogs?: Prisma.SentEmailLogUncheckedUpdateManyWithoutUserNestedInput
@@ -612,6 +690,9 @@ export type UserCreateWithoutNotificationsInput = {
   deadlineRemindersEnabled?: boolean
   dailyMotivationEnabled?: boolean
   monthlyReportEnabled?: boolean
+  reminderDays?: string
+  reminderTime?: string
+  userTimezone?: string
   createdAt?: Date | string
   applications?: Prisma.ApplicationCreateNestedManyWithoutUserInput
   sentEmailLogs?: Prisma.SentEmailLogCreateNestedManyWithoutUserInput
@@ -628,6 +709,9 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   deadlineRemindersEnabled?: boolean
   dailyMotivationEnabled?: boolean
   monthlyReportEnabled?: boolean
+  reminderDays?: string
+  reminderTime?: string
+  userTimezone?: string
   createdAt?: Date | string
   applications?: Prisma.ApplicationUncheckedCreateNestedManyWithoutUserInput
   sentEmailLogs?: Prisma.SentEmailLogUncheckedCreateNestedManyWithoutUserInput
@@ -660,6 +744,9 @@ export type UserUpdateWithoutNotificationsInput = {
   deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reminderDays?: Prisma.StringFieldUpdateOperationsInput | string
+  reminderTime?: Prisma.StringFieldUpdateOperationsInput | string
+  userTimezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   applications?: Prisma.ApplicationUpdateManyWithoutUserNestedInput
   sentEmailLogs?: Prisma.SentEmailLogUpdateManyWithoutUserNestedInput
@@ -676,6 +763,9 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reminderDays?: Prisma.StringFieldUpdateOperationsInput | string
+  reminderTime?: Prisma.StringFieldUpdateOperationsInput | string
+  userTimezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   applications?: Prisma.ApplicationUncheckedUpdateManyWithoutUserNestedInput
   sentEmailLogs?: Prisma.SentEmailLogUncheckedUpdateManyWithoutUserNestedInput
@@ -692,6 +782,9 @@ export type UserCreateWithoutSentEmailLogsInput = {
   deadlineRemindersEnabled?: boolean
   dailyMotivationEnabled?: boolean
   monthlyReportEnabled?: boolean
+  reminderDays?: string
+  reminderTime?: string
+  userTimezone?: string
   createdAt?: Date | string
   applications?: Prisma.ApplicationCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
@@ -708,6 +801,9 @@ export type UserUncheckedCreateWithoutSentEmailLogsInput = {
   deadlineRemindersEnabled?: boolean
   dailyMotivationEnabled?: boolean
   monthlyReportEnabled?: boolean
+  reminderDays?: string
+  reminderTime?: string
+  userTimezone?: string
   createdAt?: Date | string
   applications?: Prisma.ApplicationUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
@@ -740,6 +836,9 @@ export type UserUpdateWithoutSentEmailLogsInput = {
   deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reminderDays?: Prisma.StringFieldUpdateOperationsInput | string
+  reminderTime?: Prisma.StringFieldUpdateOperationsInput | string
+  userTimezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   applications?: Prisma.ApplicationUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
@@ -756,6 +855,9 @@ export type UserUncheckedUpdateWithoutSentEmailLogsInput = {
   deadlineRemindersEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dailyMotivationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   monthlyReportEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reminderDays?: Prisma.StringFieldUpdateOperationsInput | string
+  reminderTime?: Prisma.StringFieldUpdateOperationsInput | string
+  userTimezone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   applications?: Prisma.ApplicationUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
@@ -821,6 +923,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   deadlineRemindersEnabled?: boolean
   dailyMotivationEnabled?: boolean
   monthlyReportEnabled?: boolean
+  reminderDays?: boolean
+  reminderTime?: boolean
+  userTimezone?: boolean
   createdAt?: boolean
   applications?: boolean | Prisma.User$applicationsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
@@ -839,6 +944,9 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   deadlineRemindersEnabled?: boolean
   dailyMotivationEnabled?: boolean
   monthlyReportEnabled?: boolean
+  reminderDays?: boolean
+  reminderTime?: boolean
+  userTimezone?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["user"]>
 
@@ -853,6 +961,9 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   deadlineRemindersEnabled?: boolean
   dailyMotivationEnabled?: boolean
   monthlyReportEnabled?: boolean
+  reminderDays?: boolean
+  reminderTime?: boolean
+  userTimezone?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["user"]>
 
@@ -867,10 +978,13 @@ export type UserSelectScalar = {
   deadlineRemindersEnabled?: boolean
   dailyMotivationEnabled?: boolean
   monthlyReportEnabled?: boolean
+  reminderDays?: boolean
+  reminderTime?: boolean
+  userTimezone?: boolean
   createdAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "role" | "profilePicture" | "emailNotificationsEnabled" | "deadlineRemindersEnabled" | "dailyMotivationEnabled" | "monthlyReportEnabled" | "createdAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "role" | "profilePicture" | "emailNotificationsEnabled" | "deadlineRemindersEnabled" | "dailyMotivationEnabled" | "monthlyReportEnabled" | "reminderDays" | "reminderTime" | "userTimezone" | "createdAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   applications?: boolean | Prisma.User$applicationsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
@@ -898,6 +1012,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     deadlineRemindersEnabled: boolean
     dailyMotivationEnabled: boolean
     monthlyReportEnabled: boolean
+    reminderDays: string
+    reminderTime: string
+    userTimezone: string
     createdAt: Date
   }, ExtArgs["result"]["user"]>
   composites: {}
@@ -1335,6 +1452,9 @@ export interface UserFieldRefs {
   readonly deadlineRemindersEnabled: Prisma.FieldRef<"User", 'Boolean'>
   readonly dailyMotivationEnabled: Prisma.FieldRef<"User", 'Boolean'>
   readonly monthlyReportEnabled: Prisma.FieldRef<"User", 'Boolean'>
+  readonly reminderDays: Prisma.FieldRef<"User", 'String'>
+  readonly reminderTime: Prisma.FieldRef<"User", 'String'>
+  readonly userTimezone: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
 }
     

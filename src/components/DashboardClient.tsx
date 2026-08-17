@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
 const Joyride = dynamic<any>(() => import('react-joyride').then((mod: any) => ({ default: mod.Joyride })), { ssr: false });
@@ -49,6 +50,8 @@ export default function DashboardClient({
   const [monthlyGoal, setMonthlyGoal] = useState(5);
   const [draggedOverCol, setDraggedOverCol] = useState<string | null>(null);
   const [showUrgentModal, setShowUrgentModal] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleDragStart = (e: React.DragEvent, app: any) => {
     e.dataTransfer.setData('text/plain', JSON.stringify(app));
@@ -129,9 +132,6 @@ export default function DashboardClient({
 
   useEffect(() => {
     setIsMounted(true);
-    if (urgentClosingApps.length > 0) {
-      setShowUrgentModal(true);
-    }
     const showGuide = localStorage.getItem('apptracker_show_onboarding_guide') !== 'false';
     const tourCompleted = localStorage.getItem('apptracker_onboarding_completed');
     if (showGuide && !tourCompleted) {
@@ -172,8 +172,14 @@ export default function DashboardClient({
     }
   ];
 
-  // Layout / view modes
-  const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
+  // Layout / view modes – persisted to localStorage so the choice survives refreshes
+  const [viewMode, setViewMode] = useState<'board' | 'list'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('apptracker_view_mode');
+      if (saved === 'list' || saved === 'board') return saved;
+    }
+    return 'board';
+  });
   const [tabFilter, setTabFilter] = useState<'combined' | 'job' | 'scholarship'>(initialTab);
   const [jobSubType, setJobSubType] = useState<'all' | 'job' | 'internship'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -555,6 +561,126 @@ export default function DashboardClient({
     })
     .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime());
 
+  const isClosingFilter = searchParams?.get('filter') === 'closing';
+
+  if (initialTab === 'combined' && isClosingFilter) {
+    return (
+      <div className="space-y-6 max-w-7xl mx-auto">
+        {/* Closing Soon Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+            >
+              <ArrowRight className="w-4 h-4 rotate-180" />
+              Back to Dashboard
+            </button>
+            <span className="text-slate-300">/</span>
+            <span className="text-sm font-bold text-slate-800">Closing Soon</span>
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/30 animate-pulse">
+            {urgentClosingApps.length} Urgent
+          </span>
+        </div>
+
+        {/* Alert Banner */}
+        <div className="rounded-2xl bg-gradient-to-r from-rose-50 to-amber-50 border border-rose-200/80 p-5 flex items-start gap-4 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-amber-500 flex items-center justify-center text-white shrink-0 shadow-md animate-pulse">
+            <AlertTriangle className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-sm font-extrabold text-slate-800 tracking-tight">Applications Closing Within 7 Days</h2>
+            <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+              These {urgentClosingApps.length} application{urgentClosingApps.length !== 1 ? 's' : ''} have an upcoming deadline. Click any card to update your progress.
+            </p>
+          </div>
+        </div>
+
+        {/* Closing Apps List */}
+        {urgentClosingApps.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+              <Calendar className="w-7 h-7 text-emerald-500" />
+            </div>
+            <p className="text-sm font-bold text-slate-700">No urgent deadlines!</p>
+            <p className="text-xs text-slate-400">You&apos;re all caught up. No applications closing in the next 7 days.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {urgentClosingApps.map((app) => {
+              const daysLeft = Math.ceil((new Date(app.deadline!).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+              const daysText = daysLeft <= 0 ? 'Closes Today!' : daysLeft === 1 ? 'Closes Tomorrow!' : `Closes in ${daysLeft}d`;
+              const isUrgent = daysLeft <= 1;
+              return (
+                <div
+                  key={app.id}
+                  onClick={() => handleEditClick(app)}
+                  className="glass-card rounded-2xl border border-slate-200/80 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:border-rose-400/60 hover:shadow-md transition-all duration-200 group"
+                >
+                  <div className="flex items-center gap-4 min-w-0 flex-1">
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-sm text-white shrink-0 shadow-md ${
+                      isUrgent ? 'bg-gradient-to-br from-rose-500 to-rose-700 animate-pulse' : 'bg-gradient-to-br from-amber-400 to-amber-600'
+                    }`}>
+                      {app.organization.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-sm font-bold text-slate-800 truncate">{app.title}</h3>
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                          app.applicationType === 'scholarship' ? 'bg-brand-cyan/20 text-brand-cyan' :
+                          app.applicationType === 'internship' ? 'bg-brand-rose/20 text-brand-rose' :
+                          'bg-brand-indigo/20 text-brand-indigo'
+                        }`}>{app.applicationType}</span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">{app.organization}</p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span className="flex items-center gap-1 text-[11px] text-slate-400 font-medium">
+                          <Calendar className="w-3.5 h-3.5 text-rose-400" />
+                          Deadline: {new Date(app.deadline!).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                        {getStatusBadge(app.status)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className={`text-[11px] font-black px-3 py-1.5 rounded-lg whitespace-nowrap ${
+                      isUrgent ? 'bg-rose-600 text-white animate-pulse' : 'bg-amber-500/15 text-amber-600 border border-amber-400/40'
+                    }`}>
+                      ⏱ {daysText}
+                    </span>
+                    {app.url && (
+                      <a
+                        href={app.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-brand-indigo to-brand-cyan hover:opacity-90 rounded-lg shadow-sm transition-all shrink-0"
+                        title="Go to application"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        Apply
+                      </a>
+                    )}
+                    <span className="text-xs font-semibold text-brand-indigo opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                      Edit <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <ApplicationForm
+          isOpen={isFormOpen}
+          onClose={() => setIsFormOpen(false)}
+          applicationToEdit={editingApplication}
+        />
+      </div>
+    );
+  }
+
   if (initialTab === 'combined') {
     return (
       <div className="space-y-8 max-w-7xl mx-auto">
@@ -656,7 +782,7 @@ export default function DashboardClient({
                 <div className="flex items-center gap-3">
                   {urgentClosingApps.length > 0 && (
                     <button
-                      onClick={() => setShowUrgentModal(true)}
+                      onClick={() => router.push('/dashboard?filter=closing')}
                       className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-black text-white bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 rounded-lg shadow-md border border-rose-400/40 cursor-pointer animate-pulse select-none"
                     >
                       <AlertTriangle className="w-4 h-4 text-white animate-bounce" />
@@ -967,7 +1093,7 @@ export default function DashboardClient({
         <div className="flex w-full md:w-auto items-center justify-between sm:justify-end gap-3 flex-shrink-0">
           <div id="tour-view-toggle" className="flex items-center bg-white/5 p-1 rounded-lg border border-white/5">
             <button
-              onClick={() => setViewMode('board')}
+              onClick={() => { setViewMode('board'); localStorage.setItem('apptracker_view_mode', 'board'); }}
               className={`p-1.5 rounded-md transition-all cursor-pointer ${
                 viewMode === 'board' ? 'bg-brand-indigo text-white shadow-md' : 'text-gray-400 hover:text-white'
               }`}
@@ -976,7 +1102,7 @@ export default function DashboardClient({
               <Kanban className="w-4 h-4" />
             </button>
             <button
-              onClick={() => setViewMode('list')}
+              onClick={() => { setViewMode('list'); localStorage.setItem('apptracker_view_mode', 'list'); }}
               className={`p-1.5 rounded-md transition-all cursor-pointer ${
                 viewMode === 'list' ? 'bg-brand-indigo text-white shadow-md' : 'text-gray-400 hover:text-white'
               }`}

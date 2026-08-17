@@ -1,6 +1,7 @@
 import { getApplications } from '@/app/actions/applications';
 import DashboardClient from '@/components/DashboardClient';
 import { AlertCircle } from 'lucide-react';
+import { Suspense } from 'react';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,9 @@ export default async function DashboardPage() {
 
   return (
     <div className="animate-fade-in">
-      <DashboardClient initialApplications={applications} />
+      <Suspense fallback={<div className="animate-pulse h-40 bg-slate-100 rounded-2xl" />}>
+        <DashboardClient initialApplications={applications} />
+      </Suspense>
     </div>
   );
 }

@@ -58,6 +58,13 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
   const [showOnboardingGuide, setShowOnboardingGuide] = useState(true);
   const [monthlyGoal, setMonthlyGoal] = useState(5);
 
+  // Reminder schedule customisation
+  const ALL_REMINDER_DAYS = [30, 15, 10, 5, 4, 3, 2, 1] as const;
+  const [selectedReminderDays, setSelectedReminderDays] = useState<Set<number>>(new Set([5, 4, 3, 2, 1]));
+  const [reminderLocalTime, setReminderLocalTime] = useState('08:00'); // HH:MM in user's local time
+  const [isSavingSchedule, setIsSavingSchedule] = useState(false);
+  const [, startScheduleTransition] = useTransition();
+
   // AI Configuration States
   const [aiProvider, setAiProvider] = useState('gemini');
   const [openaiApiKey, setOpenaiApiKey] = useState('');
@@ -87,6 +94,28 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
         setDeadlineReminder(res.data.deadlineRemindersEnabled ?? true);
         setDailyReminder(res.data.dailyMotivationEnabled ?? true);
         setMonthlyNotif(res.data.monthlyReportEnabled ?? true);
+
+        // Load reminder schedule
+        if (res.data.reminderDays) {
+          const days = res.data.reminderDays
+            .split(',')
+            .map((d: string) => parseInt(d.trim(), 10))
+            .filter((d: number) => !isNaN(d));
+          setSelectedReminderDays(new Set(days));
+        }
+        if (res.data.reminderTime) {
+          // reminderTime is stored in UTC — convert to user's local time for display
+          try {
+            const [hStr, mStr] = res.data.reminderTime.split(':');
+            const utcDate = new Date();
+            utcDate.setUTCHours(parseInt(hStr, 10), parseInt(mStr, 10), 0, 0);
+            const localH = utcDate.getHours().toString().padStart(2, '0');
+            const localM = utcDate.getMinutes().toString().padStart(2, '0');
+            setReminderLocalTime(`${localH}:${localM}`);
+          } catch {
+            setReminderLocalTime(res.data.reminderTime);
+          }
+        }
       }
     });
   }, []);
@@ -141,6 +170,48 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
     setShowOnboardingGuide(val);
     localStorage.setItem('apptracker_show_onboarding_guide', String(val));
     toast.success(`Onboarding tour guide ${val ? 'enabled' : 'disabled'}.`);
+  };
+
+  /**
+   * Convert user's locally-chosen time to UTC HH:MM for storage.
+   * Detects the browser's IANA timezone automatically.
+   */
+  const handleSaveReminderSchedule = () => {
+    setIsSavingSchedule(true);
+    startScheduleTransition(async () => {
+      try {
+        // Auto-detect browser timezone
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'UTC';
+
+        // Convert local HH:MM → UTC HH:MM
+        let utcTime = reminderLocalTime;
+        try {
+          const [hStr, mStr] = reminderLocalTime.split(':');
+          const now = new Date();
+          now.setHours(parseInt(hStr, 10), parseInt(mStr, 10), 0, 0);
+          const utcH = now.getUTCHours().toString().padStart(2, '0');
+          const utcM = now.getUTCMinutes().toString().padStart(2, '0');
+          utcTime = `${utcH}:${utcM}`;
+        } catch { /* keep local time as fallback */ }
+
+        const reminderDaysStr = Array.from(selectedReminderDays).sort((a, b) => b - a).join(',');
+
+        const res = await updateNotificationPreferences({
+          reminderDays: reminderDaysStr,
+          reminderTime: utcTime,
+          userTimezone: timezone,
+        });
+
+        if (res.success) {
+          const daysList = Array.from(selectedReminderDays).sort((a, b) => b - a).join(', ');
+          toast.success(`Reminder schedule saved! You'll be reminded at ${reminderLocalTime} on days: ${daysList || 'none'}.`);
+        } else {
+          toast.error(res.error || 'Failed to save reminder schedule.');
+        }
+      } finally {
+        setIsSavingSchedule(false);
+      }
+    });
   };
 
   const getMonthlyReport = () => {
@@ -514,23 +585,114 @@ export default function SettingsClient({ user, initialApplications }: SettingsCl
                   </label>
                 </div>
 
-                {/* Deadline Countdown Toggle */}
-                <div className="flex items-start justify-between gap-4 border-t border-slate-100 pt-5">
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-slate-800">Deadline & Opening Reminders (5, 4, 3, 2 & 1 Days Out)</p>
-                    <p className="text-xs text-slate-500 leading-normal">
-                      Receive automated email alerts as application deadlines and portal opening dates draw near.
-                    </p>
+                {/* Deadline Reminder Schedule */}
+                <div className="border-t border-slate-100 pt-5 space-y-5">
+                  {/* Toggle row */}
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-slate-800">
+                        Deadline Reminders
+                        {selectedReminderDays.size > 0 && (
+                          <span className="ml-2 text-[10px] font-black uppercase tracking-wider text-brand-indigo bg-brand-indigo/10 px-2 py-0.5 rounded-full">
+                            {Array.from(selectedReminderDays).sort((a, b) => b - a).join(', ')} Days Out
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-slate-500 leading-normal">
+                        Get email alerts before application deadlines close. Pick the days and time that work for you.
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer select-none shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={deadlineReminder}
+                        onChange={(e) => handleToggleDeadlineReminder(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
+                    </label>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer select-none">
-                    <input 
-                      type="checkbox" 
-                      checked={deadlineReminder}
-                      onChange={(e) => handleToggleDeadlineReminder(e.target.checked)}
-                      className="sr-only peer" 
-                    />
-                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-305 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-indigo" />
-                  </label>
+
+                  {/* Customise schedule — only visible when reminders are on */}
+                  {deadlineReminder && (
+                    <div className="bg-slate-50/80 border border-slate-200/70 rounded-2xl p-5 space-y-5">
+
+                      {/* Day chips */}
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Remind me this many days before:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {ALL_REMINDER_DAYS.map((day) => {
+                            const active = selectedReminderDays.has(day);
+                            return (
+                              <button
+                                key={day}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedReminderDays(prev => {
+                                    const next = new Set(prev);
+                                    if (next.has(day)) next.delete(day);
+                                    else next.add(day);
+                                    return next;
+                                  });
+                                }}
+                                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer select-none ${
+                                  active
+                                    ? 'bg-brand-indigo text-white border-brand-indigo shadow-sm shadow-brand-indigo/20'
+                                    : 'bg-white text-slate-500 border-slate-200 hover:border-brand-indigo/40 hover:text-brand-indigo'
+                                }`}
+                              >
+                                {day === 1 ? '1 Day' : `${day} Days`}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {selectedReminderDays.size === 0 && (
+                          <p className="text-[11px] text-amber-600 font-semibold">⚠ No days selected — no reminders will be sent even if enabled.</p>
+                        )}
+                      </div>
+
+                      {/* Time picker */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Daily reminder time</p>
+                          <span className="text-[10px] text-slate-400 font-medium">
+                            (your local time · auto-converted to UTC)
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="time"
+                            value={reminderLocalTime}
+                            onChange={(e) => setReminderLocalTime(e.target.value)}
+                            className="px-3 py-2 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-indigo/40 cursor-pointer"
+                          />
+                          <span className="text-[11px] text-slate-400">
+                            Detected timezone: <span className="font-bold text-slate-600">{typeof window !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'UTC'}</span>
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Save button */}
+                      <button
+                        type="button"
+                        onClick={handleSaveReminderSchedule}
+                        disabled={isSavingSchedule}
+                        className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-brand-indigo hover:bg-brand-indigo/90 rounded-xl shadow-sm disabled:opacity-50 transition-all cursor-pointer"
+                      >
+                        {isSavingSchedule ? (
+                          <>
+                            <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                            Saving…
+                          </>
+                        ) : (
+                          <>
+                            <Check className="w-3.5 h-3.5" />
+                            Save Schedule
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Monthly Report Toggle */}
