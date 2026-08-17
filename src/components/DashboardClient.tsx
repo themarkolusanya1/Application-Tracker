@@ -782,7 +782,7 @@ export default function DashboardClient({
                 <div className="flex items-center gap-3">
                   {urgentClosingApps.length > 0 && (
                     <button
-                      onClick={() => router.push('/dashboard?filter=closing')}
+                      onClick={() => setShowUrgentModal(true)}
                       className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-black text-white bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 rounded-lg shadow-md border border-rose-400/40 cursor-pointer animate-pulse select-none"
                     >
                       <AlertTriangle className="w-4 h-4 text-white animate-bounce" />
@@ -1671,7 +1671,11 @@ export default function DashboardClient({
                     <button
                       onClick={() => {
                         setShowUrgentModal(false);
-                        handleEditClick(app);
+                        if (app.url) {
+                          window.open(app.url, '_blank', 'noopener,noreferrer');
+                        } else {
+                          handleEditClick(app);
+                        }
                       }}
                       className="px-3.5 py-1.5 text-xs font-black text-white bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 rounded-lg shadow-md flex items-center gap-1.5 transition-all cursor-pointer select-none"
                     >
