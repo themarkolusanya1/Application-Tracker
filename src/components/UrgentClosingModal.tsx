@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertTriangle, Calendar, ArrowRight } from 'lucide-react';
 
 interface UrgentClosingModalProps {
@@ -15,12 +17,18 @@ export default function UrgentClosingModal({
   urgentClosingApps,
   handleEditClick,
 }: UrgentClosingModalProps) {
+  const [mounted, setMounted] = useState(false);
   const now = new Date();
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
       {/* Click backdrop to close */}
       <div className="absolute inset-0" onClick={onClose} />
 
@@ -116,6 +124,7 @@ export default function UrgentClosingModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

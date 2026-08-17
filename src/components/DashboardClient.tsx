@@ -791,8 +791,6 @@ export default function DashboardClient({
                   {urgentClosingApps.length > 0 && (
                     <button
                       onClick={() => {
-                        console.log("Urgent Closing clicked. Current state:", showUrgentModal);
-                        toast.info(`Opening urgent modal with ${urgentClosingApps.length} applications...`);
                         setShowUrgentModal(true);
                       }}
                       className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-black text-white bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 rounded-lg shadow-md border border-rose-400/40 cursor-pointer animate-pulse select-none"
